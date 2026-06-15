@@ -1790,3 +1790,136 @@ body.user-rishit .filter-pill.active {
     border-radius: 50%;
   }
 }
+
+/* ============================================================
+   11. DIET & CALORIE TRACKER MODULE STYLES
+   ============================================================ */
+.diet-tabs::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for tabs scroll */
+}
+.diet-tabs {
+  scrollbar-width: none;
+}
+.diet-tabs .btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  color: var(--text-sub);
+  white-space: nowrap;
+  transition: var(--transition);
+}
+.diet-tabs .btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-main);
+  border-color: var(--border-hover);
+}
+.diet-tabs .btn.active {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.diet-panel {
+  display: none;
+  animation: fadeIn 0.3s ease-in-out;
+}
+.diet-panel.active {
+  display: block;
+}
+
+/* Meal Builder Foods styling */
+.meal-food-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.meal-food-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+.meal-food-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-hover);
+}
+.meal-food-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-grow: 1;
+  padding-right: 8px;
+}
+.meal-food-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.meal-food-sub {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.meal-food-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.meal-food-calories {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.btn-delete-food {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.btn-delete-food:hover {
+  color: var(--danger);
+  background: var(--danger-glow);
+}
+.meal-placeholder {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 16px 0;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.005);
+}
+
+/* Dropdown and buttons inside tables */
+.diet-add-select {
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--text-main);
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+  margin-right: 4px;
+}
+.diet-add-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

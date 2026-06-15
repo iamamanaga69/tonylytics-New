@@ -69,17 +69,9 @@
             <i data-lucide="check-square"></i>
             <span>Today's Check-In</span>
           </button>
-          <button id="nav-btn-calendar" class="nav-item" onclick="switchPage('calendar')">
-            <i data-lucide="calendar"></i>
-            <span>Gym Calendar</span>
-          </button>
-          <button id="nav-btn-weights" class="nav-item" onclick="switchPage('weights')">
-            <i data-lucide="scale"></i>
-            <span>Weight Tracker</span>
-          </button>
-          <button id="nav-btn-library" class="nav-item" onclick="switchPage('library')">
-            <i data-lucide="book-open"></i>
-            <span>Exercise Library</span>
+          <button id="nav-btn-diet" class="nav-item" onclick="switchPage('diet')">
+            <i data-lucide="salad"></i>
+            <span>Diet Tracker</span>
           </button>
           <button id="nav-btn-notes" class="nav-item" onclick="switchPage('notes')">
             <i data-lucide="file-text"></i>
@@ -120,16 +112,6 @@
               <span class="stat-label">Workouts Logged</span>
               <span id="summary-total-completed" class="stat-val">0</span>
               <span id="summary-total-missed" class="stat-trend">Missed: 0</span>
-            </div>
-            <div class="glass-card stat-card">
-              <span class="stat-label">Weight Lost</span>
-              <span id="summary-weight-change" class="stat-val">0.0 kg</span>
-              <span id="summary-weight-change-trend" class="stat-trend">Overall change</span>
-            </div>
-            <div class="glass-card stat-card">
-              <span class="stat-label">Remaining to Goal</span>
-              <span id="summary-remaining-weight" class="stat-val">0.0 kg</span>
-              <span id="summary-goal-weight" class="stat-trend">Goal: 80.0 kg</span>
             </div>
           </div>
         </section>
@@ -247,298 +229,27 @@
             </div>
 
           </div>
-        </section>
 
-        <!-- 2. GYM CALENDAR PAGE -->
-        <section id="page-calendar" class="page-section">
-          <div class="page-header">
-            <div>
-              <h2 class="page-title">Gym Calendar</h2>
-              <p class="page-subtitle">Track consistency and review history (15 Jun 2026 - 15 Jun 2027)</p>
+          <!-- Integrated Calendar Section -->
+          <div class="calendar-integrated-section" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 32px;">
+            <div class="page-header" style="margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h3 style="font-size: 18px; font-weight: 600; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="calendar" style="color: var(--accent); width: 20px; height: 20px;"></i>
+                  Workout Completion History
+                </h3>
+                <p style="font-size: 12px; color: var(--text-sub); margin: 4px 0 0 0;">Click any date cell below to instantly switch the check-in form to that day</p>
+              </div>
+              <div class="calendar-legend">
+                <div class="legend-item"><span class="legend-dot status-completed">✓</span> Done</div>
+                <div class="legend-item"><span class="legend-dot status-missed">○</span> Missed</div>
+                <div class="legend-item"><span class="legend-dot status-rest">R</span> Rest</div>
+              </div>
             </div>
             
-            <!-- Calendar Legend -->
-            <div class="calendar-legend">
-              <div class="legend-item"><span class="legend-dot status-completed">✓</span> Workout Done</div>
-              <div class="legend-item"><span class="legend-dot status-missed">○</span> Workout Missed</div>
-              <div class="legend-item"><span class="legend-dot status-rest">R</span> Rest Day</div>
+            <div id="calendar-months-grid" class="months-grid">
+              <!-- Populated dynamically via JS: 13 months total -->
             </div>
-          </div>
-
-          <!-- Calendar Grid container -->
-          <div id="calendar-months-grid" class="months-grid">
-            <!-- Populated dynamically via JS: 13 months total -->
-          </div>
-        </section>
-
-        <!-- 3. WEIGHT TRACKER PAGE -->
-        <section id="page-weights" class="page-section">
-          <div class="page-header">
-            <div>
-              <h2 class="page-title">Weight Tracker</h2>
-              <p class="page-subtitle">Log your weight and monitor progress over time</p>
-            </div>
-          </div>
-
-          <!-- Weight Dashboard Grid -->
-          <div class="weight-dashboard">
-            <!-- Stats -->
-            <div class="weight-stats">
-              <div class="glass-card stat-card">
-                <span class="stat-label">Starting Weight</span>
-                <span id="weight-stat-start" class="stat-val">94.6 kg</span>
-                <span class="stat-date">15 June 2026</span>
-              </div>
-              <div class="glass-card stat-card">
-                <span class="stat-label">Current Weight</span>
-                <span id="weight-stat-latest" class="stat-val">-- kg</span>
-                <span id="weight-stat-latest-date" class="stat-date">--</span>
-              </div>
-              <div class="glass-card stat-card">
-                <span class="stat-label">Goal Weight</span>
-                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-                  <span id="weight-stat-goal" class="stat-val">80.0 kg</span>
-                  <button type="button" class="btn-icon-subtle" onclick="promptGoalWeight()" title="Edit Goal Weight" style="padding: 4px; border: none; background: none; color: var(--text-sub); cursor: pointer; display: inline-flex; border-radius: 50%; transition: var(--transition);">
-                    <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
-                  </button>
-                </div>
-                <span class="stat-date">Target Goal</span>
-              </div>
-              <div class="glass-card stat-card">
-                <span class="stat-label">Weight Lost</span>
-                <span id="weight-stat-lost" class="stat-val">-- kg</span>
-                <span class="stat-trend" id="weight-stat-lost-trend">Overall lost</span>
-              </div>
-              <div class="glass-card stat-card">
-                <span class="stat-label">Remaining to Goal</span>
-                <span id="weight-stat-remaining" class="stat-val">-- kg</span>
-                <span class="stat-trend" id="weight-stat-remaining-trend">Remaining</span>
-              </div>
-            </div>
-
-            <!-- Forms & History Layout -->
-            <div class="weight-grid-body">
-              
-              <!-- Log Weight Form -->
-              <div class="glass-card weight-form-card">
-                <div class="card-header">
-                  <i data-lucide="plus" class="header-icon"></i>
-                  <h4>Log Weight</h4>
-                </div>
-                <form id="weight-log-form" onsubmit="logNewWeight(event)">
-                  <div class="form-group">
-                    <label for="weight-input-val">Weight (kg)</label>
-                    <input type="number" step="0.1" id="weight-input-val" required placeholder="e.g. 93.5">
-                  </div>
-                  <div class="form-group">
-                    <label for="weight-input-date">Date</label>
-                    <input type="date" id="weight-input-date" required min="2026-06-15" max="2027-06-15">
-                  </div>
-                  <button type="submit" class="btn btn-primary btn-block">
-                    <i data-lucide="save"></i> Save Weight Entry
-                  </button>
-                </form>
-              </div>
-
-              <!-- History & Monthly Summary Layout on Right -->
-              <div style="display: flex; flex-direction: column; gap: 24px;">
-                <!-- History Table -->
-                <div class="glass-card weight-history-card">
-                  <div class="card-header">
-                    <i data-lucide="history" class="header-icon"></i>
-                    <h4>Weight History</h4>
-                  </div>
-                  <div class="table-wrapper">
-                    <table class="weight-table">
-                      <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th>Weight</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody id="weight-history-tbody">
-                        <!-- Populated dynamically via JS -->
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <!-- Monthly Weight Summary Card -->
-                <div class="glass-card" style="padding: 20px;">
-                  <div class="card-header" style="padding: 0 0 12px 0;">
-                    <i data-lucide="bar-chart-2" class="header-icon"></i>
-                    <h4>Monthly Weight Summary</h4>
-                  </div>
-                  <div id="weight-monthly-summary-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px;">
-                    <!-- Populated dynamically via JS -->
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Body Measurements Section -->
-            <div class="weight-grid-body" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 32px;">
-              <!-- Log Measurements Form -->
-              <div class="glass-card weight-form-card">
-                <div class="card-header">
-                  <i data-lucide="rulers" class="header-icon"></i>
-                  <h4>Log Measurements</h4>
-                </div>
-                <p class="card-description">Track your waist, chest, arms, and thighs monthly.</p>
-                <form id="measurement-log-form" onsubmit="logNewMeasurements(event)">
-                  <div class="form-group">
-                    <label for="measure-input-date">Date</label>
-                    <input type="date" id="measure-input-date" required min="2026-06-15" max="2027-06-15">
-                  </div>
-                  <div class="form-group-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                      <label for="measure-input-chest">Chest (cm)</label>
-                      <input type="number" step="0.1" id="measure-input-chest" required placeholder="e.g. 102.5">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                      <label for="measure-input-waist">Waist (cm)</label>
-                      <input type="number" step="0.1" id="measure-input-waist" required placeholder="e.g. 88.0">
-                    </div>
-                  </div>
-                  <div class="form-group-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                      <label for="measure-input-arms">Arms (cm)</label>
-                      <input type="number" step="0.1" id="measure-input-arms" required placeholder="e.g. 38.2">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                      <label for="measure-input-thighs">Thighs (cm)</label>
-                      <input type="number" step="0.1" id="measure-input-thighs" required placeholder="e.g. 58.5">
-                    </div>
-                  </div>
-                  <button type="submit" class="btn btn-primary btn-block">
-                    <i data-lucide="save"></i> Save Measurements
-                  </button>
-                </form>
-              </div>
-              
-              <!-- Measurements History Table -->
-              <div class="glass-card weight-history-card">
-                <div class="card-header">
-                  <i data-lucide="history" class="header-icon"></i>
-                  <h4>Measurement History</h4>
-                </div>
-                <div class="table-wrapper">
-                  <table class="weight-table">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Chest</th>
-                        <th>Waist</th>
-                        <th>Arms</th>
-                        <th>Thighs</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody id="measurements-history-tbody">
-                      <!-- Populated dynamically via JS -->
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <!-- Progress Photos Section -->
-            <div class="weight-grid-body" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 32px;">
-              <!-- Upload Photos Form -->
-              <div class="glass-card weight-form-card">
-                <div class="card-header">
-                  <i data-lucide="camera" class="header-icon"></i>
-                  <h4>Upload Progress Photos</h4>
-                </div>
-                <p class="card-description">Upload Front and Side progress photos. Images are auto-compressed locally to save storage.</p>
-                <form id="photo-upload-form" onsubmit="saveProgressPhotos(event)">
-                  <div class="form-group">
-                    <label for="photo-input-date">Date</label>
-                    <input type="date" id="photo-input-date" required min="2026-06-15" max="2027-06-15">
-                  </div>
-                  <div class="form-group">
-                    <label for="photo-input-front">Front Photo</label>
-                    <input type="file" id="photo-input-front" accept="image/*" style="background: none; border: none; padding: 0;">
-                  </div>
-                  <div class="form-group">
-                    <label for="photo-input-side">Side Photo</label>
-                    <input type="file" id="photo-input-side" accept="image/*" style="background: none; border: none; padding: 0;">
-                  </div>
-                  <button type="submit" class="btn btn-primary btn-block">
-                    <i data-lucide="upload-cloud"></i> Save Progress Photos
-                  </button>
-                </form>
-              </div>
-              
-              <!-- Photos Gallery -->
-              <div class="glass-card weight-history-card" style="padding: 20px;">
-                <div class="card-header" style="padding: 0 0 16px 0;">
-                  <i data-lucide="image" class="header-icon"></i>
-                  <h4>Photo Gallery</h4>
-                </div>
-                <div id="gallery-controls" style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                  <label for="gallery-date-select" style="font-size: 13px; font-weight: 600; color: var(--text-sub);">Select Date:</label>
-                  <select id="gallery-date-select" onchange="loadGalleryPhotos(this.value)" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: var(--radius-sm); font-size: 13px; outline: none; cursor: pointer;">
-                    <!-- Options populated dynamically -->
-                  </select>
-                </div>
-                
-                <div class="photo-display-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
-                  <div class="photo-frame" style="background: rgba(0, 0, 0, 0.2); border: 1px dashed var(--border-color); border-radius: var(--radius-sm); padding: 12px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                    <h5 style="margin-bottom: 8px; color: var(--text-sub); font-size: 13px;">Front View</h5>
-                    <img id="gallery-front-img" style="max-width: 100%; max-height: 250px; display: none; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" alt="Front View">
-                    <span id="gallery-front-placeholder" style="font-size: 12px; color: var(--text-muted);">No photo loaded</span>
-                  </div>
-                  <div class="photo-frame" style="background: rgba(0, 0, 0, 0.2); border: 1px dashed var(--border-color); border-radius: var(--radius-sm); padding: 12px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                    <h5 style="margin-bottom: 8px; color: var(--text-sub); font-size: 13px;">Side View</h5>
-                    <img id="gallery-side-img" style="max-width: 100%; max-height: 250px; display: none; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" alt="Side View">
-                    <span id="gallery-side-placeholder" style="font-size: 12px; color: var(--text-muted);">No photo loaded</span>
-                  </div>
-                </div>
-                
-                <div style="margin-top: 16px; text-align: right;">
-                  <button id="delete-photos-btn" class="btn btn-secondary" onclick="deleteCurrentPhotos()" style="display: none; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #fca5a5;">
-                    <i data-lucide="trash-2"></i> Delete This Entry
-                  </button>
-                </div>
-              </div>
-            </div>
-
-          </div>
-          </div>
-        </section>
-
-        <!-- 4. EXERCISE LIBRARY PAGE -->
-        <section id="page-library" class="page-section">
-          <div class="page-header">
-            <div>
-              <h2 class="page-title">Exercise Library</h2>
-              <p class="page-subtitle">Learn proper form, breathing cues, and safety tips</p>
-            </div>
-            
-            <!-- Search bar -->
-            <div class="search-bar">
-              <i data-lucide="search" class="search-icon"></i>
-              <input type="text" id="library-search-input" placeholder="Search by exercise name or muscle group..." oninput="filterLibrary()">
-            </div>
-          </div>
-
-          <!-- Muscle Group Filter Pills -->
-          <div class="filter-pills" id="library-filter-pills">
-            <button class="filter-pill active" onclick="setLibraryFilter('all')">All</button>
-            <button class="filter-pill" onclick="setLibraryFilter('Chest')">Chest</button>
-            <button class="filter-pill" onclick="setLibraryFilter('Back')">Back</button>
-            <button class="filter-pill" onclick="setLibraryFilter('Shoulders')">Shoulders</button>
-            <button class="filter-pill" onclick="setLibraryFilter('Legs')">Legs</button>
-            <button class="filter-pill" onclick="setLibraryFilter('Core')">Core</button>
-            <button class="filter-pill" onclick="setLibraryFilter('Cardio')">Cardio</button>
-          </div>
-
-          <!-- Library Grid -->
-          <div id="library-cards-grid" class="library-grid">
-            <!-- Populated dynamically via JS -->
           </div>
         </section>
 
@@ -604,33 +315,414 @@
           </div>
         </section>
 
+        <!-- 6. DIET & CALORIE TRACKER PAGE -->
+        <section id="page-diet" class="page-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Diet & Calorie Tracker</h2>
+              <p class="page-subtitle">Track your meals, daily calories, and macronutrient targets</p>
+            </div>
+          </div>
+
+          <!-- Diet Navigation Tabs -->
+          <div class="diet-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+            <button id="diet-tab-btn-log" class="btn btn-secondary active" onclick="switchDietTab('log')" style="padding: 8px 16px; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="utensils" style="width: 14px; height: 14px;"></i> Daily Log
+            </button>
+            <button id="diet-tab-btn-schedule" class="btn btn-secondary" onclick="switchDietTab('schedule')" style="padding: 8px 16px; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="calendar" style="width: 14px; height: 14px;"></i> Weekly Schedule
+            </button>
+            <button id="diet-tab-btn-profile" class="btn btn-secondary" onclick="switchDietTab('profile')" style="padding: 8px 16px; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="user" style="width: 14px; height: 14px;"></i> Diet Profile
+            </button>
+            <button id="diet-tab-btn-reports" class="btn btn-secondary" onclick="switchDietTab('reports')" style="padding: 8px 16px; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="bar-chart-2" style="width: 14px; height: 14px;"></i> Reports & History
+            </button>
+          </div>
+
+          <!-- SUB-PAGE: DAILY LOG -->
+          <div id="diet-panel-log" class="diet-panel active">
+            <!-- Date Navigator -->
+            <div class="date-navigator" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn-icon" onclick="adjustDietDate(-1)" title="Previous Day">
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <div class="date-display-wrapper" style="position: relative; cursor: pointer;">
+                  <span id="diet-date-text" style="font-size: 16px; font-weight: 700; color: var(--text-main);">15 June 2026</span>
+                  <input type="date" id="diet-date-picker" onchange="onDietDateChanged(this.value)" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;" min="2026-06-15" max="2027-06-15">
+                </div>
+                <button class="btn-icon" onclick="adjustDietDate(1)" title="Next Day">
+                  <i data-lucide="chevron-right"></i>
+                </button>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary btn-sm" onclick="loadPresetPlanToday()" style="padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="zap" style="width: 12px; height: 12px;"></i> Load Preset Diet
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="copyScheduleToToday()" style="padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="copy" style="width: 12px; height: 12px;"></i> Load Scheduled Diet
+                </button>
+              </div>
+            </div>
+
+            <!-- Calorie Metrics Grid -->
+            <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px;">
+              <div class="glass-card stat-card">
+                <span class="stat-label">Target Calories</span>
+                <span id="diet-val-target" class="stat-val">2200 kcal</span>
+                <span class="stat-trend">Daily goal limit</span>
+              </div>
+              <div class="glass-card stat-card">
+                <span class="stat-label">Consumed Calories</span>
+                <span id="diet-val-consumed" class="stat-val">0 kcal</span>
+                <span id="diet-pct-consumed" class="stat-trend">0% of target</span>
+              </div>
+              <div class="glass-card stat-card">
+                <span class="stat-label">Remaining Calories</span>
+                <span id="diet-val-remaining" class="stat-val">2200 kcal</span>
+                <span id="diet-status-remaining" class="stat-trend">Remaining to eat</span>
+              </div>
+            </div>
+
+            <!-- Calorie Consumption Progress Bar & Macros -->
+            <div class="glass-card" style="padding: 20px; margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                <span>Daily Calorie Consumption</span>
+                <span id="diet-progress-text">0 / 2200 kcal</span>
+              </div>
+              <div class="progress-bar-container" style="height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; border: 1px solid var(--border-color); margin-bottom: 16px;">
+                <div id="diet-progress-fill" style="width: 0%; height: 100%; background: var(--accent); transition: var(--transition);"></div>
+              </div>
+              
+              <!-- Macros -->
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: var(--text-sub);">
+                    <span>Protein</span>
+                    <strong id="diet-protein-total" style="color: var(--text-main);">0g</strong>
+                  </div>
+                  <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                    <div id="diet-protein-fill" style="width: 0%; height: 100%; background: #ef4444; transition: var(--transition);"></div>
+                  </div>
+                </div>
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: var(--text-sub);">
+                    <span>Carbs</span>
+                    <strong id="diet-carbs-total" style="color: var(--text-main);">0g</strong>
+                  </div>
+                  <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                    <div id="diet-carbs-fill" style="width: 0%; height: 100%; background: #eab308; transition: var(--transition);"></div>
+                  </div>
+                </div>
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: var(--text-sub);">
+                    <span>Fat</span>
+                    <strong id="diet-fat-total" style="color: var(--text-main);">0g</strong>
+                  </div>
+                  <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                    <div id="diet-fat-fill" style="width: 0%; height: 100%; background: #3b82f6; transition: var(--transition);"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Meal Builder 4 Cards Grid -->
+            <div class="meal-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 24px;">
+              <!-- Breakfast -->
+              <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column;">
+                <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="coffee" style="color: var(--accent); width:16px; height:16px;"></i>
+                    <h4 style="font-size: 14px; font-weight:600;">Breakfast</h4>
+                  </div>
+                  <span id="meal-cal-breakfast" style="font-size: 12px; font-weight:700; color: var(--accent);">0 kcal</span>
+                </div>
+                <div id="meal-list-breakfast" style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 60px;">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+
+              <!-- Lunch -->
+              <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column;">
+                <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="sandwich" style="color: var(--accent); width:16px; height:16px;"></i>
+                    <h4 style="font-size: 14px; font-weight:600;">Lunch</h4>
+                  </div>
+                  <span id="meal-cal-lunch" style="font-size: 12px; font-weight:700; color: var(--accent);">0 kcal</span>
+                </div>
+                <div id="meal-list-lunch" style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 60px;">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+
+              <!-- Evening Snacks -->
+              <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column;">
+                <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="cookie" style="color: var(--accent); width:16px; height:16px;"></i>
+                    <h4 style="font-size: 14px; font-weight:600;">Evening Snacks</h4>
+                  </div>
+                  <span id="meal-cal-snacks" style="font-size: 12px; font-weight:700; color: var(--accent);">0 kcal</span>
+                </div>
+                <div id="meal-list-snacks" style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 60px;">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+
+              <!-- Dinner -->
+              <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column;">
+                <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="soup" style="color: var(--accent); width:16px; height:16px;"></i>
+                    <h4 style="font-size: 14px; font-weight:600;">Dinner</h4>
+                  </div>
+                  <span id="meal-cal-dinner" style="font-size: 12px; font-weight:700; color: var(--accent);">0 kcal</span>
+                </div>
+                <div id="meal-list-dinner" style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 60px;">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-PAGE: WEEKLY SCHEDULE -->
+          <div id="diet-panel-schedule" class="diet-panel" style="display: none;">
+            <div class="glass-card" style="padding: 20px; margin-bottom: 24px;">
+              <div class="card-header" style="padding: 0 0 12px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="calendar" class="header-icon" style="color: var(--accent);"></i>
+                  <h4>7-Day Weekly Diet Planner</h4>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <label for="diet-sched-day-select" style="font-size: 13px; font-weight: 600; color: var(--text-sub);">Select Day:</label>
+                  <select id="diet-sched-day-select" onchange="renderWeeklySchedule()" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 13px; outline: none; cursor: pointer;">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                  </select>
+                </div>
+              </div>
+              
+              <p class="card-description" style="margin-bottom: 20px; font-size: 13px; color: var(--text-sub);">Design your default scheduled plan for this day. You can import this directly into your logs on the Daily Log tab.</p>
+              
+              <!-- Weekly schedule grid (similar layout to daily log) -->
+              <div class="meal-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                <!-- Breakfast -->
+                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; background: rgba(0,0,0,0.15);">
+                  <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i data-lucide="coffee" style="color: var(--accent); width:16px; height:16px;"></i>
+                      <h4 style="font-size: 14px; font-weight:600;">Breakfast</h4>
+                    </div>
+                    <span id="sched-cal-breakfast" style="font-size: 12px; font-weight:700; color: var(--accent);">0 kcal</span>
+                  </div>
+                  <div id="sched-list-breakfast" style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 60px;">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+
+                <!-- Lunch -->
+                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; background: rgba(0,0,0,0.15);">
+                  <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i data-lucide="sandwich" style="color: var(--accent); width:16px; height:16px;"></i>
+                      <h4 style="font-size: 14px; font-weight:600;">Lunch</h4>
+                    </div>
+                    <span id="sched-cal-lunch" style="font-size: 12px; font-weight:700; color: var(--accent);">0 kcal</span>
+                  </div>
+                  <div id="sched-list-lunch" style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 60px;">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+
+                <!-- Evening Snacks -->
+                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; background: rgba(0,0,0,0.15);">
+                  <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i data-lucide="cookie" style="color: var(--accent); width:16px; height:16px;"></i>
+                      <h4 style="font-size: 14px; font-weight:600;">Evening Snacks</h4>
+                    </div>
+                    <span id="sched-cal-snacks" style="font-size: 12px; font-weight:700; color: var(--accent);">0 kcal</span>
+                  </div>
+                  <div id="sched-list-snacks" style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 60px;">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+
+                <!-- Dinner -->
+                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; background: rgba(0,0,0,0.15);">
+                  <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i data-lucide="soup" style="color: var(--accent); width:16px; height:16px;"></i>
+                      <h4 style="font-size: 14px; font-weight:600;">Dinner</h4>
+                    </div>
+                    <span id="sched-cal-dinner" style="font-size: 12px; font-weight:700; color: var(--accent);">0 kcal</span>
+                  </div>
+                  <div id="sched-list-dinner" style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 60px;">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-PAGE: DIET PROFILE -->
+          <div id="diet-panel-profile" class="diet-panel" style="display: none;">
+            <div class="glass-card" style="max-width: 500px; padding: 24px; margin: 0 auto;">
+              <div class="card-header" style="padding: 0 0 12px 0; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="user" class="header-icon" style="color: var(--accent);"></i>
+                <h4>Diet & Calorie Profile</h4>
+              </div>
+              
+              <form id="diet-profile-form" onsubmit="saveDietProfile(event)">
+                <div class="form-group" style="margin-bottom: 16px;">
+                  <label for="diet-prof-age" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px;">Age (years)</label>
+                  <input type="number" id="diet-prof-age" required min="1" max="120" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                  <label for="diet-prof-height" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px;">Height (cm)</label>
+                  <input type="number" id="diet-prof-height" required min="50" max="250" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                  <label for="diet-prof-weight" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px;">Current Weight (kg) <span style="font-size: 11px; font-weight: normal; color: var(--accent);">(Syncs with Gym weight tracker)</span></label>
+                  <input type="number" step="0.1" id="diet-prof-weight" required min="1" max="500" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                  <label for="diet-prof-goal" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px;">Goal Weight (kg)</label>
+                  <input type="number" step="0.1" id="diet-prof-goal" required min="1" max="500" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+                </div>
+                <div class="form-group" style="margin-bottom: 24px;">
+                  <label for="diet-prof-target" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px;">Target Daily Calories (kcal)</label>
+                  <input type="number" id="diet-prof-target" required min="500" max="10000" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                  <i data-lucide="save"></i> Save Profile Settings
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- SUB-PAGE: REPORTS & HISTORY -->
+          <div id="diet-panel-reports" class="diet-panel" style="display: none;">
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+              <!-- Calorie Analytics Grid -->
+              <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                <div class="glass-card stat-card">
+                  <span class="stat-label">Daily Calories (Today)</span>
+                  <span id="diet-report-today" class="stat-val">0 kcal</span>
+                  <span class="stat-trend">Today's consumption</span>
+                </div>
+                <div class="glass-card stat-card">
+                  <span class="stat-label">Weekly Average</span>
+                  <span id="diet-report-weekly-avg" class="stat-val">0 kcal</span>
+                  <span class="stat-trend">Last 7 active days</span>
+                </div>
+                <div class="glass-card stat-card">
+                  <span class="stat-label">Monthly Average</span>
+                  <span id="diet-report-monthly-avg" class="stat-val">0 kcal</span>
+                  <span class="stat-trend">Last 30 active days</span>
+                </div>
+              </div>
+
+              <!-- History Table Card -->
+              <div class="glass-card" style="padding: 20px;">
+                <div class="card-header" style="padding: 0 0 12px 0; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="history" class="header-icon" style="color: var(--accent);"></i>
+                  <h4>Calorie History Log</h4>
+                </div>
+                <div class="table-wrapper">
+                  <table class="weight-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Calories Consumed</th>
+                        <th>Macro Balance (P / C / F)</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="diet-history-tbody">
+                      <!-- Populated dynamically via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Monthly Grocery Checklist Card -->
+              <div class="glass-card" style="padding: 20px;">
+                <div class="card-header" style="padding: 0 0 12px 0; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="shopping-cart" class="header-icon" style="color: var(--accent);"></i>
+                  <h4>Monthly Grocery Estimation Checklist</h4>
+                </div>
+                <p class="card-description" style="font-size: 13px; color: var(--text-sub); margin-bottom: 16px;">This checklist represents your estimated joint monthly grocery needs to support the fat-loss diet plans.</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;" id="grocery-checklist-container">
+                  <!-- Populated dynamically via JS -->
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- UNIFIED FOOD SEARCH & DATABASE PANEL (Visible on Daily Log and Weekly Schedule tabs) -->
+          <div id="diet-search-panel" class="glass-card" style="padding: 20px; margin-top: 24px;">
+            <div class="card-header" style="padding: 0 0 12px 0; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="search" class="header-icon" style="color: var(--accent);"></i>
+              <h4 id="diet-search-title">Add Foods to Daily Log</h4>
+            </div>
+            
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+              <input id="diet-search-input" placeholder="Type food name (e.g. Poha, Roti, Rice)..." oninput="onDietSearch()" style="flex: 1; min-width: 180px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+              
+              <select id="diet-cat-filter" onchange="onDietSearch()" style="padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; cursor: pointer;">
+                <option value="">All Categories</option>
+              </select>
+              
+              <select id="diet-sort-select" onchange="onDietSearch()" style="padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; cursor: pointer;">
+                <option value="name-asc">Name A-Z</option>
+                <option value="cal-asc">Calories Low-High</option>
+                <option value="cal-desc">Calories High-Low</option>
+              </select>
+            </div>
+            
+            <div class="table-wrapper" style="overflow-x: auto;">
+              <table class="weight-table" style="min-width: 550px; width: 100%;">
+                <thead>
+                  <tr>
+                    <th style="width: 30%;">Food Item</th>
+                    <th style="width: 20%;">Category</th>
+                    <th style="width: 15%;">Serving</th>
+                    <th style="width: 15%;">Calories</th>
+                    <th style="width: 20%; text-align: center;">Add To Meal</th>
+                  </tr>
+                </thead>
+                <tbody id="diet-search-tbody">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="pagination" style="display: flex; align-items: center; justify-content: space-between; margin-top: 16px; font-size: 13px; color: var(--text-sub);">
+              <div>
+                <button id="diet-prev-btn" class="btn btn-secondary btn-sm" onclick="changeDietPage(-1)">← Prev</button>
+                <span id="diet-page-info" style="margin: 0 10px;">Page 1 of 1</span>
+                <button id="diet-next-btn" class="btn btn-secondary btn-sm" onclick="changeDietPage(1)">Next →</button>
+              </div>
+              <span id="diet-showing-info">(0 items)</span>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
   </div>
 
-  <!-- EXERCISE DETAILS MODAL -->
-  <div class="modal-overlay" id="exercise-modal" onclick="closeExerciseModal(event)">
-    <div class="modal-card" onclick="event.stopPropagation()">
-      <button class="modal-close-btn" onclick="closeExerciseModal()">
-        <i data-lucide="x"></i>
-      </button>
-      <div id="modal-exercise-body">
-        <!-- Populated dynamically via JS -->
-      </div>
-    </div>
-  </div>
 
-  <!-- CALENDAR CELL DETAIL MODAL -->
-  <div class="modal-overlay" id="calendar-day-modal" onclick="closeDayModal(event)">
-    <div class="modal-card" onclick="event.stopPropagation()">
-      <button class="modal-close-btn" onclick="closeDayModal()">
-        <i data-lucide="x"></i>
-      </button>
-      <div id="modal-day-body">
-        <!-- Populated dynamically via JS -->
-      </div>
-    </div>
-  </div>
 
   <!-- Main script file -->
   <script src="script.js"></script>

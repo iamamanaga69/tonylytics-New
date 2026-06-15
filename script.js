@@ -44,559 +44,7 @@
 /* ============================================================
    2. EXERCISE DATABASE (exerciseLibrary)
    ============================================================ */
-const exerciseLibrary = [
-  {
-    id: "chest-press",
-    name: "Chest Press Machine",
-    muscles: ["Chest", "Shoulders", "Triceps"],
-    image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=300&fit=crop",
-    description: "A machine-based exercise that targets your chest muscles. Great for beginners because the machine guides your movement.",
-    steps: [
-      "Sit on the machine and adjust the seat so handles are at chest level",
-      "Grip the handles with both hands",
-      "Push the handles forward until arms are almost straight",
-      "Slowly bring handles back to starting position",
-      "Repeat for the desired number of reps"
-    ],
-    mistakes: [
-      "Locking your elbows completely",
-      "Arching your back off the seat",
-      "Using too much weight",
-      "Moving too fast"
-    ],
-    breathing: "Breathe out when you push, breathe in when you return.",
-    tips: [
-      "Start with light weight to learn the movement",
-      "Keep your back flat against the seat",
-      "Control the weight on the way back"
-    ],
-    restTime: "60-90 seconds"
-  },
-  {
-    id: "lat-pulldown",
-    name: "Lat Pulldown",
-    muscles: ["Back", "Biceps"],
-    image: "https://images.unsplash.com/photo-1598971639058-fab3c3109a00?w=400&h=300&fit=crop",
-    description: "Pulls a bar down toward your chest to work your back muscles. Simulates a pull-up movement but easier for beginners.",
-    steps: [
-      "Sit down and adjust the knee pad",
-      "Grab the bar with hands wider than shoulder-width",
-      "Pull the bar down to your upper chest",
-      "Slowly let the bar go back up with control",
-      "Keep your chest up throughout"
-    ],
-    mistakes: [
-      "Pulling the bar behind your neck",
-      "Leaning too far back",
-      "Using momentum to swing the weight"
-    ],
-    breathing: "Breathe out as you pull down, breathe in as you release.",
-    tips: [
-      "Imagine pulling with your elbows, not your hands",
-      "Keep your chest lifted",
-      "Use a weight you can control"
-    ],
-    restTime: "60-90 seconds"
-  },
-  {
-    id: "seated-cable-row",
-    name: "Seated Cable Row",
-    muscles: ["Back", "Biceps", "Shoulders"],
-    image: "https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?w=400&h=300&fit=crop",
-    description: "A seated rowing movement using a cable machine. Excellent for building a stronger back.",
-    steps: [
-      "Sit on the bench and place feet on the footrests",
-      "Grab the handle and sit upright",
-      "Pull the handle toward your stomach",
-      "Squeeze your shoulder blades together",
-      "Slowly release back to start"
-    ],
-    mistakes: [
-      "Rounding your back",
-      "Pulling with only your arms",
-      "Leaning too far forward or backward"
-    ],
-    breathing: "Breathe out as you pull, breathe in as you release.",
-    tips: [
-      "Keep your back straight throughout",
-      "Focus on squeezing your back muscles",
-      "Don't use momentum"
-    ],
-    restTime: "60-90 seconds"
-  },
-  {
-    id: "shoulder-press",
-    name: "Shoulder Press Machine",
-    muscles: ["Shoulders", "Triceps"],
-    image: "https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=400&h=300&fit=crop",
-    description: "A machine press that targets your shoulder muscles. Safer than free weights for beginners.",
-    steps: [
-      "Adjust the seat so handles are at shoulder height",
-      "Sit with back firmly against the pad",
-      "Grip handles and push upward",
-      "Extend arms without locking elbows",
-      "Lower back down slowly"
-    ],
-    mistakes: [
-      "Arching your lower back",
-      "Locking elbows at the top",
-      "Shrugging shoulders up"
-    ],
-    breathing: "Breathe out as you press up, breathe in as you lower.",
-    tips: [
-      "Start light to learn proper form",
-      "Keep core engaged",
-      "Lower the weight slowly"
-    ],
-    restTime: "60-90 seconds"
-  },
-  {
-    id: "bicep-curl",
-    name: "Bicep Curl Machine",
-    muscles: ["Biceps"],
-    image: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=300&fit=crop",
-    description: "An isolation machine that targets your biceps. The machine ensures proper form.",
-    steps: [
-      "Sit on the machine and adjust the seat",
-      "Place arms on the pad and grip handles",
-      "Curl the handles up toward your shoulders",
-      "Squeeze at the top briefly",
-      "Lower slowly back down"
-    ],
-    mistakes: [
-      "Swinging your body",
-      "Lifting too heavy",
-      "Not going through full range of motion"
-    ],
-    breathing: "Breathe out as you curl up, breathe in as you lower.",
-    tips: [
-      "Focus on slow, controlled movements",
-      "Don't swing — let your biceps do the work",
-      "Use a weight you can do 12 reps with"
-    ],
-    restTime: "60 seconds"
-  },
-  {
-    id: "tricep-pushdown",
-    name: "Tricep Pushdown",
-    muscles: ["Triceps"],
-    image: "https://images.unsplash.com/photo-1590487988256-9ed24133863e?w=400&h=300&fit=crop",
-    description: "A cable exercise that isolates your triceps. You push a cable attachment downward.",
-    steps: [
-      "Stand facing the cable machine",
-      "Grab the bar or rope attachment",
-      "Keep elbows tucked at your sides",
-      "Push the handle down until arms are straight",
-      "Slowly let it come back up to chest level"
-    ],
-    mistakes: [
-      "Flaring elbows out",
-      "Using your body to push down",
-      "Going too heavy"
-    ],
-    breathing: "Breathe out as you push down, breathe in as you release.",
-    tips: [
-      "Keep elbows pinned to your sides",
-      "Stand with slight forward lean",
-      "Control the movement both ways"
-    ],
-    restTime: "60 seconds"
-  },
-  {
-    id: "incline-treadmill",
-    name: "Incline Treadmill Walk",
-    muscles: ["Legs", "Cardiovascular"],
-    image: "https://images.unsplash.com/photo-1576678927484-cc907957088c?w=400&h=300&fit=crop",
-    description: "Walking on a treadmill at an incline. Great for heart health and burning calories without high impact.",
-    steps: [
-      "Step onto the treadmill and start at a slow speed",
-      "Gradually increase the incline to 5-10%",
-      "Walk at a comfortable pace (3-4 km/h)",
-      "Keep your posture upright",
-      "Hold on to handles only if needed for balance"
-    ],
-    mistakes: [
-      "Holding handles too tightly",
-      "Leaning forward too much",
-      "Setting incline too high too soon"
-    ],
-    breathing: "Breathe naturally through your nose and mouth.",
-    tips: [
-      "Start with a lower incline and increase gradually",
-      "Swing arms naturally for balance",
-      "Watch your posture"
-    ],
-    restTime: "None — continuous"
-  },
-  {
-    id: "cycling",
-    name: "Cycling (Stationary Bike)",
-    muscles: ["Legs", "Cardiovascular"],
-    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=300&fit=crop",
-    description: "Pedaling on a stationary bike. Easy on the joints and great for cardio fitness.",
-    steps: [
-      "Adjust the seat height so your leg is slightly bent at the bottom of the pedal",
-      "Sit on the bike and place feet on pedals",
-      "Start pedaling at a comfortable pace",
-      "Gradually increase resistance if comfortable",
-      "Maintain a steady rhythm"
-    ],
-    mistakes: [
-      "Seat too high or too low",
-      "Gripping handlebars too tightly",
-      "Hunching your back"
-    ],
-    breathing: "Breathe deeply and rhythmically throughout.",
-    tips: [
-      "Adjust the seat properly before starting",
-      "Start with low resistance",
-      "Keep a steady pace"
-    ],
-    restTime: "None — continuous"
-  },
-  {
-    id: "hamstring-stretch",
-    name: "Hamstring Stretch",
-    muscles: ["Hamstrings"],
-    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop",
-    description: "A simple stretch for the back of your thighs. Helps improve flexibility and prevent injury.",
-    steps: [
-      "Stand upright or sit on the floor",
-      "Extend one leg straight in front of you",
-      "Lean forward gently from your hips",
-      "Reach toward your toes until you feel a stretch",
-      "Hold for 30 seconds, then switch legs"
-    ],
-    mistakes: [
-      "Bouncing while stretching",
-      "Rounding your back excessively",
-      "Pushing too hard into pain"
-    ],
-    breathing: "Breathe slowly and deeply while holding the stretch.",
-    tips: [
-      "Never force a stretch — go to mild discomfort only",
-      "Hold each stretch for at least 30 seconds",
-      "Do this after your workout when muscles are warm"
-    ],
-    restTime: "No rest needed"
-  },
-  {
-    id: "quad-stretch",
-    name: "Quad Stretch",
-    muscles: ["Quadriceps"],
-    image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&h=300&fit=crop",
-    description: "Stretches the front of your thigh. Important for leg flexibility and recovery.",
-    steps: [
-      "Stand on one leg (hold something for balance)",
-      "Bend your other knee and grab your ankle behind you",
-      "Pull your heel gently toward your buttock",
-      "Keep your knees close together",
-      "Hold for 30 seconds, then switch"
-    ],
-    mistakes: [
-      "Pulling too hard on your ankle",
-      "Leaning forward",
-      "Twisting your knee"
-    ],
-    breathing: "Breathe deeply and relax into the stretch.",
-    tips: [
-      "Use a wall for balance",
-      "Keep standing leg slightly bent",
-      "Don't arch your back"
-    ],
-    restTime: "No rest needed"
-  },
-  {
-    id: "shoulder-stretch",
-    name: "Shoulder Stretch",
-    muscles: ["Shoulders", "Upper Back"],
-    image: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=400&h=300&fit=crop",
-    description: "A gentle stretch for your shoulder muscles. Helps with mobility and posture.",
-    steps: [
-      "Bring one arm across your chest",
-      "Use the other hand to gently press it closer",
-      "Hold for 30 seconds",
-      "Switch arms and repeat"
-    ],
-    mistakes: [
-      "Pressing too hard",
-      "Shrugging your shoulders up",
-      "Rotating your body"
-    ],
-    breathing: "Breathe normally and relax your shoulders.",
-    tips: [
-      "Keep shoulders down and relaxed",
-      "Feel the stretch, not pain",
-      "Do this daily for better posture"
-    ],
-    restTime: "No rest needed"
-  },
-  {
-    id: "leg-press",
-    name: "Leg Press",
-    muscles: ["Quadriceps", "Hamstrings", "Glutes"],
-    image: "https://images.unsplash.com/photo-1534368959876-26bf04f2c947?w=400&h=300&fit=crop",
-    description: "A machine exercise where you push a weighted platform away with your legs. Safe and effective for building leg strength.",
-    steps: [
-      "Sit on the machine with back flat against the pad",
-      "Place feet shoulder-width apart on the platform",
-      "Release the safety handles",
-      "Lower the platform by bending your knees to 90 degrees",
-      "Push the platform back up without locking knees"
-    ],
-    mistakes: [
-      "Locking your knees at the top",
-      "Placing feet too high or too low",
-      "Letting knees cave inward",
-      "Lifting hips off the seat"
-    ],
-    breathing: "Breathe in as you lower, breathe out as you push up.",
-    tips: [
-      "Start with light weight",
-      "Keep your back pressed against the pad",
-      "Don't lock your knees"
-    ],
-    restTime: "60-90 seconds"
-  },
-  {
-    id: "leg-extension",
-    name: "Leg Extension",
-    muscles: ["Quadriceps"],
-    image: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=400&h=300&fit=crop",
-    description: "An isolation machine exercise that targets the front of your thighs. You extend your legs against resistance.",
-    steps: [
-      "Sit on the machine and adjust the back pad",
-      "Place your shins behind the padded bar",
-      "Extend your legs until they are straight",
-      "Hold briefly at the top",
-      "Slowly lower back down"
-    ],
-    mistakes: [
-      "Using too much weight",
-      "Swinging the weight up",
-      "Not controlling the lowering phase"
-    ],
-    breathing: "Breathe out as you extend, breathe in as you lower.",
-    tips: [
-      "Use a controlled tempo",
-      "Squeeze your quads at the top",
-      "Adjust the machine to fit your body"
-    ],
-    restTime: "60 seconds"
-  },
-  {
-    id: "leg-curl",
-    name: "Leg Curl",
-    muscles: ["Hamstrings"],
-    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop",
-    description: "A machine exercise targeting the back of your thighs. You curl your legs against resistance.",
-    steps: [
-      "Lie face down or sit on the leg curl machine",
-      "Position the pad just above your heels",
-      "Curl your legs up toward your buttocks",
-      "Squeeze at the top",
-      "Lower slowly back down"
-    ],
-    mistakes: [
-      "Lifting your hips off the bench",
-      "Using momentum",
-      "Not going through full range of motion"
-    ],
-    breathing: "Breathe out as you curl, breathe in as you lower.",
-    tips: [
-      "Keep hips pressed against the bench",
-      "Use smooth, controlled movements",
-      "Start with lighter weight"
-    ],
-    restTime: "60 seconds"
-  },
-  {
-    id: "calf-raise",
-    name: "Standing Calf Raise",
-    muscles: ["Calves"],
-    image: "https://images.unsplash.com/photo-1571019613576-2b22c76fd955?w=400&h=300&fit=crop",
-    description: "An exercise where you raise your heels to work your calf muscles. Can be done on a machine or a step.",
-    steps: [
-      "Stand on the calf raise machine or a step",
-      "Place the balls of your feet on the edge",
-      "Lower your heels below the platform",
-      "Push up onto your toes as high as you can",
-      "Hold briefly at the top, then lower slowly"
-    ],
-    mistakes: [
-      "Bouncing at the bottom",
-      "Not going through full range of motion",
-      "Going too fast"
-    ],
-    breathing: "Breathe out as you raise up, breathe in as you lower.",
-    tips: [
-      "Go slow for better results",
-      "Squeeze your calves at the top",
-      "Use full range of motion"
-    ],
-    restTime: "45-60 seconds"
-  },
-  {
-    id: "glute-bridge",
-    name: "Glute Bridge",
-    muscles: ["Glutes", "Hamstrings", "Core"],
-    image: "https://images.unsplash.com/photo-1571019613531-f5f5e3b5e63d?w=400&h=300&fit=crop",
-    description: "A floor exercise where you lift your hips to strengthen your glutes. No equipment needed.",
-    steps: [
-      "Lie on your back with knees bent and feet flat",
-      "Place arms at your sides",
-      "Push through your heels to lift your hips",
-      "Squeeze your glutes at the top",
-      "Lower slowly back to the ground"
-    ],
-    mistakes: [
-      "Arching your lower back too much",
-      "Pushing through toes instead of heels",
-      "Not squeezing glutes at the top"
-    ],
-    breathing: "Breathe out as you lift, breathe in as you lower.",
-    tips: [
-      "Keep feet hip-width apart",
-      "Drive through your heels",
-      "Hold the top position for 1-2 seconds"
-    ],
-    restTime: "45-60 seconds"
-  },
-  {
-    id: "plank",
-    name: "Plank",
-    muscles: ["Core", "Shoulders", "Back"],
-    image: "https://images.unsplash.com/photo-1566241142559-40e1dab266c6?w=400&h=300&fit=crop",
-    description: "A bodyweight exercise where you hold a push-up-like position. Amazing for core strength.",
-    steps: [
-      "Start on the floor on your forearms and toes",
-      "Keep your body in a straight line",
-      "Engage your core muscles",
-      "Hold the position without dropping your hips",
-      "Aim for 20-30 seconds to start"
-    ],
-    mistakes: [
-      "Letting hips sag down",
-      "Raising hips too high",
-      "Holding your breath",
-      "Looking up (strain on neck)"
-    ],
-    breathing: "Breathe normally throughout — don't hold your breath.",
-    tips: [
-      "Start with shorter holds and build up",
-      "Look at the floor to keep neck neutral",
-      "Squeeze your glutes and abs"
-    ],
-    restTime: "30-60 seconds"
-  },
-  {
-    id: "dead-bug",
-    name: "Dead Bug",
-    muscles: ["Core", "Hip Flexors"],
-    image: "https://images.unsplash.com/photo-1518459031867-a89b944bffe4?w=400&h=300&fit=crop",
-    description: "A floor exercise where you move opposite arms and legs while keeping your core stable. Great for beginners.",
-    steps: [
-      "Lie on your back with arms pointing up to the ceiling",
-      "Raise your legs with knees bent at 90 degrees",
-      "Slowly lower your right arm and left leg toward the floor",
-      "Return to starting position",
-      "Repeat with the opposite arm and leg"
-    ],
-    mistakes: [
-      "Arching your lower back off the floor",
-      "Moving too fast",
-      "Not engaging your core"
-    ],
-    breathing: "Breathe out as you extend your limbs, breathe in as you return.",
-    tips: [
-      "Press your lower back into the floor",
-      "Move slowly and with control",
-      "Start with fewer reps and build up"
-    ],
-    restTime: "30-45 seconds"
-  },
-  {
-    id: "brisk-walking",
-    name: "Brisk Walking",
-    muscles: ["Full Body", "Cardiovascular"],
-    image: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=400&h=300&fit=crop",
-    description: "Walking at a fast, purposeful pace. One of the best exercises for overall health and recovery.",
-    steps: [
-      "Put on comfortable shoes",
-      "Start walking at your normal pace",
-      "Gradually increase speed until slightly breathless",
-      "Swing your arms naturally",
-      "Maintain good posture — head up, shoulders back"
-    ],
-    mistakes: [
-      "Walking too slowly",
-      "Looking down at phone",
-      "Taking too short of steps"
-    ],
-    breathing: "Breathe naturally through nose and mouth.",
-    tips: [
-      "Aim for 5-6 km/h pace",
-      "Walk outdoors for fresh air",
-      "Use it as active recovery"
-    ],
-    restTime: "None — continuous"
-  },
-  {
-    id: "full-body-stretching",
-    name: "Full Body Stretching",
-    muscles: ["Full Body"],
-    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop",
-    description: "A series of stretches for your whole body. Essential for flexibility, recovery, and preventing injury.",
-    steps: [
-      "Start with neck rolls — 10 each direction",
-      "Shoulder rolls — 10 forward and backward",
-      "Arm across chest stretch — 30 sec each",
-      "Standing quad stretch — 30 sec each leg",
-      "Hamstring stretch — 30 sec each leg",
-      "Seated spinal twist — 30 sec each side",
-      "Child's pose — hold for 30-60 seconds"
-    ],
-    mistakes: [
-      "Bouncing while stretching",
-      "Skipping stretches",
-      "Stretching cold muscles too aggressively"
-    ],
-    breathing: "Breathe deeply and slowly throughout.",
-    tips: [
-      "Stretch after every workout",
-      "Never stretch to the point of pain",
-      "Hold each stretch for at least 30 seconds"
-    ],
-    restTime: "No rest needed"
-  },
-  {
-    id: "crunches",
-    name: "Crunches",
-    muscles: ["Abs", "Core"],
-    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop",
-    description: "A basic abdominal exercise done lying on your back. Targets the front of your core.",
-    steps: [
-      "Lie on your back with knees bent and feet flat",
-      "Place hands behind your head or across your chest",
-      "Curl your shoulders off the floor using your abs",
-      "Hold briefly at the top",
-      "Lower back down slowly"
-    ],
-    mistakes: [
-      "Pulling on your neck",
-      "Using momentum",
-      "Coming up too high",
-      "Not controlling the lowering"
-    ],
-    breathing: "Breathe out as you crunch up, breathe in as you lower.",
-    tips: [
-      "Focus on using your abs, not your neck",
-      "Keep a small gap between chin and chest",
-      "Quality over quantity"
-    ],
-    restTime: "30-45 seconds"
-  }
-];
+const exerciseLibrary = [];
 
 /* ============================================================
    3. WEEKLY WORKOUT SCHEDULE (weeklySchedule)
@@ -826,6 +274,7 @@ function loadData() {
     fitnessData = initData();
     saveData();
   }
+  loadDietData();
 }
 
 // Automatic migration utility for older storage formats
@@ -959,12 +408,12 @@ function switchUser(user) {
   updatePageContent();
 }
 
-// Switch between page panels (Summary, Today, Calendar, Weights, Library, Notes)
+// Switch between page panels (Summary, Today, Notes, Diet)
 function switchPage(pageId) {
   activePage = pageId;
 
   // Toggle active styling on navigation buttons
-  const navIds = ["summary", "today", "calendar", "weights", "library", "notes"];
+  const navIds = ["summary", "today", "notes", "diet"];
   navIds.forEach(id => {
     const btn = document.getElementById(`nav-btn-${id}`);
     if (btn) btn.classList.toggle("active", id === pageId);
@@ -986,14 +435,10 @@ function updatePageContent() {
     renderSummary();
   } else if (activePage === "today") {
     renderCheckIn();
-  } else if (activePage === "calendar") {
-    renderCalendar();
-  } else if (activePage === "weights") {
-    renderWeightTracker();
-  } else if (activePage === "library") {
-    renderExerciseLibrary();
   } else if (activePage === "notes") {
     renderNotes();
+  } else if (activePage === "diet") {
+    renderDietTracker();
   }
 }
 
@@ -1099,18 +544,7 @@ function renderCheckIn() {
     left.appendChild(chkWrapper);
     left.appendChild(label);
 
-    // Right info link icon
-    const infoLink = document.createElement("button");
-    infoLink.className = "btn-info-link";
-    infoLink.title = "View Exercise Instructions";
-    infoLink.onclick = (e) => {
-      e.stopPropagation(); // Stop checkbox toggle trigger
-      openExerciseModal(ex.exerciseId);
-    };
-    infoLink.innerHTML = `<i data-lucide="info"></i>`;
-
     row.appendChild(left);
-    row.appendChild(infoLink);
 
     checklistContainer.appendChild(row);
   });
@@ -1129,6 +563,7 @@ function renderCheckIn() {
 
   lucide.createIcons();
   updateProgressBar();
+  renderCalendar();
 }
 
 // Toggles checked state for an exercise in Today's checklist
@@ -1229,31 +664,6 @@ function renderCalendar() {
     const monthTotal = monthCompleted + monthMissed;
     const monthPercent = monthTotal > 0 ? Math.round((monthCompleted / monthTotal) * 100) : 0;
 
-    // Monthly weight change
-    const lastDay = new Date(year, month + 1, 0);
-    const lastDayStr = dateToYYYYMMDD(lastDay > new Date() ? new Date() : lastDay);
-    const weights = fitnessData[currentUser].weights || {};
-    const loggedDates = Object.keys(weights).sort();
-    let currMonthWeight = STARTING_WEIGHTS[currentUser];
-    for (const dStr of loggedDates) {
-      if (dStr <= lastDayStr) {
-        currMonthWeight = weights[dStr];
-      }
-    }
-
-    const prevLastDay = new Date(year, month, 0);
-    let prevMonthWeight = STARTING_WEIGHTS[currentUser];
-    if (prevLastDay >= new Date(START_DATE_STR)) {
-      const prevLastDayStr = dateToYYYYMMDD(prevLastDay);
-      for (const dStr of loggedDates) {
-        if (dStr <= prevLastDayStr) {
-          prevMonthWeight = weights[dStr];
-        }
-      }
-    }
-    const weightDiff = currMonthWeight - prevMonthWeight;
-    const weightDiffStr = weightDiff === 0 ? "0.0 kg" : (weightDiff > 0 ? `+${weightDiff.toFixed(1)} kg` : `${weightDiff.toFixed(1)} kg`);
-
     // Create stats sub row
     const statsSub = document.createElement("div");
     statsSub.style.fontSize = "10px";
@@ -1265,7 +675,6 @@ function renderCalendar() {
     statsSub.style.padding = "0 4px";
     statsSub.innerHTML = `
       <span>Done: ${monthCompleted} (${monthPercent}%)</span>
-      <span style="color: ${weightDiff < 0 ? "var(--success)" : (weightDiff > 0 ? "#ef4444" : "var(--text-muted)")};">${weightDiffStr}</span>
     `;
     title.appendChild(statsSub);
     monthCard.appendChild(title);
@@ -1337,8 +746,14 @@ function renderCalendar() {
           dayCell.classList.add("cell-today");
         }
 
-        // Click handler opens review modal
-        dayCell.onclick = () => openDayModal(dateStr);
+        // Click handler sets date and scrolls smoothly to top of check-in
+        dayCell.onclick = () => {
+          selectedDate = dateStr;
+          const picker = document.getElementById("checkin-date-picker");
+          if (picker) picker.value = dateStr;
+          renderCheckIn();
+          document.getElementById("page-today").scrollIntoView({ behavior: "smooth" });
+        };
       }
 
       dayCell.appendChild(statusSpan);
@@ -1351,601 +766,6 @@ function renderCalendar() {
     // Increment month
     currentMonth.setMonth(currentMonth.getMonth() + 1);
   }
-}
-
-
-/* ── RENDER PAGE 3: WEIGHT TRACKER ────────────────────────── */
-function renderWeightTracker() {
-  const weights = fitnessData[currentUser].weights || {};
-  const startingWeight = STARTING_WEIGHTS[currentUser];
-  const goalWeight = fitnessData[currentUser].goalWeight || 80.0;
-  
-  // Sort dates chronologically ascending
-  const sortedDates = Object.keys(weights).sort();
-  
-  // Find current/latest logged weight
-  let latestWeight = startingWeight;
-  let latestDateText = "15 June 2026";
-  let latestDateStr = START_DATE_STR;
-  
-  if (sortedDates.length > 0) {
-    latestDateStr = sortedDates[sortedDates.length - 1];
-    latestWeight = weights[latestDateStr];
-    latestDateText = formatDateLong(latestDateStr);
-  }
-
-  // Weight Lost
-  const lost = startingWeight - latestWeight;
-  const lostStr = lost === 0 ? "0.0 kg" : (lost > 0 ? `${lost.toFixed(1)} kg` : `+${Math.abs(lost).toFixed(1)} kg`);
-  let lostTrend = "Overall lost";
-  let lostClass = "";
-  if (lost > 0) {
-    lostClass = "text-success";
-  } else if (lost < 0) {
-    lostClass = "text-danger";
-    lostTrend = "Overall gained";
-  }
-
-  // Remaining weight to Goal
-  const remaining = latestWeight - goalWeight;
-  let remainingText = "0.0 kg";
-  let remainingTrend = "Remaining";
-  let remainingClass = "";
-  
-  if (remaining > 0) {
-    remainingText = `${remaining.toFixed(1)} kg`;
-  } else {
-    remainingText = "0.0 kg";
-    remainingTrend = "Goal Achieved! 🎉";
-    remainingClass = "text-success";
-  }
-
-  // Update Stats Cards
-  document.getElementById("weight-stat-start").textContent = `${startingWeight} kg`;
-  document.getElementById("weight-stat-latest").textContent = `${latestWeight} kg`;
-  document.getElementById("weight-stat-latest-date").textContent = latestDateText;
-  
-  document.getElementById("weight-stat-goal").textContent = `${goalWeight} kg`;
-  
-  const lostEl = document.getElementById("weight-stat-lost");
-  lostEl.textContent = lostStr;
-  lostEl.className = `stat-val ${lostClass}`;
-  document.getElementById("weight-stat-lost-trend").textContent = lostTrend;
-
-  const remainingEl = document.getElementById("weight-stat-remaining");
-  remainingEl.textContent = remainingText;
-  remainingEl.className = `stat-val ${remainingClass}`;
-  document.getElementById("weight-stat-remaining-trend").textContent = remainingTrend;
-
-  // Default input dates to today if within bounds, else baseline
-  const todayStr = dateToYYYYMMDD(new Date());
-  const defaultDate = isWithinSubscription(todayStr) ? todayStr : START_DATE_STR;
-  
-  document.getElementById("weight-input-date").value = defaultDate;
-  document.getElementById("weight-input-val").value = "";
-  
-  document.getElementById("measure-input-date").value = defaultDate;
-  document.getElementById("photo-input-date").value = defaultDate;
-
-  // Render Weight History Table body (dates descending)
-  const tbody = document.getElementById("weight-history-tbody");
-  tbody.innerHTML = "";
-
-  const descDates = [...sortedDates].reverse();
-
-  if (descDates.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No weight entries logged yet.</td></tr>`;
-  } else {
-    descDates.forEach(dateStr => {
-      const weightVal = weights[dateStr];
-      const tr = document.createElement("tr");
-
-      const tdDate = document.createElement("td");
-      tdDate.textContent = formatDateLong(dateStr);
-
-      const tdWeight = document.createElement("td");
-      tdWeight.style.fontWeight = "600";
-      tdWeight.textContent = `${weightVal} kg`;
-
-      const tdAction = document.createElement("td");
-      
-      if (dateStr === START_DATE_STR) {
-        tdAction.innerHTML = `<span style="font-size: 11px; color:var(--text-muted);">Baseline</span>`;
-      } else {
-        const delBtn = document.createElement("button");
-        delBtn.type = "button";
-        delBtn.className = "btn btn-danger-subtle btn-sm";
-        delBtn.innerHTML = `<i data-lucide="trash-2" style="width:13px;height:13px;"></i> Delete`;
-        delBtn.onclick = () => deleteWeightEntry(dateStr);
-        tdAction.appendChild(delBtn);
-      }
-
-      tr.appendChild(tdDate);
-      tr.appendChild(tdWeight);
-      tr.appendChild(tdAction);
-      tbody.appendChild(tr);
-    });
-  }
-
-  // Render Monthly Weight Summary card
-  renderMonthlyWeightSummary();
-
-  // Render Measurements History
-  renderMeasurements();
-
-  // Render Progress Photos Gallery dropdown and gallery
-  updatePhotoGalleryDropdown();
-
-  lucide.createIcons();
-}
-
-// Render Monthly Weight Summary inside card container
-function renderMonthlyWeightSummary() {
-  const container = document.getElementById("weight-monthly-summary-container");
-  container.innerHTML = "";
-
-  const monthlyChanges = calculateMonthlyWeightChanges(currentUser);
-  
-  if (monthlyChanges.length === 0) {
-    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); font-size:12px;">No summary data.</div>`;
-    return;
-  }
-
-  monthlyChanges.forEach(item => {
-    const pill = document.createElement("div");
-    pill.style.background = "rgba(255, 255, 255, 0.02)";
-    pill.style.border = "1px solid var(--border-color)";
-    pill.style.borderRadius = "var(--radius-sm)";
-    pill.style.padding = "8px 12px";
-    pill.style.display = "flex";
-    pill.style.flexDirection = "column";
-    pill.style.alignItems = "center";
-    pill.style.gap = "4px";
-
-    const label = document.createElement("span");
-    label.style.fontSize = "11px";
-    label.style.color = "var(--text-sub)";
-    label.style.fontWeight = "600";
-    label.textContent = item.label;
-
-    const val = document.createElement("span");
-    val.style.fontSize = "13px";
-    val.style.fontWeight = "700";
-    
-    if (item.change === 0) {
-      val.textContent = "0.0 kg";
-      val.style.color = "var(--text-muted)";
-    } else if (item.change < 0) {
-      val.textContent = `${item.change.toFixed(1)} kg`;
-      val.style.color = "var(--success)";
-    } else {
-      val.textContent = `+${item.change.toFixed(1)} kg`;
-      val.style.color = "#ef4444";
-    }
-
-    pill.appendChild(label);
-    pill.appendChild(val);
-    container.appendChild(pill);
-  });
-}
-
-// Log a new weight entry
-function logNewWeight(event) {
-  event.preventDefault();
-  const weight = parseFloat(document.getElementById("weight-input-val").value);
-  const dateStr = document.getElementById("weight-input-date").value;
-
-  if (dateStr > dateToYYYYMMDD(new Date())) {
-    alert("Cannot log weight for future dates.");
-    return;
-  }
-  if (!isWithinSubscription(dateStr)) {
-    alert(`Please select a date within the subscription period: ${formatDateLong(START_DATE_STR)} to ${formatDateLong(END_DATE_STR)}`);
-    return;
-  }
-  if (isNaN(weight) || weight <= 0 || weight > 300) {
-    alert("Please enter a valid weight numerical value (0 to 300 kg).");
-    return;
-  }
-
-  if (!fitnessData[currentUser].weights) {
-    fitnessData[currentUser].weights = {};
-  }
-
-  // Prevent duplicate logs confirmation
-  if (fitnessData[currentUser].weights[dateStr] !== undefined) {
-    if (!confirm(`A weight entry (${fitnessData[currentUser].weights[dateStr]} kg) already exists for ${formatDateLong(dateStr)}. Do you want to overwrite it?`)) {
-      return;
-    }
-  }
-
-  fitnessData[currentUser].weights[dateStr] = weight;
-
-  saveData();
-  renderWeightTracker();
-  if (activePage === "summary") renderSummary();
-}
-
-// Delete custom weight entry
-function deleteWeightEntry(dateStr) {
-  if (dateStr === START_DATE_STR) {
-    alert("Cannot delete the baseline starting weight.");
-    return;
-  }
-  if (confirm(`Are you sure you want to delete the weight entry for ${formatDateLong(dateStr)}?`)) {
-    delete fitnessData[currentUser].weights[dateStr];
-    saveData();
-    renderWeightTracker();
-    if (activePage === "summary") renderSummary();
-  }
-}
-
-// Render Measurements table
-function renderMeasurements() {
-  const measurements = fitnessData[currentUser].measurements || {};
-  const tbody = document.getElementById("measurements-history-tbody");
-  tbody.innerHTML = "";
-
-  const sortedDates = Object.keys(measurements).sort().reverse();
-
-  if (sortedDates.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No measurements logged yet.</td></tr>`;
-  } else {
-    sortedDates.forEach(dateStr => {
-      const entry = measurements[dateStr];
-      const tr = document.createElement("tr");
-
-      const tdDate = document.createElement("td");
-      tdDate.textContent = formatDateLong(dateStr);
-
-      const tdChest = document.createElement("td");
-      tdChest.textContent = entry.chest ? `${entry.chest} cm` : "--";
-
-      const tdWaist = document.createElement("td");
-      tdWaist.textContent = entry.waist ? `${entry.waist} cm` : "--";
-
-      const tdArms = document.createElement("td");
-      tdArms.textContent = entry.arms ? `${entry.arms} cm` : "--";
-
-      const tdThighs = document.createElement("td");
-      tdThighs.textContent = entry.thighs ? `${entry.thighs} cm` : "--";
-
-      const tdAction = document.createElement("td");
-      const delBtn = document.createElement("button");
-      delBtn.type = "button";
-      delBtn.className = "btn btn-danger-subtle btn-sm";
-      delBtn.innerHTML = `<i data-lucide="trash-2" style="width:13px;height:13px;"></i> Delete`;
-      delBtn.onclick = () => deleteMeasurement(dateStr);
-      tdAction.appendChild(delBtn);
-
-      tr.appendChild(tdDate);
-      tr.appendChild(tdChest);
-      tr.appendChild(tdWaist);
-      tr.appendChild(tdArms);
-      tr.appendChild(tdThighs);
-      tr.appendChild(tdAction);
-      tbody.appendChild(tr);
-    });
-  }
-}
-
-// Log new measurements
-function logNewMeasurements(event) {
-  event.preventDefault();
-  const dateStr = document.getElementById("measure-input-date").value;
-  const chest = parseFloat(document.getElementById("measure-input-chest").value);
-  const waist = parseFloat(document.getElementById("measure-input-waist").value);
-  const arms = parseFloat(document.getElementById("measure-input-arms").value);
-  const thighs = parseFloat(document.getElementById("measure-input-thighs").value);
-
-  if (dateStr > dateToYYYYMMDD(new Date())) {
-    alert("Cannot log measurements for future dates.");
-    return;
-  }
-  if (!isWithinSubscription(dateStr)) {
-    alert("Date must be within subscription period.");
-    return;
-  }
-  if (isNaN(chest) || chest <= 0 || isNaN(waist) || waist <= 0 || isNaN(arms) || arms <= 0 || isNaN(thighs) || thighs <= 0) {
-    alert("Please enter valid positive numbers for all measurement fields.");
-    return;
-  }
-
-  if (!fitnessData[currentUser].measurements) {
-    fitnessData[currentUser].measurements = {};
-  }
-
-  fitnessData[currentUser].measurements[dateStr] = { chest, waist, arms, thighs };
-
-  saveData();
-  renderWeightTracker();
-
-  // Reset input fields
-  document.getElementById("measure-input-chest").value = "";
-  document.getElementById("measure-input-waist").value = "";
-  document.getElementById("measure-input-arms").value = "";
-  document.getElementById("measure-input-thighs").value = "";
-}
-
-// Delete measurement entry
-function deleteMeasurement(dateStr) {
-  if (confirm(`Are you sure you want to delete measurements for ${formatDateLong(dateStr)}?`)) {
-    delete fitnessData[currentUser].measurements[dateStr];
-    saveData();
-    renderWeightTracker();
-  }
-}
-
-// Compress image via Canvas to avoid filling up localStorage
-function compressImage(file, maxWidth, maxHeight, callback) {
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const img = new Image();
-    img.onload = function () {
-      const canvas = document.createElement("canvas");
-      let width = img.width;
-      let height = img.height;
-      
-      if (width > height) {
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-      } else {
-        if (height > maxHeight) {
-          width = Math.round((width * maxHeight) / height);
-          height = maxHeight;
-        }
-      }
-      
-      canvas.width = width;
-      canvas.height = height;
-      
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, width, height);
-      
-      // Compress as JPEG (0.6 quality gives ~10-15KB)
-      const base64 = canvas.toDataURL("image/jpeg", 0.6);
-      callback(base64);
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-// Save progress photos from form submission
-function saveProgressPhotos(event) {
-  event.preventDefault();
-  const dateStr = document.getElementById("photo-input-date").value;
-
-  if (dateStr > dateToYYYYMMDD(new Date())) {
-    alert("Cannot log photos for future dates.");
-    return;
-  }
-  if (!isWithinSubscription(dateStr)) {
-    alert("Date must be within subscription period.");
-    return;
-  }
-
-  const frontFile = document.getElementById("photo-input-front").files[0];
-  const sideFile = document.getElementById("photo-input-side").files[0];
-
-  if (!frontFile && !sideFile) {
-    alert("Please select at least one photo (Front or Side) to upload.");
-    return;
-  }
-
-  let frontBase64 = null;
-  let sideBase64 = null;
-
-  const handleSave = () => {
-    if (!fitnessData[currentUser].photos) {
-      fitnessData[currentUser].photos = {};
-    }
-
-    const existing = fitnessData[currentUser].photos[dateStr] || {};
-
-    fitnessData[currentUser].photos[dateStr] = {
-      front: frontBase64 || existing.front || null,
-      side: sideBase64 || existing.side || null
-    };
-
-    saveData();
-    renderWeightTracker();
-
-    // Clear file inputs
-    document.getElementById("photo-input-front").value = "";
-    document.getElementById("photo-input-side").value = "";
-    
-    // Set dropdown to new date automatically
-    const select = document.getElementById("gallery-date-select");
-    if (select) {
-      select.value = dateStr;
-      loadGalleryPhotos(dateStr);
-    }
-  };
-
-  // Resize and compress sequentially
-  if (frontFile && sideFile) {
-    compressImage(frontFile, 400, 400, (b64Front) => {
-      frontBase64 = b64Front;
-      compressImage(sideFile, 400, 400, (b64Side) => {
-        sideBase64 = b64Side;
-        handleSave();
-      });
-    });
-  } else if (frontFile) {
-    compressImage(frontFile, 400, 400, (b64Front) => {
-      frontBase64 = b64Front;
-      handleSave();
-    });
-  } else if (sideFile) {
-    compressImage(sideFile, 400, 400, (b64Side) => {
-      sideBase64 = b64Side;
-      handleSave();
-    });
-  }
-}
-
-// Populates dates for progress photos gallery dropdown
-function updatePhotoGalleryDropdown() {
-  const select = document.getElementById("gallery-date-select");
-  if (!select) return;
-
-  const photos = fitnessData[currentUser].photos || {};
-  const dates = Object.keys(photos).sort().reverse();
-  
-  const savedVal = select.value;
-  select.innerHTML = "";
-
-  if (dates.length === 0) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "No entries";
-    select.appendChild(opt);
-    loadGalleryPhotos("");
-    return;
-  }
-
-  dates.forEach(dStr => {
-    const opt = document.createElement("option");
-    opt.value = dStr;
-    opt.textContent = formatDateLong(dStr);
-    select.appendChild(opt);
-  });
-
-  // Restore previous selection if still valid, else default to latest date
-  if (dates.includes(savedVal)) {
-    select.value = savedVal;
-  } else {
-    select.value = dates[0];
-  }
-  
-  loadGalleryPhotos(select.value);
-}
-
-// Load active photos in gallery from selected date
-function loadGalleryPhotos(dateStr) {
-  const frontImg = document.getElementById("gallery-front-img");
-  const frontPlace = document.getElementById("gallery-front-placeholder");
-  const sideImg = document.getElementById("gallery-side-img");
-  const sidePlace = document.getElementById("gallery-side-placeholder");
-  const delBtn = document.getElementById("delete-photos-btn");
-
-  if (!dateStr) {
-    frontImg.style.display = "none";
-    frontPlace.style.display = "inline";
-    sideImg.style.display = "none";
-    sidePlace.style.display = "inline";
-    if (delBtn) delBtn.style.display = "none";
-    return;
-  }
-
-  const entry = (fitnessData[currentUser].photos || {})[dateStr];
-  
-  if (entry && entry.front) {
-    frontImg.src = entry.front;
-    frontImg.style.display = "inline";
-    frontPlace.style.display = "none";
-  } else {
-    frontImg.style.display = "none";
-    frontPlace.style.display = "inline";
-  }
-
-  if (entry && entry.side) {
-    sideImg.src = entry.side;
-    sideImg.style.display = "inline";
-    sidePlace.style.display = "none";
-  } else {
-    sideImg.style.display = "none";
-    sidePlace.style.display = "inline";
-  }
-
-  if (delBtn) {
-    delBtn.style.display = "inline-block";
-  }
-}
-
-// Delete photo gallery entry
-function deleteCurrentPhotos() {
-  const select = document.getElementById("gallery-date-select");
-  if (!select) return;
-  const dateStr = select.value;
-  if (!dateStr) return;
-
-  if (confirm(`Are you sure you want to delete the progress photo entry for ${formatDateLong(dateStr)}?`)) {
-    delete fitnessData[currentUser].photos[dateStr];
-    saveData();
-    renderWeightTracker();
-  }
-}
-
-
-/* ── RENDER PAGE 4: EXERCISE LIBRARY ──────────────────────── */
-function renderExerciseLibrary() {
-  filterLibrary();
-}
-
-// Filter and render exercise cards inside library
-function filterLibrary() {
-  const query = document.getElementById("library-search-input").value.toLowerCase().trim();
-  const grid = document.getElementById("library-cards-grid");
-  grid.innerHTML = "";
-
-  const filtered = exerciseLibrary.filter(ex => {
-    // 1. Muscle filter match
-    if (activeLibraryFilter !== "all") {
-      const hasMuscle = ex.muscles.some(m => m.toLowerCase() === activeLibraryFilter.toLowerCase());
-      if (!hasMuscle) return false;
-    }
-    // 2. Search query match
-    if (query !== "") {
-      const nameMatch = ex.name.toLowerCase().includes(query);
-      const muscleMatch = ex.muscles.some(m => m.toLowerCase().includes(query));
-      return nameMatch || muscleMatch;
-    }
-    return true;
-  });
-
-  if (filtered.length === 0) {
-    grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:var(--text-muted);">No exercises found matching your search.</div>`;
-    return;
-  }
-
-  filtered.forEach(ex => {
-    const card = document.createElement("div");
-    card.className = "exercise-card";
-    card.onclick = () => openExerciseModal(ex.id);
-
-    const img = document.createElement("img");
-    img.src = ex.image;
-    img.alt = ex.name;
-    img.className = "exercise-card-image";
-    img.loading = "lazy";
-
-    const content = document.createElement("div");
-    content.className = "exercise-card-content";
-
-    const title = document.createElement("h4");
-    title.className = "exercise-card-title";
-    title.textContent = ex.name;
-
-    const tags = document.createElement("div");
-    tags.className = "muscle-tags";
-    ex.muscles.forEach(m => {
-      const tag = document.createElement("span");
-      tag.className = "muscle-tag";
-      tag.textContent = m;
-      tags.appendChild(tag);
-    });
-
-    content.appendChild(title);
-    content.appendChild(tags);
-    card.appendChild(img);
-    card.appendChild(content);
-
-    grid.appendChild(card);
-  });
 }
 
 
@@ -1982,211 +802,6 @@ function saveGeneralNotes() {
 }
 
 /* ============================================================
-   9. DETAIL POPUP DIALOGS (MODALS)
-   ============================================================ */
-
-/* ── EXERCISE INSTRUCTIONS MODAL ────────────────────────── */
-function openExerciseModal(exerciseId) {
-  const exercise = exerciseLibrary.find(e => e.id === exerciseId);
-  if (!exercise) return;
-
-  // Calculate history of completion for this exercise
-  const completionDates = [];
-  const workouts = fitnessData[currentUser].workouts || {};
-  for (const dateStr in workouts) {
-    const rec = workouts[dateStr];
-    if (rec.completedExercises && rec.completedExercises.includes(exerciseId)) {
-      completionDates.push(dateStr);
-    }
-  }
-  completionDates.sort(); // Sort chronological ascending
-
-  const totalCompletedCount = completionDates.length;
-  const formattedDates = completionDates.map(d => {
-    const [y, m, dNum] = d.split("-").map(Number);
-    const dateObj = new Date(y, m - 1, dNum);
-    return dateObj.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
-  });
-
-  const modalBody = document.getElementById("modal-exercise-body");
-  modalBody.innerHTML = `
-    <img src="${exercise.image}" alt="${exercise.name}" class="modal-image">
-    <div class="modal-padding">
-      <div class="modal-title-box">
-        <h3>${exercise.name}</h3>
-        <div class="muscle-tags" style="margin-top:8px;">
-          ${exercise.muscles.map(m => `<span class="muscle-tag">${m}</span>`).join("")}
-        </div>
-      </div>
-
-      <p class="modal-desc">${exercise.description}</p>
-
-      <div class="modal-section">
-        <h4 class="modal-section-title">Step-by-Step Instructions</h4>
-        <ol class="modal-list">
-          ${exercise.steps.map(s => `<li>${s}</li>`).join("")}
-        </ol>
-      </div>
-
-      <div class="modal-section">
-        <h4 class="modal-section-title">Common Mistakes to Avoid</h4>
-        <ul class="modal-list" style="list-style-type: disc;">
-          ${exercise.mistakes.map(m => `<li>${m}</li>`).join("")}
-        </ul>
-      </div>
-
-      <div class="modal-section">
-        <h4 class="modal-section-title">Breathing Technique</h4>
-        <p class="modal-text">${exercise.breathing}</p>
-      </div>
-
-      <div class="modal-section">
-        <h4 class="modal-section-title">Safety & Tips</h4>
-        <ul class="modal-list" style="list-style-type: disc;">
-          ${exercise.tips.map(t => `<li>${t}</li>`).join("")}
-        </ul>
-      </div>
-
-      <div class="modal-section">
-        <h4 class="modal-section-title">Recommended Rest Period</h4>
-        <p class="modal-text">${exercise.restTime}</p>
-      </div>
-
-      <div class="modal-section" style="margin-bottom:0; border-top: 1px solid var(--border-color); padding-top:16px;">
-        <h4 class="modal-section-title">Personal Exercise History</h4>
-        <p class="modal-text">Total Completed: <strong>${totalCompletedCount} times</strong></p>
-        ${totalCompletedCount > 0 ? `
-          <div style="max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-top: 8px; font-size: 12px;">
-            <ul style="list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 0;">
-              ${formattedDates.map(fd => `<li style="display: flex; align-items: center; gap: 4px; color: var(--text-main);"><span style="color: var(--accent);">✓</span> ${fd}</li>`).join("")}
-            </ul>
-          </div>
-        ` : `
-          <p class="modal-text" style="color: var(--text-muted); font-style: italic; margin-top: 4px;">You haven't completed this exercise yet.</p>
-        `}
-      </div>
-    </div>
-  `;
-
-  document.getElementById("exercise-modal").classList.add("active");
-}
-
-function closeExerciseModal(event) {
-  document.getElementById("exercise-modal").classList.remove("active");
-}
-
-/* ── CALENDAR DAY HISTORY MODAL ──────────────────────────── */
-function openDayModal(dateStr) {
-  ensureDateRecord(currentUser, dateStr);
-  const record = fitnessData[currentUser].workouts[dateStr];
-  const workout = getWorkoutForDate(dateStr);
-  const isFutureDate = dateStr > dateToYYYYMMDD(new Date());
-
-  const modalBody = document.getElementById("modal-day-body");
-  modalBody.innerHTML = `
-    <div class="modal-padding">
-      <div class="c-modal-header">
-        <span class="c-modal-date">${formatDateLong(dateStr)}</span>
-        <h3 class="c-modal-title">${workout.type}</h3>
-        <p class="c-modal-meta">Focus: ${workout.focus}</p>
-      </div>
-
-      <div class="workout-progress-box" style="margin-bottom:20px;">
-        <div class="progress-info">
-          <span class="progress-title">Completion Percentage</span>
-          <span id="c-modal-percent" class="progress-val">${record.completionPercentage}%</span>
-        </div>
-        <div class="progress-bar-bg">
-          <div id="c-modal-progress-fill" class="progress-bar-fill" style="width: ${record.completionPercentage}%"></div>
-        </div>
-        <p id="c-modal-count-text" class="progress-count-text">
-          Completed: ${record.completedExercises.length} of ${workout.exercises.length} exercises
-        </p>
-      </div>
-
-      <h4 class="modal-section-title" style="margin-bottom:10px;">Exercises Toggled</h4>
-      <div class="c-modal-checklist">
-        ${workout.exercises.map(ex => {
-          const isChecked = record.completedExercises.includes(ex.exerciseId);
-          return `
-            <div class="c-modal-chk-row ${isChecked ? "checked" : ""}" ${isFutureDate ? `style="opacity:0.6; cursor:not-allowed;" onclick="alert('Cannot log workouts for future dates.')"` : `onclick="toggleModalExercise('${dateStr}', '${ex.exerciseId}')"`}>
-              <div class="custom-checkbox-wrapper">
-                <input type="checkbox" class="custom-checkbox-input" ${isChecked ? "checked" : ""} ${isFutureDate ? "disabled" : ""}>
-                <div class="custom-checkbox-box"></div>
-              </div>
-              <div class="checklist-label">
-                <span class="ex-name" style="font-size:13px;">${ex.name}</span>
-                <span class="ex-details" style="font-size:10px;">${ex.sets ? `${ex.sets} Sets × ${ex.reps}` : ex.reps}</span>
-              </div>
-            </div>
-          `;
-        }).join("")}
-      </div>
-
-      <div class="c-modal-notes-box">
-        <label for="c-modal-notes-input">Notes for this Date</label>
-        <textarea id="c-modal-notes-input" placeholder="${isFutureDate ? "Notes are disabled for future dates." : "Type notes for this date..."}" ${isFutureDate ? "disabled" : ""} oninput="saveModalDateNotes('${dateStr}')">${record.notes || ""}</textarea>
-      </div>
-    </div>
-  `;
-
-  document.getElementById("calendar-day-modal").classList.add("active");
-}
-
-// Toggles checked state for an exercise inside the Calendar day details modal
-function toggleModalExercise(dateStr, exerciseId) {
-  if (dateStr > dateToYYYYMMDD(new Date())) {
-    alert("Cannot log workouts for future dates.");
-    return;
-  }
-  const record = fitnessData[currentUser].workouts[dateStr];
-  const index = record.completedExercises.indexOf(exerciseId);
-
-  if (index === -1) {
-    record.completedExercises.push(exerciseId);
-  } else {
-    record.completedExercises.splice(index, 1);
-  }
-
-  // Recalculate percentage
-  const workout = getWorkoutForDate(dateStr);
-  const total = workout.exercises.length;
-  const completed = record.completedExercises.length;
-  record.completionPercentage = total > 0 ? Math.round((completed / total) * 1000) / 10 : 0;
-
-  saveData();
-  
-  // Re-render modal to show updated status
-  openDayModal(dateStr);
-  
-  // Update parent views if dates align
-  if (dateStr === selectedDate) {
-    renderCheckIn();
-  }
-  
-  // Re-draw calendar background cell statuses
-  renderCalendar();
-}
-
-// Saves text entered in the day modal notes textarea
-function saveModalDateNotes(dateStr) {
-  if (dateStr > dateToYYYYMMDD(new Date())) return;
-  const text = document.getElementById("c-modal-notes-input").value;
-  fitnessData[currentUser].workouts[dateStr].notes = text;
-  saveData();
-
-  // Update checkin page if dates align
-  if (dateStr === selectedDate) {
-    document.getElementById("today-notes-input").value = text;
-  }
-}
-
-function closeDayModal(event) {
-  document.getElementById("calendar-day-modal").classList.remove("active");
-}
-
-
-/* ============================================================
    10. GOOGLE DRIVE BACKUP & RESTORE UTILITIES
    ============================================================ */
 
@@ -2196,7 +811,12 @@ function downloadBackup() {
   saveData();
   renderNotes(); // Refresh label immediately
 
-  const dataStr = JSON.stringify(fitnessData, null, 2);
+  // Wrap fitnessData and diet data together
+  const exportData = JSON.parse(JSON.stringify(fitnessData));
+  exportData._amanDietData = amanDietData;
+  exportData._rishitDietData = rishitDietData;
+
+  const dataStr = JSON.stringify(exportData, null, 2);
   const dataBlob = new Blob([dataStr], { type: "application/json" });
   
   // Generate filename: GymTracker_Backup_YYYY-MM-DD.json
@@ -2234,7 +854,21 @@ function handleRestoreUpload(event) {
       
       // Validation check for primary structures
       if (parsed && (parsed.aman || parsed.rishit)) {
-        if (confirm("Are you sure you want to restore this backup? This will overwrite your current workout and weight logs permanently.")) {
+        if (confirm("Are you sure you want to restore this backup? This will overwrite your current workout, weight, and diet logs permanently.")) {
+          // Extract diet data if packaged
+          if (parsed._amanDietData) {
+            amanDietData = parsed._amanDietData;
+            localStorage.setItem("amanDietData", JSON.stringify(amanDietData));
+          }
+          if (parsed._rishitDietData) {
+            rishitDietData = parsed._rishitDietData;
+            localStorage.setItem("rishitDietData", JSON.stringify(rishitDietData));
+          }
+          
+          // Clean diet fields from primary gym tracker object before saving
+          delete parsed._amanDietData;
+          delete parsed._rishitDietData;
+          
           fitnessData = parsed;
           migrateDataIfNecessary(); // Formats backup in case it was old
           saveData();
@@ -2523,49 +1157,6 @@ function renderSummary() {
   document.getElementById("summary-total-completed").textContent = `${stats.completed}`;
   document.getElementById("summary-total-missed").textContent = `Missed: ${stats.missed} | Rest: ${stats.restDays}`;
 
-  // Weight Change delta
-  const startWeight = STARTING_WEIGHTS[currentUser];
-  const weights = fitnessData[currentUser].weights || {};
-  const sortedDates = Object.keys(weights).sort();
-  let latestWeight = startWeight;
-  if (sortedDates.length > 0) {
-    latestWeight = weights[sortedDates[sortedDates.length - 1]];
-  }
-
-  const lost = startWeight - latestWeight;
-  const lostStr = lost === 0 ? "0.0 kg" : (lost > 0 ? `${lost.toFixed(1)} kg` : `+${Math.abs(lost).toFixed(1)} kg`);
-  const weightChangeEl = document.getElementById("summary-weight-change");
-  weightChangeEl.textContent = lostStr;
-  
-  const weightChangeTrend = document.getElementById("summary-weight-change-trend");
-  if (lost > 0) {
-    weightChangeEl.className = "stat-val text-success";
-    weightChangeTrend.textContent = "Overall lost";
-  } else if (lost < 0) {
-    weightChangeEl.className = "stat-val text-danger";
-    weightChangeTrend.textContent = "Overall gained";
-  } else {
-    weightChangeEl.className = "stat-val";
-    weightChangeTrend.textContent = "Overall change";
-  }
-
-  // Remaining Weight to Goal
-  const goalWeight = fitnessData[currentUser].goalWeight || 80.0;
-  const remaining = latestWeight - goalWeight;
-  const remainingEl = document.getElementById("summary-remaining-weight");
-  const goalWeightEl = document.getElementById("summary-goal-weight");
-
-  goalWeightEl.textContent = `Goal: ${goalWeight} kg`;
-
-  if (remaining > 0) {
-    remainingEl.textContent = `${remaining.toFixed(1)} kg`;
-    remainingEl.className = "stat-val";
-  } else {
-    remainingEl.textContent = "0.0 kg";
-    remainingEl.className = "stat-val text-success";
-    goalWeightEl.textContent = "Goal Achieved! 🎉";
-  }
-
   lucide.createIcons();
 }
 
@@ -2644,8 +1235,1242 @@ function setLibraryFilter(muscle) {
    ============================================================ */
 
 
+
+
+
 /* ============================================================
-   11. INITIALIZATION ON LOAD
+   12. DIET & CALORIE TRACKER MODULE LOGIC
+   ============================================================ */
+
+// Food database containing Indian, Bengali, and common daily foods
+const dietFoods = [
+  {n:"Poha",c:"Breakfast",s:"1 plate (150g)",k:180},
+  {n:"Chire Bhaja",c:"Breakfast",s:"1 cup (80g)",k:290},
+  {n:"Doodh Chire",c:"Breakfast",s:"1 bowl (200g)",k:220},
+  {n:"Muri",c:"Breakfast",s:"1 cup (30g)",k:110},
+  {n:"Muri Makha",c:"Breakfast",s:"1 plate (120g)",k:200},
+  {n:"Jhal Muri",c:"Breakfast",s:"1 plate (100g)",k:130},
+  {n:"Suji Upma",c:"Breakfast",s:"1 plate (150g)",k:200},
+  {n:"Vegetable Upma",c:"Breakfast",s:"1 plate (150g)",k:180},
+  {n:"Daliya",c:"Breakfast",s:"1 bowl (200g)",k:150},
+  {n:"Oats Porridge",c:"Breakfast",s:"1 bowl (200g)",k:150},
+  {n:"Cornflakes",c:"Breakfast",s:"1 bowl (40g+200ml milk)",k:200},
+  {n:"Bread Butter",c:"Breakfast",s:"2 slices+butter",k:220},
+  {n:"Bread Jam",c:"Breakfast",s:"2 slices+jam",k:210},
+  {n:"Bread Toast",c:"Breakfast",s:"2 slices",k:160},
+  {n:"Vegetable Sandwich",c:"Breakfast",s:"1 sandwich",k:200},
+  {n:"Aloo Paratha",c:"Breakfast",s:"1 paratha (100g)",k:260},
+  {n:"Paneer Paratha",c:"Breakfast",s:"1 paratha (100g)",k:280},
+  {n:"Plain Paratha",c:"Breakfast",s:"1 paratha (80g)",k:220},
+  {n:"Lachha Paratha",c:"Breakfast",s:"1 paratha (80g)",k:240},
+  {n:"Luchi",c:"Breakfast",s:"2 pieces (80g)",k:210},
+  {n:"Kochuri",c:"Breakfast",s:"2 pieces (80g)",k:240},
+  {n:"Radhaballabhi",c:"Breakfast",s:"2 pieces (80g)",k:260},
+  {n:"Ghugni",c:"Breakfast",s:"1 bowl (150g)",k:160},
+  {n:"Cholar Dal",c:"Breakfast",s:"1 bowl (150g)",k:180},
+  {n:"Idli",c:"Breakfast",s:"2 pieces (100g)",k:130},
+  {n:"Dosa",c:"Breakfast",s:"1 plain (80g)",k:170},
+  {n:"Uttapam",c:"Breakfast",s:"1 piece (100g)",k:180},
+  {n:"Pongal",c:"Breakfast",s:"1 bowl (200g)",k:200},
+  {n:"Puri Bhaji",c:"Breakfast",s:"2 puri+bhaji",k:310},
+  {n:"Sabudana Khichdi",c:"Breakfast",s:"1 plate (150g)",k:230},
+  {n:"Besan Chilla",c:"Breakfast",s:"2 pieces (100g)",k:180},
+  {n:"Moong Dal Chilla",c:"Breakfast",s:"2 pieces (100g)",k:160},
+  {n:"Thepla",c:"Breakfast",s:"2 pieces (80g)",k:200},
+  {n:"Handvo",c:"Breakfast",s:"1 slice (100g)",k:160},
+  {n:"Dhokla",c:"Breakfast",s:"4 pieces (100g)",k:150},
+  {n:"Banana",c:"Fruits",s:"1 medium (120g)",k:105},
+  {n:"Apple",c:"Fruits",s:"1 medium (182g)",k:95},
+  {n:"Papaya",c:"Fruits",s:"1 cup (145g)",k:62},
+  {n:"Guava",c:"Fruits",s:"1 medium (100g)",k:68},
+  {n:"Seasonal Fruit Bowl",c:"Fruits",s:"1 bowl (200g)",k:120},
+  {n:"Steamed Rice",c:"Rice",s:"1 cup cooked (180g)",k:240},
+  {n:"Gobindobhog Rice",c:"Rice",s:"1 cup cooked (180g)",k:250},
+  {n:"Brown Rice",c:"Rice",s:"1 cup cooked (195g)",k:215},
+  {n:"Jeera Rice",c:"Rice",s:"1 cup (180g)",k:260},
+  {n:"Ghee Rice",c:"Rice",s:"1 cup (180g)",k:290},
+  {n:"Lemon Rice",c:"Rice",s:"1 plate (180g)",k:260},
+  {n:"Curd Rice",c:"Rice",s:"1 plate (200g)",k:220},
+  {n:"Vegetable Pulao",c:"Rice",s:"1 plate (200g)",k:270},
+  {n:"Peas Pulao",c:"Rice",s:"1 plate (200g)",k:260},
+  {n:"Veg Biryani",c:"Rice",s:"1 plate (300g)",k:420},
+  {n:"Khichdi",c:"Rice",s:"1 bowl (250g)",k:280},
+  {n:"Bhoger Khichuri",c:"Rice",s:"1 plate (250g)",k:320},
+  {n:"Masala Khichdi",c:"Rice",s:"1 plate (250g)",k:300},
+  {n:"Moong Dal Khichdi",c:"Rice",s:"1 bowl (250g)",k:270},
+  {n:"Vegetable Khichdi",c:"Rice",s:"1 bowl (250g)",k:260},
+  {n:"Roti",c:"Bread",s:"1 roti (40g)",k:100},
+  {n:"Chapati",c:"Bread",s:"1 chapati (40g)",k:100},
+  {n:"Phulka",c:"Bread",s:"1 phulka (35g)",k:85},
+  {n:"Tandoori Roti",c:"Bread",s:"1 piece (60g)",k:130},
+  {n:"Missi Roti",c:"Bread",s:"1 piece (60g)",k:145},
+  {n:"Bajra Roti",c:"Bread",s:"1 piece (50g)",k:120},
+  {n:"Jowar Roti",c:"Bread",s:"1 piece (50g)",k:110},
+  {n:"Makki Roti",c:"Bread",s:"1 piece (60g)",k:135},
+  {n:"Naan",c:"Bread",s:"1 piece (90g)",k:260},
+  {n:"Kulcha",c:"Bread",s:"1 piece (90g)",k:250},
+  {n:"Stuffed Kulcha",c:"Bread",s:"1 piece (110g)",k:280},
+  {n:"Roomali Roti",c:"Bread",s:"1 piece (50g)",k:115},
+  {n:"Moong Dal",c:"Dal",s:"1 bowl (200g)",k:150},
+  {n:"Masoor Dal",c:"Dal",s:"1 bowl (200g)",k:160},
+  {n:"Toor Dal",c:"Dal",s:"1 bowl (200g)",k:170},
+  {n:"Arhar Dal",c:"Dal",s:"1 bowl (200g)",k:175},
+  {n:"Chana Dal",c:"Dal",s:"1 bowl (200g)",k:180},
+  {n:"Urad Dal",c:"Dal",s:"1 bowl (200g)",k:185},
+  {n:"Dal Tadka",c:"Dal",s:"1 bowl (200g)",k:190},
+  {n:"Dal Fry",c:"Dal",s:"1 bowl (200g)",k:200},
+  {n:"Mixed Dal",c:"Dal",s:"1 bowl (200g)",k:170},
+  {n:"Panchmel Dal",c:"Dal",s:"1 bowl (200g)",k:180},
+  {n:"Bengali Dal",c:"Dal",s:"1 bowl (200g)",k:155},
+  {n:"Tomato Dal",c:"Dal",s:"1 bowl (200g)",k:160},
+  {n:"Palak Dal",c:"Dal",s:"1 bowl (200g)",k:155},
+  {n:"Lau Dal",c:"Dal",s:"1 bowl (200g)",k:140},
+  {n:"Sambar",c:"Dal",s:"1 bowl (200g)",k:120},
+  {n:"Aloo Bhaja",c:"Bengali Sabji",s:"1 serving (80g)",k:160},
+  {n:"Begun Bhaja",c:"Bengali Sabji",s:"1 serving (80g)",k:130},
+  {n:"Potol Bhaja",c:"Bengali Sabji",s:"1 serving (80g)",k:110},
+  {n:"Kumro Bhaja",c:"Bengali Sabji",s:"1 serving (80g)",k:105},
+  {n:"Jhinge Bhaja",c:"Bengali Sabji",s:"1 serving (80g)",k:100},
+  {n:"Ucche Bhaja",c:"Bengali Sabji",s:"1 serving (80g)",k:90},
+  {n:"Aloo Posto",c:"Bengali Sabji",s:"1 serving (120g)",k:185},
+  {n:"Potol Posto",c:"Bengali Sabji",s:"1 serving (120g)",k:160},
+  {n:"Jhinge Posto",c:"Bengali Sabji",s:"1 serving (120g)",k:150},
+  {n:"Chorchori",c:"Bengali Sabji",s:"1 serving (150g)",k:170},
+  {n:"Labra",c:"Bengali Sabji",s:"1 serving (150g)",k:155},
+  {n:"Shukto",c:"Bengali Sabji",s:"1 bowl (150g)",k:140},
+  {n:"Ghonto",c:"Bengali Sabji",s:"1 serving (150g)",k:150},
+  {n:"Mochar Ghonto",c:"Bengali Sabji",s:"1 serving (150g)",k:165},
+  {n:"Bandhakopir Ghonto",c:"Bengali Sabji",s:"1 serving (150g)",k:120},
+  {n:"Lau Ghonto",c:"Bengali Sabji",s:"1 serving (150g)",k:100},
+  {n:"Kumro Ghonto",c:"Bengali Sabji",s:"1 serving (150g)",k:115},
+  {n:"Palong Ghonto",c:"Bengali Sabji",s:"1 serving (150g)",k:110},
+  {n:"Thor Ghonto",c:"Bengali Sabji",s:"1 serving (150g)",k:130},
+  {n:"Chhanar Dalna",c:"Bengali Sabji",s:"1 bowl (200g)",k:230},
+  {n:"Dhokar Dalna",c:"Bengali Sabji",s:"1 bowl (200g)",k:240},
+  {n:"Niramish Dalna",c:"Bengali Sabji",s:"1 bowl (200g)",k:160},
+  {n:"Alur Dom",c:"Bengali Sabji",s:"1 bowl (200g)",k:220},
+  {n:"Niramish Alur Dum",c:"Bengali Sabji",s:"1 bowl (200g)",k:190},
+  {n:"Bandhakopi Tarkari",c:"Bengali Sabji",s:"1 serving (150g)",k:110},
+  {n:"Lau Tarkari",c:"Bengali Sabji",s:"1 serving (150g)",k:90},
+  {n:"Jhinge Tarkari",c:"Bengali Sabji",s:"1 serving (150g)",k:100},
+  {n:"Potol Tarkari",c:"Bengali Sabji",s:"1 serving (150g)",k:110},
+  {n:"Kumro Tarkari",c:"Bengali Sabji",s:"1 serving (150g)",k:105},
+  {n:"Palak Sabji",c:"Bengali Sabji",s:"1 serving (150g)",k:100},
+  {n:"Methi Sabji",c:"Bengali Sabji",s:"1 serving (150g)",k:90},
+  {n:"Mixed Vegetable Curry",c:"Bengali Sabji",s:"1 bowl (200g)",k:150},
+  {n:"Vegetable Jalfrezi",c:"Bengali Sabji",s:"1 bowl (200g)",k:160},
+  {n:"Paneer Butter Masala",c:"Paneer",s:"1 bowl (200g)",k:330},
+  {n:"Kadai Paneer",c:"Paneer",s:"1 bowl (200g)",k:310},
+  {n:"Shahi Paneer",c:"Paneer",s:"1 bowl (200g)",k:350},
+  {n:"Palak Paneer",c:"Paneer",s:"1 bowl (200g)",k:270},
+  {n:"Matar Paneer",c:"Paneer",s:"1 bowl (200g)",k:280},
+  {n:"Paneer Bhurji",c:"Paneer",s:"1 serving (150g)",k:270},
+  {n:"Paneer Do Pyaza",c:"Paneer",s:"1 bowl (200g)",k:300},
+  {n:"Paneer Tikka Masala",c:"Paneer",s:"1 bowl (200g)",k:340},
+  {n:"Paneer Lababdar",c:"Paneer",s:"1 bowl (200g)",k:360},
+  {n:"Paneer Korma",c:"Paneer",s:"1 bowl (200g)",k:370},
+  {n:"Paneer Curry",c:"Paneer",s:"1 bowl (200g)",k:290},
+  {n:"Soybean Curry",c:"Soybean",s:"1 bowl (200g)",k:210},
+  {n:"Soybean Masala",c:"Soybean",s:"1 bowl (200g)",k:220},
+  {n:"Soybean Bhurji",c:"Soybean",s:"1 serving (150g)",k:190},
+  {n:"Soybean Keema",c:"Soybean",s:"1 bowl (200g)",k:230},
+  {n:"Soybean Pulao",c:"Soybean",s:"1 plate (200g)",k:270},
+  {n:"Aloo Gobi",c:"Dry Veg",s:"1 serving (150g)",k:150},
+  {n:"Aloo Matar",c:"Dry Veg",s:"1 serving (150g)",k:160},
+  {n:"Aloo Beans",c:"Dry Veg",s:"1 serving (150g)",k:145},
+  {n:"Aloo Capsicum",c:"Dry Veg",s:"1 serving (150g)",k:140},
+  {n:"Aloo Palak",c:"Dry Veg",s:"1 serving (150g)",k:135},
+  {n:"Bhindi Masala",c:"Dry Veg",s:"1 serving (150g)",k:130},
+  {n:"Bhindi Fry",c:"Dry Veg",s:"1 serving (150g)",k:140},
+  {n:"Baingan Bharta",c:"Dry Veg",s:"1 bowl (150g)",k:120},
+  {n:"Baingan Curry",c:"Dry Veg",s:"1 bowl (150g)",k:130},
+  {n:"Lauki Sabji",c:"Dry Veg",s:"1 serving (150g)",k:90},
+  {n:"Tinda Sabji",c:"Dry Veg",s:"1 serving (150g)",k:95},
+  {n:"Parwal Sabji",c:"Dry Veg",s:"1 serving (150g)",k:105},
+  {n:"Cabbage Sabji",c:"Dry Veg",s:"1 serving (150g)",k:100},
+  {n:"Carrot Beans Sabji",c:"Dry Veg",s:"1 serving (150g)",k:110},
+  {n:"Beetroot Sabji",c:"Dry Veg",s:"1 serving (150g)",k:90},
+  {n:"Mixed Veg Sabji",c:"Dry Veg",s:"1 serving (150g)",k:120},
+  {n:"Rajma",c:"Legumes",s:"1 bowl (200g)",k:230},
+  {n:"Rajma Masala",c:"Legumes",s:"1 bowl (200g)",k:240},
+  {n:"Chole",c:"Legumes",s:"1 bowl (200g)",k:250},
+  {n:"Chana Masala",c:"Legumes",s:"1 bowl (200g)",k:260},
+  {n:"Kala Chana Curry",c:"Legumes",s:"1 bowl (200g)",k:240},
+  {n:"White Peas Curry",c:"Legumes",s:"1 bowl (200g)",k:230},
+  {n:"Sprouts Curry",c:"Legumes",s:"1 bowl (200g)",k:150},
+  {n:"Chanachur",c:"Snacks",s:"1 handful (30g)",k:140},
+  {n:"Roasted Chana",c:"Snacks",s:"1 handful (40g)",k:150},
+  {n:"Roasted Peanut",c:"Snacks",s:"1 handful (30g)",k:170},
+  {n:"Peanut Chaat",c:"Snacks",s:"1 plate (100g)",k:220},
+  {n:"Sprouts Chaat",c:"Snacks",s:"1 plate (100g)",k:100},
+  {n:"Fruit Chaat",c:"Snacks",s:"1 plate (150g)",k:120},
+  {n:"Makhana",c:"Snacks",s:"1 cup (30g)",k:110},
+  {n:"Bhel Puri",c:"Snacks",s:"1 plate (150g)",k:170},
+  {n:"Sev Puri",c:"Snacks",s:"1 plate (150g)",k:200},
+  {n:"Dahi Puri",c:"Snacks",s:"1 plate (100g)",k:180},
+  {n:"Papdi Chaat",c:"Snacks",s:"1 plate (150g)",k:250},
+  {n:"Samosa",c:"Snacks",s:"1 piece (80g)",k:190},
+  {n:"Kachori",c:"Snacks",s:"1 piece (70g)",k:210},
+  {n:"Singara",c:"Snacks",s:"1 piece (80g)",k:185},
+  {n:"Vegetable Cutlet",c:"Snacks",s:"1 piece (80g)",k:150},
+  {n:"Veg Chop",c:"Snacks",s:"1 piece (80g)",k:160},
+  {n:"Beguni",c:"Snacks",s:"2 pieces (60g)",k:140},
+  {n:"Peyaji",c:"Snacks",s:"2 pieces (60g)",k:130},
+  {n:"Mochar Chop",c:"Snacks",s:"1 piece (80g)",k:170},
+  {n:"Aloor Chop",c:"Snacks",s:"1 piece (80g)",k:180},
+  {n:"Puchka",c:"Street Food",s:"6 pieces",k:130},
+  {n:"Dahi Puchka",c:"Street Food",s:"6 pieces",k:160},
+  {n:"Churmur",c:"Street Food",s:"1 plate (150g)",k:200},
+  {n:"Vegetable Roll",c:"Street Food",s:"1 roll (150g)",k:250},
+  {n:"Paneer Roll",c:"Street Food",s:"1 roll (150g)",k:300},
+  {n:"Chowmein",c:"Street Food",s:"1 plate (200g)",k:280},
+  {n:"Veg Momos",c:"Street Food",s:"6 pieces",k:200},
+  {n:"Tomato Soup",c:"Soups",s:"1 bowl (250ml)",k:80},
+  {n:"Vegetable Soup",c:"Soups",s:"1 bowl (250ml)",k:70},
+  {n:"Sweet Corn Soup",c:"Soups",s:"1 bowl (250ml)",k:100},
+  {n:"Spinach Soup",c:"Soups",s:"1 bowl (250ml)",k:60},
+  {n:"Lentil Soup",c:"Soups",s:"1 bowl (250ml)",k:130},
+  {n:"Pumpkin Soup",c:"Soups",s:"1 bowl (250ml)",k:75},
+  {n:"Mixed Veg Soup",c:"Soups",s:"1 bowl (250ml)",k:80},
+  {n:"Kachumber Salad",c:"Salads",s:"1 bowl (150g)",k:45},
+  {n:"Cucumber Salad",c:"Salads",s:"1 bowl (150g)",k:30},
+  {n:"Onion Salad",c:"Salads",s:"1 bowl (100g)",k:40},
+  {n:"Tomato Salad",c:"Salads",s:"1 bowl (150g)",k:35},
+  {n:"Sprouts Salad",c:"Salads",s:"1 bowl (150g)",k:80},
+  {n:"Fruit Salad",c:"Salads",s:"1 bowl (200g)",k:120},
+  {n:"Mixed Vegetable Salad",c:"Salads",s:"1 bowl (200g)",k:60},
+  {n:"Rasgulla",c:"Bengali Sweets",s:"2 pieces (100g)",k:186},
+  {n:"Rajbhog",c:"Bengali Sweets",s:"2 pieces (100g)",k:200},
+  {n:"Sandesh",c:"Bengali Sweets",s:"2 pieces (60g)",k:170},
+  {n:"Mishti Doi",c:"Bengali Sweets",s:"1 cup (150g)",k:180},
+  {n:"Chhanar Payesh",c:"Bengali Sweets",s:"1 bowl (150g)",k:220},
+  {n:"Payesh",c:"Bengali Sweets",s:"1 bowl (150g)",k:210},
+  {n:"Roshomalai",c:"Bengali Sweets",s:"2 pieces (100g)",k:200},
+  {n:"Kalakand",c:"Bengali Sweets",s:"1 piece (60g)",k:180},
+  {n:"Cham Cham",c:"Bengali Sweets",s:"2 pieces (100g)",k:190},
+  {n:"Pantua",c:"Bengali Sweets",s:"2 pieces (100g)",k:220},
+  {n:"Ledikeni",c:"Bengali Sweets",s:"2 pieces (100g)",k:210},
+  {n:"Kheer Kadam",c:"Bengali Sweets",s:"2 pieces (100g)",k:230},
+  {n:"Gulab Jamun",c:"Desserts",s:"2 pieces (100g)",k:280},
+  {n:"Jalebi",c:"Desserts",s:"2 pieces (60g)",k:200},
+  {n:"Rabri",c:"Desserts",s:"1 bowl (100g)",k:230},
+  {n:"Kheer",c:"Desserts",s:"1 bowl (150g)",k:200},
+  {n:"Seviyan Kheer",c:"Desserts",s:"1 bowl (150g)",k:210},
+  {n:"Gajar Halwa",c:"Desserts",s:"1 serving (150g)",k:280},
+  {n:"Suji Halwa",c:"Desserts",s:"1 serving (150g)",k:300},
+  {n:"Moong Dal Halwa",c:"Desserts",s:"1 serving (150g)",k:340},
+  {n:"Besan Ladoo",c:"Desserts",s:"2 pieces (60g)",k:280},
+  {n:"Motichoor Ladoo",c:"Desserts",s:"2 pieces (60g)",k:260},
+  {n:"Rasmalai",c:"Desserts",s:"2 pieces (100g)",k:210},
+  {n:"Mango",c:"Fruits",s:"1 cup (165g)",k:99},
+  {n:"Orange",c:"Fruits",s:"1 medium (130g)",k:62},
+  {n:"Mosambi",c:"Fruits",s:"1 medium (130g)",k:58},
+  {n:"Pineapple",c:"Fruits",s:"1 cup (165g)",k:83},
+  {n:"Watermelon",c:"Fruits",s:"1 cup (280g)",k:84},
+  {n:"Muskmelon",c:"Fruits",s:"1 cup (177g)",k:60},
+  {n:"Pomegranate",c:"Fruits",s:"1/2 cup seeds (87g)",k:72},
+  {n:"Grapes",c:"Fruits",s:"1 cup (151g)",k:104},
+  {n:"Litchi",c:"Fruits",s:"1 cup (190g)",k:125},
+  {n:"Jackfruit",c:"Fruits",s:"1 cup (165g)",k:155},
+  {n:"Coconut",c:"Fruits",s:"1/4 cup (20g)",k:71},
+  {n:"Pear",c:"Fruits",s:"1 medium (166g)",k:96},
+  {n:"Plum",c:"Fruits",s:"2 medium (132g)",k:60},
+  {n:"Dahi Puchka (Street)",c:"Street Food",s:"6 pieces",k:160},
+  {n:"Milk",c:"Breakfast",s:"1 glass (200ml)",k:120}
+];
+
+// Default preset diet plan mapping (Fat-loss base plan)
+const defaultPresetDiet = {
+  Breakfast: [
+    { n: "Poha", c: "Breakfast", s: "1 plate (150g)", k: 180 },
+    { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
+    { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+  ],
+  Lunch: [
+    { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
+    { n: "Masoor Dal", c: "Dal", s: "1 bowl (200g)", k: 160 },
+    { n: "Lau Tarkari", c: "Dry Veg", s: "1 serving (150g)", k: 90 },
+    { n: "Mixed Vegetable Salad", c: "Salads", s: "1 bowl (200g)", k: 60 }
+  ],
+  EveningSnacks: [
+    { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+  ],
+  Dinner: [
+    { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
+    { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
+    { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+  ]
+};
+
+// Default 7-day weekday-specific diet plan mapping for Aman (Fat-Loss Diet)
+const defaultWeeklyScheduleAman = {
+  Monday: {
+    Breakfast: [
+      { n: "Poha", c: "Breakfast", s: "1 plate (150g)", k: 180 },
+      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ],
+    Lunch: [
+      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
+      { n: "Moong Dal", c: "Dal", s: "1 bowl (200g)", k: 150 },
+      { n: "Lau Tarkari", c: "Dry Veg", s: "1 serving (150g)", k: 90 },
+      { n: "Mixed Vegetable Salad", c: "Salads", s: "1 bowl (200g)", k: 60 }
+    ],
+    EveningSnacks: [
+      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+    ],
+    Dinner: [
+      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
+      { n: "Mixed Vegetable Salad", c: "Salads", s: "1 bowl (200g)", k: 60 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ]
+  },
+  Tuesday: {
+    Breakfast: [
+      { n: "Suji Upma", c: "Breakfast", s: "1 plate (150g)", k: 200 },
+      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ],
+    Lunch: [
+      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
+      { n: "Masoor Dal", c: "Dal", s: "1 bowl (200g)", k: 160 },
+      { n: "Bandhakopi Tarkari", c: "Bengali Sabji", s: "1 serving (150g)", k: 110 }
+    ],
+    EveningSnacks: [
+      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+    ],
+    Dinner: [
+      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ]
+  },
+  Wednesday: {
+    Breakfast: [
+      { n: "Oats Porridge", c: "Breakfast", s: "1 bowl (200g)", k: 150 },
+      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ],
+    Lunch: [
+      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
+      { n: "Chana Dal", c: "Dal", s: "1 bowl (200g)", k: 180 },
+      { n: "Mixed Vegetable Curry", c: "Bengali Sabji", s: "1 bowl (200g)", k: 150 }
+    ],
+    EveningSnacks: [
+      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+    ],
+    Dinner: [
+      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ]
+  },
+  Thursday: {
+    Breakfast: [
+      { n: "Daliya", c: "Breakfast", s: "1 bowl (200g)", k: 150 },
+      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ],
+    Lunch: [
+      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
+      { n: "Moong Dal", c: "Dal", s: "1 bowl (200g)", k: 150 },
+      { n: "Palak Sabji", c: "Bengali Sabji", s: "1 serving (150g)", k: 100 }
+    ],
+    EveningSnacks: [
+      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+    ],
+    Dinner: [
+      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ]
+  },
+  Friday: {
+    Breakfast: [
+      { n: "Poha", c: "Breakfast", s: "1 plate (150g)", k: 180 },
+      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ],
+    Lunch: [
+      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
+      { n: "Moong Dal", c: "Dal", s: "1 bowl (200g)", k: 150 },
+      { n: "Aloo Gobi", c: "Dry Veg", s: "1 serving (150g)", k: 150 }
+    ],
+    EveningSnacks: [
+      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+    ],
+    Dinner: [
+      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ]
+  },
+  Saturday: {
+    Breakfast: [
+      { n: "Suji Upma", c: "Breakfast", s: "1 plate (150g)", k: 200 },
+      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ],
+    Lunch: [
+      { n: "Khichdi", c: "Rice", s: "1 bowl (250g)", k: 280 },
+      { n: "Mixed Vegetable Salad", c: "Salads", s: "1 bowl (200g)", k: 60 }
+    ],
+    EveningSnacks: [
+      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+    ],
+    Dinner: [
+      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ]
+  },
+  Sunday: {
+    Breakfast: [
+      { n: "Oats Porridge", c: "Breakfast", s: "1 bowl (200g)", k: 150 },
+      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ],
+    Lunch: [
+      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
+      { n: "Moong Dal", c: "Dal", s: "1 bowl (200g)", k: 150 },
+      { n: "Mixed Vegetable Curry", c: "Bengali Sabji", s: "1 bowl (200g)", k: 150 }
+    ],
+    EveningSnacks: [
+      { n: "Sprouts Chaat", c: "Snacks", s: "1 plate (100g)", k: 100 }
+    ],
+    Dinner: [
+      { n: "Khichdi", c: "Rice", s: "1 bowl (250g)", k: 280 },
+      { n: "Mishti Doi", c: "Bengali Sweets", s: "1 cup (150g)", k: 180 },
+      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    ]
+  }
+};
+
+// Default 7-day weekday-specific diet plan mapping for Rishit (Aman's + Extra portion)
+const defaultWeeklyScheduleRishit = JSON.parse(JSON.stringify(defaultWeeklyScheduleAman));
+Object.keys(defaultWeeklyScheduleRishit).forEach(day => {
+  const dayPlan = defaultWeeklyScheduleRishit[day];
+  ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(mealType => {
+    dayPlan[mealType] = dayPlan[mealType].map(item => {
+      // 1. rice: +0.5 cup (Steamed Rice k=360 instead of 240)
+      if (item.n === "Steamed Rice") {
+        return { n: "Steamed Rice", c: "Rice", s: "1.5 cups cooked (270g)", k: 360 };
+      }
+      // 2. roti: +1 roti (Roti k=400 instead of 300)
+      if (item.n === "Roti" && item.k === 300) {
+        return { n: "Roti", c: "Bread", s: "4 pieces", k: 400 };
+      }
+      // 3. roasted_chana: +10g (Roasted Chana k=190 instead of 150)
+      if (item.n === "Roasted Chana") {
+        return { n: "Roasted Chana", c: "Snacks", s: "1 handful (50g)", k: 190 };
+      }
+      return item;
+    });
+  });
+});
+
+// Joint monthly grocery items database representation
+const monthlyGroceryItems = [
+  { id: "g-rice", n: "Rice", q: "20 kg" },
+  { id: "g-atta", n: "Atta (Whole Wheat Flour)", q: "15 kg" },
+  { id: "g-moong", n: "Moong Dal", q: "2 kg" },
+  { id: "g-masoor", n: "Masoor Dal", q: "2 kg" },
+  { id: "g-chana", n: "Chana Dal", q: "2 kg" },
+  { id: "g-soybean", n: "Soybean Chunks", q: "5 kg" },
+  { id: "g-milk", n: "Milk", q: "45 Liters" },
+  { id: "g-bananas", n: "Bananas", q: "90 pieces" },
+  { id: "g-roasted-chana", n: "Roasted Chana", q: "3 kg" },
+  { id: "g-veg", n: "Seasonal Vegetables", q: "Daily purchase" },
+  { id: "g-cucumber", n: "Cucumber", q: "Daily purchase" },
+  { id: "g-onion", n: "Onion", q: "Daily purchase" },
+  { id: "g-tomato", n: "Tomato", q: "Daily purchase" }
+];
+
+// State variables for Diet Tracker
+let amanDietData = null;
+let rishitDietData = null;
+let selectedDietDate = "";
+let activeDietTab = "log"; // log, schedule, profile, reports
+let dietSearchPage = 1;
+const dietSearchPageSize = 8;
+
+// Macro Calculation Helper: estimates P/C/F based on food categories and calories
+function getFoodMacros(food) {
+  let p = 0, c = 0, f = 0;
+  const kcal = food.k || food.calories || 0;
+  const cat = food.c || food.category || "";
+  
+  switch(cat) {
+    case "Breakfast":
+      p = Math.round((kcal * 0.15) / 4);
+      c = Math.round((kcal * 0.60) / 4);
+      f = Math.round((kcal * 0.25) / 9);
+      break;
+    case "Rice":
+    case "Bread":
+      p = Math.round((kcal * 0.08) / 4);
+      c = Math.round((kcal * 0.85) / 4);
+      f = Math.round((kcal * 0.07) / 9);
+      break;
+    case "Dal":
+    case "Legumes":
+      p = Math.round((kcal * 0.25) / 4);
+      c = Math.round((kcal * 0.65) / 4);
+      f = Math.round((kcal * 0.10) / 9);
+      break;
+    case "Paneer":
+      p = Math.round((kcal * 0.25) / 4);
+      c = Math.round((kcal * 0.15) / 4);
+      f = Math.round((kcal * 0.60) / 9);
+      break;
+    case "Soybean":
+      p = Math.round((kcal * 0.40) / 4);
+      c = Math.round((kcal * 0.35) / 4);
+      f = Math.round((kcal * 0.25) / 9);
+      break;
+    case "Bengali Sabji":
+    case "Dry Veg":
+    case "Salads":
+    case "Soups":
+      p = Math.round((kcal * 0.10) / 4);
+      c = Math.round((kcal * 0.70) / 4);
+      f = Math.round((kcal * 0.20) / 9);
+      break;
+    case "Fruits":
+      p = Math.round((kcal * 0.03) / 4);
+      c = Math.round((kcal * 0.95) / 4);
+      f = Math.round((kcal * 0.02) / 9);
+      break;
+    case "Snacks":
+    case "Street Food":
+      p = Math.round((kcal * 0.08) / 4);
+      c = Math.round((kcal * 0.52) / 4);
+      f = Math.round((kcal * 0.40) / 9);
+      break;
+    case "Bengali Sweets":
+    case "Desserts":
+      p = Math.round((kcal * 0.05) / 4);
+      c = Math.round((kcal * 0.75) / 4);
+      f = Math.round((kcal * 0.20) / 9);
+      break;
+    default:
+      p = Math.round((kcal * 0.15) / 4);
+      c = Math.round((kcal * 0.55) / 4);
+      f = Math.round((kcal * 0.30) / 9);
+  }
+  
+  // Minimal carbohydrate assignment if calorie value exists but formula estimates zero
+  if (kcal > 0 && p === 0 && c === 0 && f === 0) {
+    c = Math.round(kcal / 4);
+  }
+  return { protein: p, carbs: c, fat: f };
+}
+
+// Automatic migration utility to update legacy same-day schedules to new ReportLab plan
+function migrateDietDataIfNecessary(data, user) {
+  if (data && data.schedule && data.schedule.Monday && data.schedule.Tuesday) {
+    const monItems = data.schedule.Monday.Breakfast.map(f => f.n).join(",");
+    const tueItems = data.schedule.Tuesday.Breakfast.map(f => f.n).join(",");
+    
+    let needMigrate = false;
+    
+    // Check if it's the old layout
+    if (monItems === tueItems && monItems === "Poha,Banana,Milk") {
+      needMigrate = true;
+    }
+    
+    // Also check if Aman's target calories is 2200, migrate to 2100
+    if (user === "aman" && data.profile.targetCalories === 2200) {
+      data.profile.targetCalories = 2100;
+      needMigrate = true;
+    }
+    
+    if (needMigrate) {
+      data.schedule = JSON.parse(JSON.stringify(user === "aman" ? defaultWeeklyScheduleAman : defaultWeeklyScheduleRishit));
+      return true;
+    }
+  }
+  return false;
+}
+
+// Initial default structures generator
+function initDietData(user) {
+  const isAman = (user === "aman");
+  return {
+    profile: {
+      age: isAman ? 24 : 18,
+      height: 170,
+      weight: isAman ? 94.6 : 92.7,
+      goalWeight: 80,
+      targetCalories: isAman ? 2100 : 2300 // Aman is 2100, Rishit is 2300
+    },
+    meals: {}, // date -> { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] }
+    schedule: JSON.parse(JSON.stringify(isAman ? defaultWeeklyScheduleAman : defaultWeeklyScheduleRishit))
+  };
+}
+
+// Load separate databases from localStorage
+function loadDietData() {
+  const storedAman = localStorage.getItem("amanDietData");
+  if (storedAman) {
+    try { 
+      amanDietData = JSON.parse(storedAman);
+      if (migrateDietDataIfNecessary(amanDietData, "aman")) {
+        localStorage.setItem("amanDietData", JSON.stringify(amanDietData));
+      }
+    }
+    catch(e) { amanDietData = initDietData("aman"); }
+  } else {
+    amanDietData = initDietData("aman");
+  }
+
+  const storedRishit = localStorage.getItem("rishitDietData");
+  if (storedRishit) {
+    try { 
+      rishitDietData = JSON.parse(storedRishit);
+      if (migrateDietDataIfNecessary(rishitDietData, "rishit")) {
+        localStorage.setItem("rishitDietData", JSON.stringify(rishitDietData));
+      }
+    }
+    catch(e) { rishitDietData = initDietData("rishit"); }
+  } else {
+    rishitDietData = initDietData("rishit");
+  }
+}
+
+// Save back to respective separate keys
+function saveDietData() {
+  localStorage.setItem("amanDietData", JSON.stringify(amanDietData));
+  localStorage.setItem("rishitDietData", JSON.stringify(rishitDietData));
+}
+
+// Active user diet data selector
+function getActiveDietData() {
+  return currentUser === "aman" ? amanDietData : rishitDietData;
+}
+
+// Ensure meal arrays exist for a selected date
+function ensureDietDateRecord(data, dateStr) {
+  if (!data.meals[dateStr]) {
+    data.meals[dateStr] = {
+      Breakfast: [],
+      Lunch: [],
+      EveningSnacks: [],
+      Dinner: []
+    };
+  }
+}
+
+// Main page switch renderer entry point
+function renderDietTracker() {
+  if (!selectedDietDate) {
+    selectedDietDate = selectedDate; // Sync with calendar date context
+  }
+  
+  // Populate category filter dropdown if empty
+  const filterSelect = document.getElementById("diet-cat-filter");
+  if (filterSelect && filterSelect.options.length <= 1) {
+    const cats = [...new Set(dietFoods.map(f => f.c))].sort();
+    cats.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = c;
+      filterSelect.appendChild(opt);
+    });
+  }
+
+  // Switch Sub-tabs content show/hide
+  const panels = ["log", "schedule", "profile", "reports"];
+  panels.forEach(p => {
+    const el = document.getElementById(`diet-panel-${p}`);
+    if (el) el.style.display = (p === activeDietTab) ? "block" : "none";
+    
+    const btn = document.getElementById(`diet-tab-btn-${p}`);
+    if (btn) btn.classList.toggle("active", p === activeDietTab);
+  });
+
+  // Show/Hide search panel (visible on Daily Log and Weekly Schedule tabs)
+  const searchPanel = document.getElementById("diet-search-panel");
+  if (searchPanel) {
+    if (activeDietTab === "log" || activeDietTab === "schedule") {
+      searchPanel.style.display = "block";
+      const title = document.getElementById("diet-search-title");
+      if (title) {
+        title.textContent = activeDietTab === "log" 
+          ? "Add Foods to Daily Log" 
+          : `Add Foods to Weekly Schedule (${document.getElementById("diet-sched-day-select").value})`;
+      }
+    } else {
+      searchPanel.style.display = "none";
+    }
+  }
+
+  // Route inner renders
+  if (activeDietTab === "log") {
+    renderDietLog();
+  } else if (activeDietTab === "schedule") {
+    renderWeeklySchedule();
+  } else if (activeDietTab === "profile") {
+    renderDietProfile();
+  } else if (activeDietTab === "reports") {
+    renderDietReports();
+  }
+  
+  // Refresh search display
+  onDietSearch();
+}
+
+// Tab switcher handler
+function switchDietTab(tabId) {
+  activeDietTab = tabId;
+  renderDietTracker();
+}
+
+// ── RENDER SUB-TAB 1: DAILY LOG ──
+function renderDietLog() {
+  const data = getActiveDietData();
+  ensureDietDateRecord(data, selectedDietDate);
+  
+  // Date values
+  document.getElementById("diet-date-text").textContent = formatDateLong(selectedDietDate);
+  document.getElementById("diet-date-picker").value = selectedDietDate;
+  
+  const targetCals = data.profile.targetCalories || 2000;
+  document.getElementById("diet-val-target").textContent = `${targetCals} kcal`;
+  
+  // Compute logged items
+  const meals = data.meals[selectedDietDate];
+  let consumedCals = 0;
+  let totalProtein = 0;
+  let totalCarbs = 0;
+  let totalFat = 0;
+
+  const mealTypes = ["Breakfast", "Lunch", "EveningSnacks", "Dinner"];
+  
+  mealTypes.forEach(type => {
+    const listContainer = document.getElementById(type === "EveningSnacks" ? "meal-list-snacks" : `meal-list-${type.toLowerCase()}`);
+    const calLabel = document.getElementById(type === "EveningSnacks" ? "meal-cal-snacks" : `meal-cal-${type.toLowerCase()}`);
+    
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+    
+    let mealCals = 0;
+    const items = meals[type] || [];
+    
+    if (items.length === 0) {
+      listContainer.innerHTML = `<div class="meal-placeholder">No foods logged</div>`;
+    } else {
+      items.forEach((food, idx) => {
+        mealCals += food.k;
+        consumedCals += food.k;
+        
+        // Accumulate macros
+        const macros = getFoodMacros(food);
+        totalProtein += macros.protein;
+        totalCarbs += macros.carbs;
+        totalFat += macros.fat;
+        
+        const row = document.createElement("div");
+        row.className = "meal-food-item";
+        row.innerHTML = `
+          <div class="meal-food-info">
+            <span class="meal-food-name">${food.n}</span>
+            <span class="meal-food-sub">${food.s} • P: ${macros.protein}g C: ${macros.carbs}g F: ${macros.fat}g</span>
+          </div>
+          <div class="meal-food-right">
+            <span class="meal-food-calories">${food.k} kcal</span>
+            <button class="btn-delete-food" onclick="deleteFoodItem('${type}', ${idx})" title="Remove item">
+              <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+            </button>
+          </div>
+        `;
+        listContainer.appendChild(row);
+      });
+    }
+    
+    if (calLabel) calLabel.textContent = `${mealCals} kcal`;
+  });
+
+  // Update summary totals
+  document.getElementById("diet-val-consumed").textContent = `${consumedCals} kcal`;
+  
+  const remainingCals = targetCals - consumedCals;
+  const remainingLabel = document.getElementById("diet-val-remaining");
+  const remainingStatus = document.getElementById("diet-status-remaining");
+  
+  if (remainingCals >= 0) {
+    remainingLabel.textContent = `${remainingCals} kcal`;
+    remainingLabel.style.color = "var(--text-main)";
+    remainingStatus.textContent = "Remaining to eat";
+    remainingStatus.style.color = "var(--text-sub)";
+  } else {
+    remainingLabel.textContent = `${Math.abs(remainingCals)} kcal`;
+    remainingLabel.style.color = "var(--danger)";
+    remainingStatus.textContent = "Over calorie budget!";
+    remainingStatus.style.color = "var(--danger)";
+  }
+
+  const pct = Math.min(100, Math.round((consumedCals / targetCals) * 100));
+  document.getElementById("diet-pct-consumed").textContent = `${pct}% of target`;
+  
+  // Progress fill width
+  const progressFill = document.getElementById("diet-progress-fill");
+  if (progressFill) {
+    progressFill.style.width = `${pct}%`;
+    progressFill.style.background = (consumedCals > targetCals) ? "var(--danger)" : "var(--accent)";
+  }
+  document.getElementById("diet-progress-text").textContent = `${consumedCals} / ${targetCals} kcal`;
+
+  // Macro progress totals
+  document.getElementById("diet-protein-total").textContent = `${totalProtein}g`;
+  document.getElementById("diet-carbs-total").textContent = `${totalCarbs}g`;
+  document.getElementById("diet-fat-total").textContent = `${totalFat}g`;
+
+  // Calculate percentage of typical macro splits: Protein (130g target), Carbs (250g target), Fat (70g target)
+  const pPct = Math.min(100, Math.round((totalProtein / 130) * 100));
+  const cPct = Math.min(100, Math.round((totalCarbs / 250) * 100));
+  const fPct = Math.min(100, Math.round((totalFat / 70) * 100));
+
+  document.getElementById("diet-protein-fill").style.width = `${pPct}%`;
+  document.getElementById("diet-carbs-fill").style.width = `${cPct}%`;
+  document.getElementById("diet-fat-fill").style.width = `${fPct}%`;
+
+  // Refresh lucide icons inside logs
+  lucide.createIcons();
+}
+
+// Delete food entry from log
+function deleteFoodItem(type, index) {
+  const data = getActiveDietData();
+  
+  if (activeDietTab === "log") {
+    data.meals[selectedDietDate][type].splice(index, 1);
+  } else if (activeDietTab === "schedule") {
+    const day = document.getElementById("diet-sched-day-select").value;
+    data.schedule[day][type].splice(index, 1);
+  }
+  
+  saveDietData();
+  renderDietTracker();
+}
+
+// Date Navigation Controls
+function adjustDietDate(days) {
+  const current = new Date(selectedDietDate);
+  current.setDate(current.getDate() + days);
+  const dateStr = dateToYYYYMMDD(current);
+  if (isWithinSubscription(dateStr)) {
+    selectedDietDate = dateStr;
+    renderDietTracker();
+  }
+}
+
+function onDietDateChanged(newVal) {
+  if (isWithinSubscription(newVal)) {
+    selectedDietDate = newVal;
+    renderDietTracker();
+  } else {
+    alert("Date selected is outside subscription period!");
+    document.getElementById("diet-date-picker").value = selectedDietDate;
+  }
+}
+
+// ── RENDER SUB-TAB 2: WEEKLY SCHEDULE ──
+function renderWeeklySchedule() {
+  const data = getActiveDietData();
+  const day = document.getElementById("diet-sched-day-select").value;
+  
+  const schedule = data.schedule[day];
+  const mealTypes = ["Breakfast", "Lunch", "EveningSnacks", "Dinner"];
+  
+  mealTypes.forEach(type => {
+    const listContainer = document.getElementById(type === "EveningSnacks" ? "sched-list-snacks" : `sched-list-${type.toLowerCase()}`);
+    const calLabel = document.getElementById(type === "EveningSnacks" ? "sched-cal-snacks" : `sched-cal-${type.toLowerCase()}`);
+    
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+    
+    let mealCals = 0;
+    const items = schedule[type] || [];
+    
+    if (items.length === 0) {
+      listContainer.innerHTML = `<div class="meal-placeholder">No foods scheduled</div>`;
+    } else {
+      items.forEach((food, idx) => {
+        mealCals += food.k;
+        const macros = getFoodMacros(food);
+        
+        const row = document.createElement("div");
+        row.className = "meal-food-item";
+        row.innerHTML = `
+          <div class="meal-food-info">
+            <span class="meal-food-name">${food.n}</span>
+            <span class="meal-food-sub">${food.s} • P: ${macros.protein}g C: ${macros.carbs}g F: ${macros.fat}g</span>
+          </div>
+          <div class="meal-food-right">
+            <span class="meal-food-calories">${food.k} kcal</span>
+            <button class="btn-delete-food" onclick="deleteFoodItem('${type}', ${idx})" title="Remove item">
+              <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+            </button>
+          </div>
+        `;
+        listContainer.appendChild(row);
+      });
+    }
+    if (calLabel) calLabel.textContent = `${mealCals} kcal`;
+  });
+  
+  lucide.createIcons();
+}
+
+// ── RENDER SUB-TAB 3: DIET PROFILE ──
+function renderDietProfile() {
+  const data = getActiveDietData();
+  
+  // Fetch latest weight dynamically from weights registry
+  const weights = fitnessData[currentUser].weights || {};
+  const dates = Object.keys(weights).sort();
+  const latestWeight = dates.length ? weights[dates[dates.length - 1]] : data.profile.weight;
+  
+  document.getElementById("diet-prof-age").value = data.profile.age;
+  document.getElementById("diet-prof-height").value = data.profile.height;
+  document.getElementById("diet-prof-weight").value = latestWeight;
+  document.getElementById("diet-prof-goal").value = data.profile.goalWeight;
+  document.getElementById("diet-prof-target").value = data.profile.targetCalories;
+}
+
+// Profile Save handler
+function saveDietProfile(event) {
+  event.preventDefault();
+  const data = getActiveDietData();
+  
+  const age = parseInt(document.getElementById("diet-prof-age").value);
+  const height = parseInt(document.getElementById("diet-prof-height").value);
+  const weight = parseFloat(document.getElementById("diet-prof-weight").value);
+  const goal = parseFloat(document.getElementById("diet-prof-goal").value);
+  const target = parseInt(document.getElementById("diet-prof-target").value);
+  
+  if (age <= 0 || height <= 0 || weight <= 0 || goal <= 0 || target <= 0) {
+    alert("Please enter positive numeric bounds!");
+    return;
+  }
+  
+  data.profile.age = age;
+  data.profile.height = height;
+  data.profile.weight = weight;
+  data.profile.goalWeight = goal;
+  data.profile.targetCalories = target;
+  
+  // Backwards integration: Save weight into weights database for selected date
+  if (!fitnessData[currentUser].weights) {
+    fitnessData[currentUser].weights = {};
+  }
+  fitnessData[currentUser].weights[selectedDietDate] = weight;
+  fitnessData[currentUser].goalWeight = goal;
+  
+  saveData(); // Save Gym tracker data
+  saveDietData(); // Save Diet tracker data
+  
+  alert("Diet profile saved successfully!");
+  renderDietTracker();
+}
+
+// ── RENDER SUB-TAB 4: REPORTS & CALORIE HISTORY ──
+function renderDietReports() {
+  const data = getActiveDietData();
+  
+  // Calculate today's calories
+  ensureDietDateRecord(data, selectedDietDate);
+  const todayMeals = data.meals[selectedDietDate];
+  let todayCals = 0;
+  ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(type => {
+    (todayMeals[type] || []).forEach(f => todayCals += f.k);
+  });
+  
+  document.getElementById("diet-report-today").textContent = `${todayCals} kcal`;
+  
+  // Gather active logs history
+  const activeDates = Object.keys(data.meals).filter(d => {
+    let dayTotal = 0;
+    ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(t => {
+      (data.meals[d][t] || []).forEach(f => dayTotal += f.k);
+    });
+    return dayTotal > 0;
+  }).sort();
+  
+  // Calculate Weekly Average (past 7 active days)
+  let weeklySum = 0;
+  const weeklyDates = activeDates.slice(-7);
+  weeklyDates.forEach(d => {
+    ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(t => {
+      (data.meals[d][t] || []).forEach(f => weeklySum += f.k);
+    });
+  });
+  const weeklyAvg = weeklyDates.length ? Math.round(weeklySum / weeklyDates.length) : 0;
+  document.getElementById("diet-report-weekly-avg").textContent = `${weeklyAvg} kcal`;
+  
+  // Calculate Monthly Average (past 30 active days)
+  let monthlySum = 0;
+  const monthlyDates = activeDates.slice(-30);
+  monthlyDates.forEach(d => {
+    ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(t => {
+      (data.meals[d][t] || []).forEach(f => monthlySum += f.k);
+    });
+  });
+  const monthlyAvg = monthlyDates.length ? Math.round(monthlySum / monthlyDates.length) : 0;
+  document.getElementById("diet-report-monthly-avg").textContent = `${monthlyAvg} kcal`;
+  
+
+  
+  // History table population
+  const tbody = document.getElementById("diet-history-tbody");
+  tbody.innerHTML = "";
+  
+  if (activeDates.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No meals recorded yet.</td></tr>`;
+  } else {
+    // Reverse chronological order
+    const reverseDates = [...activeDates].reverse();
+    reverseDates.forEach(d => {
+      let dayTotal = 0;
+      let pTotal = 0, cTotal = 0, fTotal = 0;
+      
+      ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(t => {
+        (data.meals[d][t] || []).forEach(f => {
+          dayTotal += f.k;
+          const mac = getFoodMacros(f);
+          pTotal += mac.protein;
+          cTotal += mac.carbs;
+          fTotal += mac.fat;
+        });
+      });
+      
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="font-weight: 600;">${formatDateLong(d)}</td>
+        <td style="font-weight: 700; color: var(--accent);">${dayTotal} kcal</td>
+        <td>
+          <span style="color: #ef4444; font-weight: 500;">P: ${pTotal}g</span> • 
+          <span style="color: #eab308; font-weight: 500;">C: ${cTotal}g</span> • 
+          <span style="color: #3b82f6; font-weight: 500;">F: ${fTotal}g</span>
+        </td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick="onDietDateChanged('${d}'); switchDietTab('log');" style="padding: 4px 8px; font-size: 11px;">
+            View Log
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  renderGroceryChecklist();
+}
+
+// Render the monthly grocery checklist inside the Reports page
+function renderGroceryChecklist() {
+  const container = document.getElementById("grocery-checklist-container");
+  if (!container) return;
+  container.innerHTML = "";
+  
+  const checkedStates = JSON.parse(localStorage.getItem("duogym_grocery_checklist") || "{}");
+  
+  monthlyGroceryItems.forEach(item => {
+    const isChecked = checkedStates[item.id] ? "checked" : "";
+    const labelStyle = checkedStates[item.id] ? "text-decoration: line-through; color: var(--text-muted);" : "color: var(--text-main);";
+    
+    const div = document.createElement("div");
+    div.style = "display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); border-radius: var(--radius-sm); transition: var(--transition);";
+    div.innerHTML = `
+      <input type="checkbox" id="${item.id}" ${isChecked} onchange="toggleGroceryItem('${item.id}')" style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--accent);">
+      <label for="${item.id}" style="cursor: pointer; font-size: 13px; font-weight: 500; ${labelStyle} flex-grow: 1; display: flex; justify-content: space-between; gap: 8px; margin: 0;">
+        <span>${item.n}</span>
+        <strong style="color: var(--accent);">${item.q}</strong>
+      </label>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Toggle grocery checklist checkbox state
+function toggleGroceryItem(id) {
+  const checkedStates = JSON.parse(localStorage.getItem("duogym_grocery_checklist") || "{}");
+  checkedStates[id] = !checkedStates[id];
+  localStorage.setItem("duogym_grocery_checklist", JSON.stringify(checkedStates));
+  renderGroceryChecklist();
+}
+
+// ── FOOD DATABASE SEARCH & PAGINATION CONTROLLER ──
+function onDietSearch() {
+  const query = document.getElementById("diet-search-input").value.toLowerCase();
+  const filterCat = document.getElementById("diet-cat-filter").value;
+  const sortBy = document.getElementById("diet-sort-select").value;
+  
+  let list = dietFoods.filter(f => {
+    return (!query || f.n.toLowerCase().includes(query)) && (!filterCat || f.c === filterCat);
+  });
+  
+  // Sorting logic
+  if (sortBy === "name-asc") {
+    list.sort((a,b) => a.n.localeCompare(b.n));
+  } else if (sortBy === "cal-asc") {
+    list.sort((a,b) => a.k - b.k);
+  } else if (sortBy === "cal-desc") {
+    list.sort((a,b) => b.k - a.k);
+  }
+  
+  const total = list.length;
+  const totalPages = Math.ceil(total / dietSearchPageSize) || 1;
+  if (dietSearchPage > totalPages) dietSearchPage = totalPages;
+  if (dietSearchPage < 1) dietSearchPage = 1;
+  
+  const startIdx = (dietSearchPage - 1) * dietSearchPageSize;
+  const pageSlice = list.slice(startIdx, startIdx + dietSearchPageSize);
+  
+  const tbody = document.getElementById("diet-search-tbody");
+  tbody.innerHTML = "";
+  
+  if (pageSlice.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 12px;">No food matches found.</td></tr>`;
+  } else {
+    pageSlice.forEach((f, idx) => {
+      const macros = getFoodMacros(f);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="font-weight: 500; color: var(--text-main);">${f.n}</td>
+        <td><span style="font-size: 11px; padding: 2px 8px; border-radius: 99px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-sub);">${f.c}</span></td>
+        <td style="color: var(--text-sub); font-size: 12px;">${f.s}</td>
+        <td style="font-weight: 700; color: var(--accent);">${f.k} kcal <span style="display:block; font-size:9px; font-weight:normal; color:var(--text-muted);">P:${macros.protein}g C:${macros.carbs}g F:${macros.fat}g</span></td>
+        <td style="text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+            <select class="diet-add-select" id="add-meal-sel-${idx}">
+              <option value="Breakfast">Breakfast</option>
+              <option value="Lunch">Lunch</option>
+              <option value="EveningSnacks">Snacks</option>
+              <option value="Dinner">Dinner</option>
+            </select>
+            <button class="btn btn-primary diet-add-btn" onclick="addSearchedFood('${f.n}', ${idx})">
+              <i data-lucide="plus" style="width: 10px; height: 10px;"></i> Add
+            </button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  
+  document.getElementById("diet-page-info").textContent = `Page ${dietSearchPage} of ${totalPages}`;
+  document.getElementById("diet-showing-info").textContent = `(${total} items)`;
+  document.getElementById("diet-prev-btn").disabled = dietSearchPage <= 1;
+  document.getElementById("diet-next-btn").disabled = dietSearchPage >= totalPages;
+  
+  lucide.createIcons();
+}
+
+function changeDietPage(dir) {
+  dietSearchPage += dir;
+  onDietSearch();
+}
+
+// Add searched food selection to daily log or schedule
+function addSearchedFood(foodName, selectIndex) {
+  const food = dietFoods.find(f => f.n === foodName);
+  if (!food) return;
+  
+  const selElement = document.getElementById(`add-meal-sel-${selectIndex}`);
+  let mealType = selElement.value;
+  if (mealType === "Snacks") mealType = "EveningSnacks";
+  
+  const data = getActiveDietData();
+  
+  if (activeDietTab === "log") {
+    // Future log prevention check
+    const todayStr = dateToYYYYMMDD(new Date());
+    if (selectedDietDate > todayStr) {
+      alert("You cannot log diet items for future dates!");
+      return;
+    }
+    
+    ensureDietDateRecord(data, selectedDietDate);
+    data.meals[selectedDietDate][mealType].push({
+      n: food.n,
+      c: food.c,
+      s: food.s,
+      k: food.k
+    });
+  } else if (activeDietTab === "schedule") {
+    const day = document.getElementById("diet-sched-day-select").value;
+    data.schedule[day][mealType].push({
+      n: food.n,
+      c: food.c,
+      s: food.s,
+      k: food.k
+    });
+  }
+  
+  saveDietData();
+  renderDietTracker();
+}
+
+// ── PRESET PLAN LOADERS ──
+function loadPresetPlanToday() {
+  const todayStr = dateToYYYYMMDD(new Date());
+  if (selectedDietDate > todayStr) {
+    alert("You cannot log preset items for future dates!");
+    return;
+  }
+
+  if (confirm("Load default fat-loss plan (Poha, Rice/Dal/Veg, Roasted Chana, Roti/Soybean) into today's log? This will append to your current log.")) {
+    const data = getActiveDietData();
+    ensureDietDateRecord(data, selectedDietDate);
+    
+    const preset = JSON.parse(JSON.stringify(defaultPresetDiet));
+    
+    ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(type => {
+      preset[type].forEach(food => {
+        data.meals[selectedDietDate][type].push(food);
+      });
+    });
+    
+    saveDietData();
+    renderDietTracker();
+  }
+}
+
+// Import schedule of today's day-of-week into daily logs
+function copyScheduleToToday() {
+  const todayStr = dateToYYYYMMDD(new Date());
+  if (selectedDietDate > todayStr) {
+    alert("You cannot log scheduled items for future dates!");
+    return;
+  }
+
+  const d = new Date(selectedDietDate);
+  const weekdayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const dayName = weekdayNames[d.getDay()];
+  
+  if (confirm(`Load your custom scheduled ${dayName} plan into today's log? This will append to your current log.`)) {
+    const data = getActiveDietData();
+    ensureDietDateRecord(data, selectedDietDate);
+    
+    const sched = JSON.parse(JSON.stringify(data.schedule[dayName] || {}));
+    
+    ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(type => {
+      const foods = sched[type] || [];
+      foods.forEach(food => {
+        data.meals[selectedDietDate][type].push(food);
+      });
+    });
+    
+    saveDietData();
+    renderDietTracker();
+  }
+}
+
+
+
+/* ============================================================
+   13. INITIALIZATION ON LOAD
    ============================================================ */
 window.addEventListener("DOMContentLoaded", () => {
   // Load data from storage
