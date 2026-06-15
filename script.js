@@ -2254,9 +2254,17 @@ function loadPresetPlanToday() {
     return;
   }
 
-  if (confirm("Load default fat-loss plan (Poha, Rice/Dal/Veg, Roasted Chana, Roti/Soybean) into today's log? This will append to your current log.")) {
+  if (confirm("Load default dietician plan (Poha, Rice/Dal/Veg, Roasted Chana, Roti/Soybean/Milk) into today's log? This will overwrite any currently logged items for today.")) {
     const data = getActiveDietData();
     ensureDietDateRecord(data, selectedDietDate);
+    
+    // Clear existing meals for this day
+    data.meals[selectedDietDate] = {
+      Breakfast: [],
+      Lunch: [],
+      EveningSnacks: [],
+      Dinner: []
+    };
     
     const preset = JSON.parse(JSON.stringify(defaultPresetDiet));
     
@@ -2283,9 +2291,17 @@ function copyScheduleToToday() {
   const weekdayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const dayName = weekdayNames[d.getDay()];
   
-  if (confirm(`Load your custom scheduled ${dayName} plan into today's log? This will append to your current log.`)) {
+  if (confirm(`Load your custom scheduled ${dayName} plan into today's log? This will overwrite any currently logged items for today.`)) {
     const data = getActiveDietData();
     ensureDietDateRecord(data, selectedDietDate);
+    
+    // Clear existing meals for this day
+    data.meals[selectedDietDate] = {
+      Breakfast: [],
+      Lunch: [],
+      EveningSnacks: [],
+      Dinner: []
+    };
     
     const sched = JSON.parse(JSON.stringify(data.schedule[dayName] || {}));
     
