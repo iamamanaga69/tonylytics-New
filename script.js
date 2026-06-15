@@ -1538,6 +1538,9 @@ let selectedDietDate = "";
 let activeDietTab = "log"; // log, schedule, profile, reports
 let dietSearchPage = 1;
 const dietSearchPageSize = 8;
+let activeLoggingMeal = "";
+let selectedDietCategory = "";
+
 
 // Macro Calculation Helper: estimates P/C/F based on food categories and calories
 function getFoodMacros(food) {
@@ -1712,18 +1715,6 @@ function renderDietTracker() {
     selectedDietDate = selectedDate; // Sync with calendar date context
   }
   
-  // Populate category filter dropdown if empty
-  const filterSelect = document.getElementById("diet-cat-filter");
-  if (filterSelect && filterSelect.options.length <= 1) {
-    const cats = [...new Set(dietFoods.map(f => f.c))].sort();
-    cats.forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c;
-      opt.textContent = c;
-      filterSelect.appendChild(opt);
-    });
-  }
-
   // Switch Sub-tabs content show/hide
   const panels = ["log", "schedule", "profile", "reports"];
   panels.forEach(p => {
@@ -1733,22 +1724,6 @@ function renderDietTracker() {
     const btn = document.getElementById(`diet-tab-btn-${p}`);
     if (btn) btn.classList.toggle("active", p === activeDietTab);
   });
-
-  // Show/Hide search panel (visible on Daily Log and Weekly Schedule tabs)
-  const searchPanel = document.getElementById("diet-search-panel");
-  if (searchPanel) {
-    if (activeDietTab === "log" || activeDietTab === "schedule") {
-      searchPanel.style.display = "block";
-      const title = document.getElementById("diet-search-title");
-      if (title) {
-        title.textContent = activeDietTab === "log" 
-          ? "Add Foods to Daily Log" 
-          : `Add Foods to Weekly Schedule (${document.getElementById("diet-sched-day-select").value})`;
-      }
-    } else {
-      searchPanel.style.display = "none";
-    }
-  }
 
   // Route inner renders
   if (activeDietTab === "log") {
@@ -1760,9 +1735,6 @@ function renderDietTracker() {
   } else if (activeDietTab === "reports") {
     renderDietReports();
   }
-  
-  // Refresh search display
-  onDietSearch();
 }
 
 // Tab switcher handler
@@ -1781,7 +1753,7 @@ function renderDietLog() {
   document.getElementById("diet-date-picker").value = selectedDietDate;
   
   const targetCals = data.profile.targetCalories || 2000;
-  document.getElementById("diet-val-target").textContent = `${targetCals} kcal`;
+  document.getElementById("diet-val-target").textContent = targetCals;
   
   // Compute logged items
   const meals = data.meals[selectedDietDate];
@@ -1837,7 +1809,7 @@ function renderDietLog() {
   });
 
   // Update summary totals
-  document.getElementById("diet-val-consumed").textContent = `${consumedCals} kcal`;
+  document.getElementById("diet-val-consumed").textContent = consumedCals;
   
   const remainingCals = targetCals - consumedCals;
   const remainingLabel = document.getElementById("diet-val-remaining");
@@ -1846,17 +1818,16 @@ function renderDietLog() {
   if (remainingCals >= 0) {
     remainingLabel.textContent = `${remainingCals} kcal`;
     remainingLabel.style.color = "var(--text-main)";
-    remainingStatus.textContent = "Remaining to eat";
+    remainingStatus.textContent = "Remaining";
     remainingStatus.style.color = "var(--text-sub)";
   } else {
     remainingLabel.textContent = `${Math.abs(remainingCals)} kcal`;
     remainingLabel.style.color = "var(--danger)";
-    remainingStatus.textContent = "Over calorie budget!";
+    remainingStatus.textContent = "Over budget";
     remainingStatus.style.color = "var(--danger)";
   }
 
   const pct = Math.min(100, Math.round((consumedCals / targetCals) * 100));
-  document.getElementById("diet-pct-consumed").textContent = `${pct}% of target`;
   
   // Progress fill width
   const progressFill = document.getElementById("diet-progress-fill");
@@ -1864,21 +1835,11 @@ function renderDietLog() {
     progressFill.style.width = `${pct}%`;
     progressFill.style.background = (consumedCals > targetCals) ? "var(--danger)" : "var(--accent)";
   }
-  document.getElementById("diet-progress-text").textContent = `${consumedCals} / ${targetCals} kcal`;
 
   // Macro progress totals
-  document.getElementById("diet-protein-total").textContent = `${totalProtein}g`;
-  document.getElementById("diet-carbs-total").textContent = `${totalCarbs}g`;
-  document.getElementById("diet-fat-total").textContent = `${totalFat}g`;
-
-  // Calculate percentage of typical macro splits: Protein (130g target), Carbs (250g target), Fat (70g target)
-  const pPct = Math.min(100, Math.round((totalProtein / 130) * 100));
-  const cPct = Math.min(100, Math.round((totalCarbs / 250) * 100));
-  const fPct = Math.min(100, Math.round((totalFat / 70) * 100));
-
-  document.getElementById("diet-protein-fill").style.width = `${pPct}%`;
-  document.getElementById("diet-carbs-fill").style.width = `${cPct}%`;
-  document.getElementById("diet-fat-fill").style.width = `${fPct}%`;
+  document.getElementById("diet-protein-total").textContent = `${totalProtein} / 130g`;
+  document.getElementById("diet-carbs-total").textContent = `${totalCarbs} / 250g`;
+  document.getElementById("diet-fat-total").textContent = `${totalFat} / 70g`;
 
   // Refresh lucide icons inside logs
   lucide.createIcons();
@@ -2144,11 +2105,85 @@ function toggleGroceryItem(id) {
   renderGroceryChecklist();
 }
 
+// Open/close add food bottom-sheet modal
+function openAddFoodModal(mealType) {
+  activeLoggingMeal = mealType;
+  selectedDietCategory = ""; // Reset category filter
+  
+  // Set modal title depending on context (schedule vs log)
+  const titleEl = document.getElementById("diet-modal-title-text");
+  if (titleEl) {
+    if (activeDietTab === "schedule") {
+      const day = document.getElementById("diet-sched-day-select").value;
+      titleEl.textContent = `Add to ${day}'s ${mealType}`;
+    } else {
+      titleEl.textContent = `Add to ${mealType}`;
+    }
+  }
+  
+  // Reset search input
+  const searchInput = document.getElementById("diet-search-input");
+  if (searchInput) searchInput.value = "";
+  
+  // Render category chips
+  renderCategoryChips();
+  
+  // Reset search page
+  dietSearchPage = 1;
+  
+  // Perform initial search
+  onDietSearch();
+  
+  // Show modal
+  const modal = document.getElementById("diet-food-modal");
+  if (modal) modal.classList.add("active");
+}
+
+function closeAddFoodModal() {
+  const modal = document.getElementById("diet-food-modal");
+  if (modal) modal.classList.remove("active");
+  activeLoggingMeal = "";
+}
+
+function renderCategoryChips() {
+  const container = document.getElementById("diet-cat-chips-container");
+  if (!container) return;
+  container.innerHTML = "";
+  
+  // Generate categories from dietFoods
+  const cats = [...new Set(dietFoods.map(f => f.c))].sort();
+  
+  // Add "All" chip
+  const allChip = document.createElement("div");
+  allChip.className = `diet-chip ${!selectedDietCategory ? "active" : ""}`;
+  allChip.textContent = "All Categories";
+  allChip.onclick = () => selectCategoryChip("");
+  container.appendChild(allChip);
+  
+  cats.forEach(c => {
+    const chip = document.createElement("div");
+    chip.className = `diet-chip ${selectedDietCategory === c ? "active" : ""}`;
+    chip.textContent = c;
+    chip.onclick = () => selectCategoryChip(c);
+    container.appendChild(chip);
+  });
+}
+
+function selectCategoryChip(catName) {
+  selectedDietCategory = catName;
+  renderCategoryChips();
+  dietSearchPage = 1;
+  onDietSearch();
+}
+
 // ── FOOD DATABASE SEARCH & PAGINATION CONTROLLER ──
 function onDietSearch() {
-  const query = document.getElementById("diet-search-input").value.toLowerCase();
-  const filterCat = document.getElementById("diet-cat-filter").value;
-  const sortBy = document.getElementById("diet-sort-select").value;
+  const searchInput = document.getElementById("diet-search-input");
+  const query = searchInput ? searchInput.value.toLowerCase() : "";
+  const filterCat = selectedDietCategory;
+  
+  const sortSelect = document.getElementById("diet-sort-select");
+  const sortBy = sortSelect ? sortSelect.value : "name-asc";
   
   let list = dietFoods.filter(f => {
     return (!query || f.n.toLowerCase().includes(query)) && (!filterCat || f.c === filterCat);
@@ -2171,42 +2206,54 @@ function onDietSearch() {
   const startIdx = (dietSearchPage - 1) * dietSearchPageSize;
   const pageSlice = list.slice(startIdx, startIdx + dietSearchPageSize);
   
-  const tbody = document.getElementById("diet-search-tbody");
-  tbody.innerHTML = "";
+  const listContainer = document.getElementById("diet-search-list");
+  if (!listContainer) return;
+  listContainer.innerHTML = "";
   
   if (pageSlice.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 12px;">No food matches found.</td></tr>`;
+    listContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 13px;">No food matches found.</div>`;
   } else {
-    pageSlice.forEach((f, idx) => {
+    pageSlice.forEach(f => {
       const macros = getFoodMacros(f);
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td style="font-weight: 500; color: var(--text-main);">${f.n}</td>
-        <td><span style="font-size: 11px; padding: 2px 8px; border-radius: 99px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-sub);">${f.c}</span></td>
-        <td style="color: var(--text-sub); font-size: 12px;">${f.s}</td>
-        <td style="font-weight: 700; color: var(--accent);">${f.k} kcal <span style="display:block; font-size:9px; font-weight:normal; color:var(--text-muted);">P:${macros.protein}g C:${macros.carbs}g F:${macros.fat}g</span></td>
-        <td style="text-align: center;">
-          <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
-            <select class="diet-add-select" id="add-meal-sel-${idx}">
-              <option value="Breakfast">Breakfast</option>
-              <option value="Lunch">Lunch</option>
-              <option value="EveningSnacks">Snacks</option>
-              <option value="Dinner">Dinner</option>
-            </select>
-            <button class="btn btn-primary diet-add-btn" onclick="addSearchedFood('${f.n}', ${idx})">
-              <i data-lucide="plus" style="width: 10px; height: 10px;"></i> Add
-            </button>
+      const row = document.createElement("div");
+      row.className = "diet-search-row";
+      row.onclick = () => addSearchedFood(f.n);
+      row.innerHTML = `
+        <div class="diet-search-row-left">
+          <span class="diet-search-row-name">${f.n}</span>
+          <div class="diet-search-row-meta">
+            <span class="diet-search-row-cat">${f.c}</span>
+            <span>•</span>
+            <span>${f.s}</span>
           </div>
-        </td>
+        </div>
+        <div class="diet-search-row-right">
+          <div class="diet-search-row-kcal">
+            <div>${f.k} kcal</div>
+            <div style="font-size: 9px; font-weight: normal; color: var(--text-muted); margin-top: 1px;">
+              P:${macros.protein}g C:${macros.carbs}g F:${macros.fat}g
+            </div>
+          </div>
+          <button class="diet-search-row-add-btn" title="Add to meal">
+            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+          </button>
+        </div>
       `;
-      tbody.appendChild(tr);
+      listContainer.appendChild(row);
     });
   }
   
-  document.getElementById("diet-page-info").textContent = `Page ${dietSearchPage} of ${totalPages}`;
-  document.getElementById("diet-showing-info").textContent = `(${total} items)`;
-  document.getElementById("diet-prev-btn").disabled = dietSearchPage <= 1;
-  document.getElementById("diet-next-btn").disabled = dietSearchPage >= totalPages;
+  const pageInfoEl = document.getElementById("diet-page-info");
+  if (pageInfoEl) pageInfoEl.textContent = `Page ${dietSearchPage} of ${totalPages}`;
+  
+  const showingInfoEl = document.getElementById("diet-showing-info");
+  if (showingInfoEl) showingInfoEl.textContent = `(${total} items)`;
+  
+  const prevBtn = document.getElementById("diet-prev-btn");
+  if (prevBtn) prevBtn.disabled = dietSearchPage <= 1;
+  
+  const nextBtn = document.getElementById("diet-next-btn");
+  if (nextBtn) nextBtn.disabled = dietSearchPage >= totalPages;
   
   lucide.createIcons();
 }
@@ -2217,13 +2264,12 @@ function changeDietPage(dir) {
 }
 
 // Add searched food selection to daily log or schedule
-function addSearchedFood(foodName, selectIndex) {
+function addSearchedFood(foodName) {
   const food = dietFoods.find(f => f.n === foodName);
   if (!food) return;
   
-  const selElement = document.getElementById(`add-meal-sel-${selectIndex}`);
-  let mealType = selElement.value;
-  if (mealType === "Snacks") mealType = "EveningSnacks";
+  const mealType = activeLoggingMeal;
+  if (!mealType) return;
   
   const data = getActiveDietData();
   
@@ -2254,6 +2300,7 @@ function addSearchedFood(foodName, selectIndex) {
   
   saveDietData();
   renderDietTracker();
+  closeAddFoodModal();
 }
 
 // ── PRESET PLAN LOADERS ──
