@@ -1324,212 +1324,201 @@ const dietFoods = [
 ];
 
 // Default preset diet plan mapping (Fat-loss base plan)
+// Default preset diet plan mapping (Fat-loss base plan - Monday)
 const defaultPresetDiet = {
   Breakfast: [
-    { n: "Poha", c: "Breakfast", s: "1 plate (150g)", k: 180 },
-    { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
-    { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    { n: "Poha", c: "Breakfast", s: "1 Plate", k: 300 },
+    { n: "Banana", c: "Fruits", s: "1 Medium", k: 105 },
+    { n: "Milk", c: "Breakfast", s: "250ml", k: 150 }
   ],
   Lunch: [
-    { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
-    { n: "Masoor Dal", c: "Dal", s: "1 bowl (200g)", k: 160 },
-    { n: "Lau Tarkari", c: "Dry Veg", s: "1 serving (150g)", k: 90 },
-    { n: "Mixed Vegetable Salad", c: "Salads", s: "1 bowl (200g)", k: 60 }
+    { n: "Rice", c: "Rice", s: "1.5 Cups", k: 300 },
+    { n: "Moong Dal", c: "Dal", s: "1 Bowl", k: 180 },
+    { n: "Lau Ghonto", c: "Dry Veg", s: "1 Bowl", k: 100 },
+    { n: "Salad", c: "Salads", s: "1 Plate", k: 40 }
   ],
   EveningSnacks: [
-    { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+    { n: "Roasted Chana", c: "Snacks", s: "40g", k: 150 }
   ],
   Dinner: [
-    { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
-    { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
-    { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+    { n: "Roti", c: "Bread", s: "3", k: 360 },
+    { n: "Soybean Curry", c: "Soybean", s: "1 Bowl", k: 350 },
+    { n: "Salad", c: "Salads", s: "1 Plate", k: 45 },
+    { n: "Milk (Before Sleep)", c: "Breakfast", s: "250ml", k: 150 }
   ]
 };
 
-// Default 7-day weekday-specific diet plan mapping for Aman (Fat-Loss Diet)
+// Default 7-day weekday-specific diet plan mapping for Aman (Dietician Fat-Loss Diet)
 const defaultWeeklyScheduleAman = {
   Monday: {
     Breakfast: [
-      { n: "Poha", c: "Breakfast", s: "1 plate (150g)", k: 180 },
-      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Poha", c: "Breakfast", s: "1 Plate", k: 300 },
+      { n: "Banana", c: "Fruits", s: "1 Medium", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "250ml", k: 150 }
     ],
     Lunch: [
-      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
-      { n: "Moong Dal", c: "Dal", s: "1 bowl (200g)", k: 150 },
-      { n: "Lau Tarkari", c: "Dry Veg", s: "1 serving (150g)", k: 90 },
-      { n: "Mixed Vegetable Salad", c: "Salads", s: "1 bowl (200g)", k: 60 }
+      { n: "Rice", c: "Rice", s: "1.5 Cups", k: 300 },
+      { n: "Moong Dal", c: "Dal", s: "1 Bowl", k: 180 },
+      { n: "Lau Ghonto", c: "Dry Veg", s: "1 Bowl", k: 100 },
+      { n: "Salad", c: "Salads", s: "1 Plate", k: 40 }
     ],
     EveningSnacks: [
-      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+      { n: "Roasted Chana", c: "Snacks", s: "40g", k: 150 }
     ],
     Dinner: [
-      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
-      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
-      { n: "Mixed Vegetable Salad", c: "Salads", s: "1 bowl (200g)", k: 60 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Roti", c: "Bread", s: "3", k: 360 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 Bowl", k: 350 },
+      { n: "Salad", c: "Salads", s: "1 Plate", k: 45 },
+      { n: "Milk (Before Sleep)", c: "Breakfast", s: "250ml", k: 150 }
     ]
   },
   Tuesday: {
     Breakfast: [
-      { n: "Suji Upma", c: "Breakfast", s: "1 plate (150g)", k: 200 },
-      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Upma", c: "Breakfast", s: "1 Plate", k: 320 },
+      { n: "Banana", c: "Fruits", s: "1", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "250ml", k: 150 }
     ],
     Lunch: [
-      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
-      { n: "Masoor Dal", c: "Dal", s: "1 bowl (200g)", k: 160 },
-      { n: "Bandhakopi Tarkari", c: "Bengali Sabji", s: "1 serving (150g)", k: 110 }
+      { n: "Rice", c: "Rice", s: "1.5 Cups", k: 300 },
+      { n: "Masoor Dal", c: "Dal", s: "1 Bowl", k: 180 },
+      { n: "Bandhakopi Tarkari", c: "Dry Veg", s: "1 Bowl", k: 110 }
     ],
     EveningSnacks: [
-      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+      { n: "Roasted Chana", c: "Snacks", s: "40g", k: 150 }
     ],
     Dinner: [
-      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
-      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Roti", c: "Bread", s: "3", k: 360 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 Bowl", k: 375 },
+      { n: "Milk (Before Sleep)", c: "Breakfast", s: "250ml", k: 150 }
     ]
   },
   Wednesday: {
     Breakfast: [
-      { n: "Oats Porridge", c: "Breakfast", s: "1 bowl (200g)", k: 150 },
-      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Oats", c: "Breakfast", s: "60g", k: 230 },
+      { n: "Milk", c: "Breakfast", s: "250ml", k: 150 },
+      { n: "Banana", c: "Fruits", s: "1", k: 105 }
     ],
     Lunch: [
-      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
-      { n: "Chana Dal", c: "Dal", s: "1 bowl (200g)", k: 180 },
-      { n: "Mixed Vegetable Curry", c: "Bengali Sabji", s: "1 bowl (200g)", k: 150 }
+      { n: "Rice", c: "Rice", s: "1.5 Cups", k: 300 },
+      { n: "Chana Dal", c: "Dal", s: "1 Bowl", k: 220 },
+      { n: "Mixed Vegetable Curry", c: "Dry Veg", s: "1 Bowl", k: 120 }
     ],
     EveningSnacks: [
-      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+      { n: "Roasted Chana", c: "Snacks", s: "40g", k: 150 }
     ],
     Dinner: [
-      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
-      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Roti", c: "Bread", s: "3", k: 360 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 Bowl", k: 365 },
+      { n: "Milk (Before Sleep)", c: "Breakfast", s: "250ml", k: 150 }
     ]
   },
   Thursday: {
     Breakfast: [
-      { n: "Daliya", c: "Breakfast", s: "1 bowl (200g)", k: 150 },
-      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Daliya", c: "Breakfast", s: "1 Bowl", k: 280 },
+      { n: "Banana", c: "Fruits", s: "1", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "250ml", k: 150 }
     ],
     Lunch: [
-      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
-      { n: "Moong Dal", c: "Dal", s: "1 bowl (200g)", k: 150 },
-      { n: "Palak Sabji", c: "Bengali Sabji", s: "1 serving (150g)", k: 100 }
+      { n: "Rice", c: "Rice", s: "1.5 Cups", k: 300 },
+      { n: "Moong Dal", c: "Dal", s: "1 Bowl", k: 180 },
+      { n: "Palak Sabji", c: "Dry Veg", s: "1 Bowl", k: 110 }
     ],
     EveningSnacks: [
-      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+      { n: "Roasted Chana", c: "Snacks", s: "40g", k: 150 }
     ],
     Dinner: [
-      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
-      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Roti", c: "Bread", s: "3", k: 360 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 Bowl", k: 415 },
+      { n: "Milk (Before Sleep)", c: "Breakfast", s: "250ml", k: 150 }
     ]
   },
   Friday: {
     Breakfast: [
-      { n: "Poha", c: "Breakfast", s: "1 plate (150g)", k: 180 },
-      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Poha", c: "Breakfast", s: "1 Plate", k: 300 },
+      { n: "Banana", c: "Fruits", s: "1 Medium", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "250ml", k: 150 }
     ],
     Lunch: [
-      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
-      { n: "Moong Dal", c: "Dal", s: "1 bowl (200g)", k: 150 },
-      { n: "Aloo Gobi", c: "Dry Veg", s: "1 serving (150g)", k: 150 }
+      { n: "Rice", c: "Rice", s: "1.5 Cups", k: 300 },
+      { n: "Dal", c: "Dal", s: "1 Bowl", k: 180 },
+      { n: "Aloo Gobi", c: "Dry Veg", s: "1 Bowl", k: 150 }
     ],
     EveningSnacks: [
-      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+      { n: "Roasted Chana", c: "Snacks", s: "40g", k: 150 }
     ],
     Dinner: [
-      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
-      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Roti", c: "Bread", s: "3", k: 360 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 Bowl", k: 335 },
+      { n: "Milk (Before Sleep)", c: "Breakfast", s: "250ml", k: 150 }
     ]
   },
   Saturday: {
     Breakfast: [
-      { n: "Suji Upma", c: "Breakfast", s: "1 plate (150g)", k: 200 },
-      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Upma", c: "Breakfast", s: "1 Plate", k: 320 },
+      { n: "Banana", c: "Fruits", s: "1", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "250ml", k: 150 }
     ],
     Lunch: [
-      { n: "Khichdi", c: "Rice", s: "1 bowl (250g)", k: 280 },
-      { n: "Mixed Vegetable Salad", c: "Salads", s: "1 bowl (200g)", k: 60 }
+      { n: "Khichdi", c: "Rice", s: "2 Bowls", k: 500 },
+      { n: "Salad", c: "Salads", s: "1 Plate", k: 40 }
     ],
     EveningSnacks: [
-      { n: "Roasted Chana", c: "Snacks", s: "1 handful (40g)", k: 150 }
+      { n: "Roasted Chana", c: "Snacks", s: "40g", k: 150 }
     ],
     Dinner: [
-      { n: "Roti", c: "Bread", s: "3 pieces", k: 300 },
-      { n: "Soybean Curry", c: "Soybean", s: "1 bowl (200g)", k: 210 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Roti", c: "Bread", s: "3", k: 360 },
+      { n: "Soybean Curry", c: "Soybean", s: "1 Bowl", k: 425 },
+      { n: "Milk (Before Sleep)", c: "Breakfast", s: "250ml", k: 150 }
     ]
   },
   Sunday: {
     Breakfast: [
-      { n: "Oats Porridge", c: "Breakfast", s: "1 bowl (200g)", k: 150 },
-      { n: "Banana", c: "Fruits", s: "1 medium (120g)", k: 105 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Oats", c: "Breakfast", s: "60g", k: 230 },
+      { n: "Banana", c: "Fruits", s: "1", k: 105 },
+      { n: "Milk", c: "Breakfast", s: "250ml", k: 150 }
     ],
     Lunch: [
-      { n: "Steamed Rice", c: "Rice", s: "1 cup cooked (180g)", k: 240 },
-      { n: "Moong Dal", c: "Dal", s: "1 bowl (200g)", k: 150 },
-      { n: "Mixed Vegetable Curry", c: "Bengali Sabji", s: "1 bowl (200g)", k: 150 }
+      { n: "Rice", c: "Rice", s: "1.5 Cups", k: 300 },
+      { n: "Dal", c: "Dal", s: "1 Bowl", k: 180 },
+      { n: "Mixed Vegetable Curry", c: "Dry Veg", s: "1 Bowl", k: 120 }
     ],
     EveningSnacks: [
-      { n: "Sprouts Chaat", c: "Snacks", s: "1 plate (100g)", k: 100 }
+      { n: "Sprouts", c: "Snacks", s: "1 Bowl", k: 120 }
     ],
     Dinner: [
-      { n: "Khichdi", c: "Rice", s: "1 bowl (250g)", k: 280 },
-      { n: "Mishti Doi", c: "Bengali Sweets", s: "1 cup (150g)", k: 180 },
-      { n: "Milk", c: "Breakfast", s: "1 glass (200ml)", k: 120 }
+      { n: "Khichdi", c: "Rice", s: "1.5 Bowls", k: 450 },
+      { n: "Curd", c: "Dairy", s: "1 Bowl", k: 150 },
+      { n: "Milk (Before Sleep)", c: "Breakfast", s: "250ml", k: 150 }
     ]
   }
 };
 
-// Default 7-day weekday-specific diet plan mapping for Rishit (Aman's + Extra portion)
+// Default 7-day weekday-specific diet plan mapping for Rishit (Aman's + Dietician Extra portion)
 const defaultWeeklyScheduleRishit = JSON.parse(JSON.stringify(defaultWeeklyScheduleAman));
 Object.keys(defaultWeeklyScheduleRishit).forEach(day => {
   const dayPlan = defaultWeeklyScheduleRishit[day];
   ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(mealType => {
     dayPlan[mealType] = dayPlan[mealType].map(item => {
-      // 1. rice: +0.5 cup (Steamed Rice k=360 instead of 240)
-      if (item.n === "Steamed Rice") {
-        return { n: "Steamed Rice", c: "Rice", s: "1.5 cups cooked (270g)", k: 360 };
+      // 1. rice: +0.5 Cup Every Lunch (total 2 Cups, k=400 instead of 300)
+      if (item.n === "Rice") {
+        return { n: "Rice", c: "Rice", s: "2 Cups", k: 400 };
       }
-      // 2. roti: +1 roti (Roti k=400 instead of 300)
-      if (item.n === "Roti" && item.k === 300) {
-        return { n: "Roti", c: "Bread", s: "4 pieces", k: 400 };
+      // 2. roti: +1 Roti Every Dinner (total 4, k=480 instead of 360)
+      if (item.n === "Roti") {
+        return { n: "Roti", c: "Bread", s: "4", k: 480 };
       }
-      // 3. roasted_chana: +10g (Roasted Chana k=190 instead of 150)
+      // 3. roastedChana: +10g Daily (total 50g, k=190 instead of 150)
       if (item.n === "Roasted Chana") {
-        return { n: "Roasted Chana", c: "Snacks", s: "1 handful (50g)", k: 190 };
+        return { n: "Roasted Chana", c: "Snacks", s: "50g", k: 190 };
+      }
+      // 4. soybeanCurry: +50g Soy Chunks Daily (add 170 kcal, total s="1 Bowl + 50g Soy Chunks")
+      if (item.n === "Soybean Curry") {
+        return { n: "Soybean Curry", c: "Soybean", s: "1 Bowl + 50g Soy Chunks", k: item.k + 170 };
       }
       return item;
     });
   });
 });
-
-// Joint monthly grocery items database representation
-const monthlyGroceryItems = [
-  { id: "g-rice", n: "Rice", q: "20 kg" },
-  { id: "g-atta", n: "Atta (Whole Wheat Flour)", q: "15 kg" },
-  { id: "g-moong", n: "Moong Dal", q: "2 kg" },
-  { id: "g-masoor", n: "Masoor Dal", q: "2 kg" },
-  { id: "g-chana", n: "Chana Dal", q: "2 kg" },
-  { id: "g-soybean", n: "Soybean Chunks", q: "5 kg" },
-  { id: "g-milk", n: "Milk", q: "45 Liters" },
-  { id: "g-bananas", n: "Bananas", q: "90 pieces" },
-  { id: "g-roasted-chana", n: "Roasted Chana", q: "3 kg" },
-  { id: "g-veg", n: "Seasonal Vegetables", q: "Daily purchase" },
-  { id: "g-cucumber", n: "Cucumber", q: "Daily purchase" },
-  { id: "g-onion", n: "Onion", q: "Daily purchase" },
-  { id: "g-tomato", n: "Tomato", q: "Daily purchase" }
-];
 
 // State variables for Diet Tracker
 let amanDietData = null;
@@ -1614,29 +1603,14 @@ function getFoodMacros(food) {
   return { protein: p, carbs: c, fat: f };
 }
 
-// Automatic migration utility to update legacy same-day schedules to new ReportLab plan
+// Automatic migration utility to update legacy schedules to dietician plan
 function migrateDietDataIfNecessary(data, user) {
-  if (data && data.schedule && data.schedule.Monday && data.schedule.Tuesday) {
-    const monItems = data.schedule.Monday.Breakfast.map(f => f.n).join(",");
-    const tueItems = data.schedule.Tuesday.Breakfast.map(f => f.n).join(",");
-    
-    let needMigrate = false;
-    
-    // Check if it's the old layout
-    if (monItems === tueItems && monItems === "Poha,Banana,Milk") {
-      needMigrate = true;
-    }
-    
-    // Also check if Aman's target calories is 2200, migrate to 2100
-    if (user === "aman" && data.profile.targetCalories === 2200) {
-      data.profile.targetCalories = 2100;
-      needMigrate = true;
-    }
-    
-    if (needMigrate) {
-      data.schedule = JSON.parse(JSON.stringify(user === "aman" ? defaultWeeklyScheduleAman : defaultWeeklyScheduleRishit));
-      return true;
-    }
+  const versionKey = "duogym_diet_version_dietician_v2";
+  if (!localStorage.getItem(versionKey)) {
+    const isAman = (user === "aman");
+    data.profile.targetCalories = isAman ? 2200 : 2300;
+    data.schedule = JSON.parse(JSON.stringify(isAman ? defaultWeeklyScheduleAman : defaultWeeklyScheduleRishit));
+    return true;
   }
   return false;
 }
@@ -1650,7 +1624,7 @@ function initDietData(user) {
       height: 170,
       weight: isAman ? 94.6 : 92.7,
       goalWeight: 80,
-      targetCalories: isAman ? 2100 : 2300 // Aman is 2100, Rishit is 2300
+      targetCalories: isAman ? 2200 : 2300
     },
     meals: {}, // date -> { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] }
     schedule: JSON.parse(JSON.stringify(isAman ? defaultWeeklyScheduleAman : defaultWeeklyScheduleRishit))
@@ -1684,6 +1658,9 @@ function loadDietData() {
   } else {
     rishitDietData = initDietData("rishit");
   }
+
+  // Set version flag so migration doesn't run again next time
+  localStorage.setItem("duogym_diet_version_dietician_v2", "true");
 }
 
 // Save back to respective separate keys
@@ -2069,40 +2046,6 @@ function renderDietReports() {
       tbody.appendChild(tr);
     });
   }
-  renderGroceryChecklist();
-}
-
-// Render the monthly grocery checklist inside the Reports page
-function renderGroceryChecklist() {
-  const container = document.getElementById("grocery-checklist-container");
-  if (!container) return;
-  container.innerHTML = "";
-  
-  const checkedStates = JSON.parse(localStorage.getItem("duogym_grocery_checklist") || "{}");
-  
-  monthlyGroceryItems.forEach(item => {
-    const isChecked = checkedStates[item.id] ? "checked" : "";
-    const labelStyle = checkedStates[item.id] ? "text-decoration: line-through; color: var(--text-muted);" : "color: var(--text-main);";
-    
-    const div = document.createElement("div");
-    div.style = "display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); border-radius: var(--radius-sm); transition: var(--transition);";
-    div.innerHTML = `
-      <input type="checkbox" id="${item.id}" ${isChecked} onchange="toggleGroceryItem('${item.id}')" style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--accent);">
-      <label for="${item.id}" style="cursor: pointer; font-size: 13px; font-weight: 500; ${labelStyle} flex-grow: 1; display: flex; justify-content: space-between; gap: 8px; margin: 0;">
-        <span>${item.n}</span>
-        <strong style="color: var(--accent);">${item.q}</strong>
-      </label>
-    `;
-    container.appendChild(div);
-  });
-}
-
-// Toggle grocery checklist checkbox state
-function toggleGroceryItem(id) {
-  const checkedStates = JSON.parse(localStorage.getItem("duogym_grocery_checklist") || "{}");
-  checkedStates[id] = !checkedStates[id];
-  localStorage.setItem("duogym_grocery_checklist", JSON.stringify(checkedStates));
-  renderGroceryChecklist();
 }
 
 // Open/close add food bottom-sheet modal
