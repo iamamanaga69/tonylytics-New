@@ -214,6 +214,46 @@ button, input, textarea, select {
   color: #ffffff;
 }
 
+/* INSTALL APP BUTTON */
+.install-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-gradient);
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--accent-shadow);
+  transition: var(--transition);
+  outline: none;
+}
+
+body.user-aman .install-btn {
+  color: #070a13;
+}
+
+body.user-rishit .install-btn {
+  color: #ffffff;
+}
+
+.install-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--accent-shadow);
+  filter: brightness(1.1);
+}
+
+.install-btn:active {
+  transform: translateY(1px);
+}
+
+.install-btn i {
+  width: 14px;
+  height: 14px;
+}
+
 /* MAIN WRAPPER */
 .app-body {
   display: flex;
@@ -1676,5 +1716,14 @@ button, input, textarea, select {
   
   .logo-text {
     display: none; /* Hide logo text on very small devices */
+  }
+
+  .install-btn-text {
+    display: none;
+  }
+
+  .install-btn {
+    padding: 8px;
+    border-radius: 50%;
   }
 }

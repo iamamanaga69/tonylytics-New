@@ -1587,6 +1587,50 @@ function handleRestoreUpload(event) {
   event.target.value = "";
 }
 
+/* ============================================================
+   10. PWA INSTALLATION PROMPT
+   ============================================================ */
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  // Prevent Chrome 67 and earlier from automatically showing the prompt
+  e.preventDefault();
+  // Stash the event so it can be triggered later.
+  deferredPrompt = e;
+  // Update UI to notify the user they can install the PWA
+  const installBtn = document.getElementById("install-app-btn");
+  if (installBtn) {
+    installBtn.style.display = "flex";
+  }
+});
+
+function installApp() {
+  if (!deferredPrompt) return;
+  // Show the prompt
+  deferredPrompt.prompt();
+  // Wait for the user to respond to the prompt
+  deferredPrompt.userChoice.then((choiceResult) => {
+    if (choiceResult.outcome === "accepted") {
+      console.log("User accepted the install prompt");
+    } else {
+      console.log("User dismissed the install prompt");
+    }
+    deferredPrompt = null;
+    const installBtn = document.getElementById("install-app-btn");
+    if (installBtn) {
+      installBtn.style.display = "none";
+    }
+  });
+}
+
+window.addEventListener("appinstalled", (evt) => {
+  console.log("App was successfully installed");
+  const installBtn = document.getElementById("install-app-btn");
+  if (installBtn) {
+    installBtn.style.display = "none";
+  }
+});
+
 
 /* ============================================================
    11. INITIALIZATION ON LOAD

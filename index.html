@@ -39,6 +39,11 @@
         </div>
       </div>
 
+      <!-- Install App Button (hidden by default, shown when install prompt is available) -->
+      <button id="install-app-btn" class="install-btn" onclick="installApp()" style="display: none;">
+        <i data-lucide="download"></i> <span class="install-btn-text">Install App</span>
+      </button>
+
       <!-- User Tab Selector -->
       <div class="user-tabs">
         <button id="tab-user-aman" class="user-tab-btn active" onclick="switchUser('aman')">
