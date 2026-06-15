@@ -2493,7 +2493,32 @@ window.addEventListener("DOMContentLoaded", () => {
   // Register PWA Service Worker for offline support and quick loads
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js")
-      .then(() => console.log("Service Worker Registered"))
+      .then((reg) => {
+        console.log("Service Worker Registered");
+        
+        // Listen for updates on the installing worker
+        reg.addEventListener("updatefound", () => {
+          const newWorker = reg.installing;
+          if (newWorker) {
+            newWorker.addEventListener("statechange", () => {
+              if (newWorker.state === "activated") {
+                console.log("New service worker version activated. Reloading page...");
+                window.location.reload();
+              }
+            });
+          }
+        });
+      })
       .catch(err => console.error("Service Worker registration failed:", err));
+
+    // Listen for controller changes (new service worker takes over)
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!refreshing) {
+        refreshing = true;
+        console.log("Service Worker updated, reloading page...");
+        window.location.reload();
+      }
+    });
   }
 });

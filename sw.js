@@ -1,4 +1,4 @@
-const CACHE_NAME = "duogym-cache-v1";
+const CACHE_NAME = "duogym-cache-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -35,29 +35,59 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// Intercept requests and serve from cache first, falling back to network
+// Intercept requests: Network-First for local files, Cache-First for CDNs/fonts
 self.addEventListener("fetch", (e) => {
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(e.request).then((response) => {
-        // Only cache valid standard GET responses
-        if (!response || response.status !== 200 || response.type !== "basic" || e.request.method !== "GET") {
+  if (e.request.method !== "GET") {
+    return;
+  }
+
+  const url = new URL(e.request.url);
+
+  // For local files (same origin), try network first, then fall back to cache
+  if (url.origin === self.location.origin) {
+    e.respondWith(
+      fetch(e.request)
+        .then((response) => {
+          // If valid response, update the cache
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(e.request, responseToCache);
+            });
+          }
           return response;
+        })
+        .catch(() => {
+          // Network failed (offline), get from cache
+          return caches.match(e.request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Offline fallback for navigation requests
+            if (e.request.mode === "navigate") {
+              return caches.match("./index.html");
+            }
+          });
+        })
+    );
+  } else {
+    // For third-party assets (fonts/CDNs), use cache-first
+    e.respondWith(
+      caches.match(e.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
         }
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(e.request, responseToCache);
+        return fetch(e.request).then((response) => {
+          if (!response || response.status !== 200) {
+            return response;
+          }
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseToCache);
+          });
+          return response;
         });
-        return response;
-      }).catch(() => {
-        // Offline fallback for navigation requests
-        if (e.request.mode === "navigate") {
-          return caches.match("./index.html");
-        }
-      });
-    })
-  );
+      })
+    );
+  }
 });
