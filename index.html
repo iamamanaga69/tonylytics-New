@@ -61,7 +61,11 @@
       <!-- NAVIGATION SIDEBAR -->
       <aside class="app-sidebar">
         <nav class="sidebar-nav">
-          <button id="nav-btn-today" class="nav-item active" onclick="switchPage('today')">
+          <button id="nav-btn-summary" class="nav-item active" onclick="switchPage('summary')">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Summary Dashboard</span>
+          </button>
+          <button id="nav-btn-today" class="nav-item" onclick="switchPage('today')">
             <i data-lucide="check-square"></i>
             <span>Today's Check-In</span>
           </button>
@@ -87,8 +91,51 @@
       <!-- MAIN CONTENT AREA -->
       <main class="app-content">
 
+        <!-- 0. SUMMARY DASHBOARD PAGE -->
+        <section id="page-summary" class="page-section active">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Summary Dashboard</h2>
+              <p class="page-subtitle">Your gym performance and progress overview</p>
+            </div>
+          </div>
+          
+          <div class="dashboard-grid">
+            <div class="glass-card stat-card">
+              <span class="stat-label">Current Streak</span>
+              <span id="summary-current-streak" class="stat-val">0 Days</span>
+              <span class="stat-trend" id="summary-current-streak-trend">Keep it up! 🔥</span>
+            </div>
+            <div class="glass-card stat-card">
+              <span class="stat-label">Best Streak</span>
+              <span id="summary-best-streak" class="stat-val">0 Days</span>
+              <span class="stat-trend">All-time record 🏆</span>
+            </div>
+            <div class="glass-card stat-card">
+              <span class="stat-label">Completion %</span>
+              <span id="summary-completion-percent" class="stat-val">0%</span>
+              <span id="summary-completion-ratio" class="stat-trend">Completed: 0 of 0</span>
+            </div>
+            <div class="glass-card stat-card">
+              <span class="stat-label">Workouts Logged</span>
+              <span id="summary-total-completed" class="stat-val">0</span>
+              <span id="summary-total-missed" class="stat-trend">Missed: 0</span>
+            </div>
+            <div class="glass-card stat-card">
+              <span class="stat-label">Weight Lost</span>
+              <span id="summary-weight-change" class="stat-val">0.0 kg</span>
+              <span id="summary-weight-change-trend" class="stat-trend">Overall change</span>
+            </div>
+            <div class="glass-card stat-card">
+              <span class="stat-label">Remaining to Goal</span>
+              <span id="summary-remaining-weight" class="stat-val">0.0 kg</span>
+              <span id="summary-goal-weight" class="stat-trend">Goal: 80.0 kg</span>
+            </div>
+          </div>
+        </section>
+
         <!-- 1. TODAY'S CHECK-IN PAGE -->
-        <section id="page-today" class="page-section active">
+        <section id="page-today" class="page-section">
           <div class="page-header">
             <div>
               <h2 class="page-title">Daily Check-In</h2>
@@ -113,6 +160,9 @@
               <button class="btn btn-secondary btn-sm" onclick="jumpToToday()">Today</button>
             </div>
           </div>
+
+          <!-- Yesterday Missed Notification Banner -->
+          <div id="yesterday-missed-banner" class="missed-notification-banner" style="display: none;"></div>
 
           <!-- CHECK-IN GRID -->
           <div class="dashboard-grid">
@@ -240,14 +290,29 @@
                 <span class="stat-date">15 June 2026</span>
               </div>
               <div class="glass-card stat-card">
-                <span class="stat-label">Latest Weight</span>
+                <span class="stat-label">Current Weight</span>
                 <span id="weight-stat-latest" class="stat-val">-- kg</span>
                 <span id="weight-stat-latest-date" class="stat-date">--</span>
               </div>
               <div class="glass-card stat-card">
-                <span class="stat-label">Total Change</span>
-                <span id="weight-stat-change" class="stat-val">--</span>
-                <span class="stat-trend">Overall change</span>
+                <span class="stat-label">Goal Weight</span>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                  <span id="weight-stat-goal" class="stat-val">80.0 kg</span>
+                  <button type="button" class="btn-icon-subtle" onclick="promptGoalWeight()" title="Edit Goal Weight" style="padding: 4px; border: none; background: none; color: var(--text-sub); cursor: pointer; display: inline-flex; border-radius: 50%; transition: var(--transition);">
+                    <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                  </button>
+                </div>
+                <span class="stat-date">Target Goal</span>
+              </div>
+              <div class="glass-card stat-card">
+                <span class="stat-label">Weight Lost</span>
+                <span id="weight-stat-lost" class="stat-val">-- kg</span>
+                <span class="stat-trend" id="weight-stat-lost-trend">Overall lost</span>
+              </div>
+              <div class="glass-card stat-card">
+                <span class="stat-label">Remaining to Goal</span>
+                <span id="weight-stat-remaining" class="stat-val">-- kg</span>
+                <span class="stat-trend" id="weight-stat-remaining-trend">Remaining</span>
               </div>
             </div>
 
@@ -275,29 +340,173 @@
                 </form>
               </div>
 
-              <!-- History Table -->
+              <!-- History & Monthly Summary Layout on Right -->
+              <div style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- History Table -->
+                <div class="glass-card weight-history-card">
+                  <div class="card-header">
+                    <i data-lucide="history" class="header-icon"></i>
+                    <h4>Weight History</h4>
+                  </div>
+                  <div class="table-wrapper">
+                    <table class="weight-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Weight</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody id="weight-history-tbody">
+                        <!-- Populated dynamically via JS -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Monthly Weight Summary Card -->
+                <div class="glass-card" style="padding: 20px;">
+                  <div class="card-header" style="padding: 0 0 12px 0;">
+                    <i data-lucide="bar-chart-2" class="header-icon"></i>
+                    <h4>Monthly Weight Summary</h4>
+                  </div>
+                  <div id="weight-monthly-summary-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px;">
+                    <!-- Populated dynamically via JS -->
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Body Measurements Section -->
+            <div class="weight-grid-body" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 32px;">
+              <!-- Log Measurements Form -->
+              <div class="glass-card weight-form-card">
+                <div class="card-header">
+                  <i data-lucide="rulers" class="header-icon"></i>
+                  <h4>Log Measurements</h4>
+                </div>
+                <p class="card-description">Track your waist, chest, arms, and thighs monthly.</p>
+                <form id="measurement-log-form" onsubmit="logNewMeasurements(event)">
+                  <div class="form-group">
+                    <label for="measure-input-date">Date</label>
+                    <input type="date" id="measure-input-date" required min="2026-06-15" max="2027-06-15">
+                  </div>
+                  <div class="form-group-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                      <label for="measure-input-chest">Chest (cm)</label>
+                      <input type="number" step="0.1" id="measure-input-chest" required placeholder="e.g. 102.5">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                      <label for="measure-input-waist">Waist (cm)</label>
+                      <input type="number" step="0.1" id="measure-input-waist" required placeholder="e.g. 88.0">
+                    </div>
+                  </div>
+                  <div class="form-group-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                      <label for="measure-input-arms">Arms (cm)</label>
+                      <input type="number" step="0.1" id="measure-input-arms" required placeholder="e.g. 38.2">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                      <label for="measure-input-thighs">Thighs (cm)</label>
+                      <input type="number" step="0.1" id="measure-input-thighs" required placeholder="e.g. 58.5">
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    <i data-lucide="save"></i> Save Measurements
+                  </button>
+                </form>
+              </div>
+              
+              <!-- Measurements History Table -->
               <div class="glass-card weight-history-card">
                 <div class="card-header">
                   <i data-lucide="history" class="header-icon"></i>
-                  <h4>Weight History</h4>
+                  <h4>Measurement History</h4>
                 </div>
                 <div class="table-wrapper">
                   <table class="weight-table">
                     <thead>
                       <tr>
                         <th>Date</th>
-                        <th>Weight</th>
+                        <th>Chest</th>
+                        <th>Waist</th>
+                        <th>Arms</th>
+                        <th>Thighs</th>
                         <th>Action</th>
                       </tr>
                     </thead>
-                    <tbody id="weight-history-tbody">
+                    <tbody id="measurements-history-tbody">
                       <!-- Populated dynamically via JS -->
                     </tbody>
                   </table>
                 </div>
               </div>
-
             </div>
+
+            <!-- Progress Photos Section -->
+            <div class="weight-grid-body" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 32px;">
+              <!-- Upload Photos Form -->
+              <div class="glass-card weight-form-card">
+                <div class="card-header">
+                  <i data-lucide="camera" class="header-icon"></i>
+                  <h4>Upload Progress Photos</h4>
+                </div>
+                <p class="card-description">Upload Front and Side progress photos. Images are auto-compressed locally to save storage.</p>
+                <form id="photo-upload-form" onsubmit="saveProgressPhotos(event)">
+                  <div class="form-group">
+                    <label for="photo-input-date">Date</label>
+                    <input type="date" id="photo-input-date" required min="2026-06-15" max="2027-06-15">
+                  </div>
+                  <div class="form-group">
+                    <label for="photo-input-front">Front Photo</label>
+                    <input type="file" id="photo-input-front" accept="image/*" style="background: none; border: none; padding: 0;">
+                  </div>
+                  <div class="form-group">
+                    <label for="photo-input-side">Side Photo</label>
+                    <input type="file" id="photo-input-side" accept="image/*" style="background: none; border: none; padding: 0;">
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    <i data-lucide="upload-cloud"></i> Save Progress Photos
+                  </button>
+                </form>
+              </div>
+              
+              <!-- Photos Gallery -->
+              <div class="glass-card weight-history-card" style="padding: 20px;">
+                <div class="card-header" style="padding: 0 0 16px 0;">
+                  <i data-lucide="image" class="header-icon"></i>
+                  <h4>Photo Gallery</h4>
+                </div>
+                <div id="gallery-controls" style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                  <label for="gallery-date-select" style="font-size: 13px; font-weight: 600; color: var(--text-sub);">Select Date:</label>
+                  <select id="gallery-date-select" onchange="loadGalleryPhotos(this.value)" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: var(--radius-sm); font-size: 13px; outline: none; cursor: pointer;">
+                    <!-- Options populated dynamically -->
+                  </select>
+                </div>
+                
+                <div class="photo-display-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
+                  <div class="photo-frame" style="background: rgba(0, 0, 0, 0.2); border: 1px dashed var(--border-color); border-radius: var(--radius-sm); padding: 12px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <h5 style="margin-bottom: 8px; color: var(--text-sub); font-size: 13px;">Front View</h5>
+                    <img id="gallery-front-img" style="max-width: 100%; max-height: 250px; display: none; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" alt="Front View">
+                    <span id="gallery-front-placeholder" style="font-size: 12px; color: var(--text-muted);">No photo loaded</span>
+                  </div>
+                  <div class="photo-frame" style="background: rgba(0, 0, 0, 0.2); border: 1px dashed var(--border-color); border-radius: var(--radius-sm); padding: 12px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <h5 style="margin-bottom: 8px; color: var(--text-sub); font-size: 13px;">Side View</h5>
+                    <img id="gallery-side-img" style="max-width: 100%; max-height: 250px; display: none; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" alt="Side View">
+                    <span id="gallery-side-placeholder" style="font-size: 12px; color: var(--text-muted);">No photo loaded</span>
+                  </div>
+                </div>
+                
+                <div style="margin-top: 16px; text-align: right;">
+                  <button id="delete-photos-btn" class="btn btn-secondary" onclick="deleteCurrentPhotos()" style="display: none; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #fca5a5;">
+                    <i data-lucide="trash-2"></i> Delete This Entry
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
           </div>
         </section>
 
@@ -314,6 +523,17 @@
               <i data-lucide="search" class="search-icon"></i>
               <input type="text" id="library-search-input" placeholder="Search by exercise name or muscle group..." oninput="filterLibrary()">
             </div>
+          </div>
+
+          <!-- Muscle Group Filter Pills -->
+          <div class="filter-pills" id="library-filter-pills">
+            <button class="filter-pill active" onclick="setLibraryFilter('all')">All</button>
+            <button class="filter-pill" onclick="setLibraryFilter('Chest')">Chest</button>
+            <button class="filter-pill" onclick="setLibraryFilter('Back')">Back</button>
+            <button class="filter-pill" onclick="setLibraryFilter('Shoulders')">Shoulders</button>
+            <button class="filter-pill" onclick="setLibraryFilter('Legs')">Legs</button>
+            <button class="filter-pill" onclick="setLibraryFilter('Core')">Core</button>
+            <button class="filter-pill" onclick="setLibraryFilter('Cardio')">Cardio</button>
           </div>
 
           <!-- Library Grid -->
@@ -363,6 +583,12 @@
                   <i data-lucide="upload"></i> Restore Backup File
                 </button>
                 <input type="file" id="backup-file-upload" style="display: none;" accept=".json" onchange="handleRestoreUpload(event)">
+              </div>
+
+              <!-- Last Backup Date & Status Info -->
+              <div class="backup-status-row" style="margin: 16px 0; padding: 10px 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="info" id="backup-status-icon" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
+                <span id="last-backup-text" style="color: var(--text-sub);">Last Backup: <strong style="color: var(--text-main);">Never</strong></span>
               </div>
 
               <div class="backup-instructions">

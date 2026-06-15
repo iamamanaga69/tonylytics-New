@@ -1042,7 +1042,7 @@ body.user-rishit .install-btn {
 
 .weight-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 20px;
 }
 
@@ -1166,6 +1166,69 @@ body.user-rishit .install-btn {
   color: var(--text-main);
   outline: none;
   width: 100%;
+}
+
+/* MISSED WORKOUT BANNER */
+.missed-notification-banner {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fca5a5;
+  font-size: 13px;
+  font-weight: 500;
+  width: 100%;
+}
+
+.missed-notification-banner i {
+  width: 18px;
+  height: 18px;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+/* MUSCLE FILTER PILLS */
+.filter-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.filter-pill {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  color: var(--text-sub);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  outline: none;
+}
+
+.filter-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+}
+
+body.user-aman .filter-pill.active {
+  background: var(--success);
+  border-color: transparent;
+  color: #070a13;
+  box-shadow: 0 4px 12px var(--accent-shadow);
+}
+
+body.user-rishit .filter-pill.active {
+  background: var(--accent);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 4px 12px var(--accent-shadow);
 }
 
 .library-grid {

@@ -786,40 +786,129 @@ function jumpToToday() {
    ============================================================ */
 
 // Returns default empty data structures for users
+// Returns default empty data structures for users
 function initData() {
   return {
     aman: {
-      _weightHistory: [
-        { date: "2026-06-15", weight: STARTING_WEIGHTS.aman }
-      ],
-      _generalNotes: ""
+      workouts: {},
+      weights: { "2026-06-15": STARTING_WEIGHTS.aman },
+      notes: { general: "" },
+      measurements: {},
+      photos: {},
+      goalWeight: 80.0
     },
     rishit: {
-      _weightHistory: [
-        { date: "2026-06-15", weight: STARTING_WEIGHTS.rishit }
-      ],
-      _generalNotes: ""
-    }
+      workouts: {},
+      weights: { "2026-06-15": STARTING_WEIGHTS.rishit },
+      notes: { general: "" },
+      measurements: {},
+      photos: {},
+      goalWeight: 80.0
+    },
+    lastBackup: null
   };
 }
 
-// Load data from localStorage
+// Load data from localStorage and perform migrations if necessary
 function loadData() {
   const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (stored) {
     try {
       fitnessData = JSON.parse(stored);
-      // Ensure basic structure exists if restored file was incomplete
-      if (!fitnessData.aman) fitnessData.aman = initData().aman;
-      if (!fitnessData.rishit) fitnessData.rishit = initData().rishit;
-      if (!fitnessData.aman._weightHistory) fitnessData.aman._weightHistory = [{ date: "2026-06-15", weight: STARTING_WEIGHTS.aman }];
-      if (!fitnessData.rishit._weightHistory) fitnessData.rishit._weightHistory = [{ date: "2026-06-15", weight: STARTING_WEIGHTS.rishit }];
+      // Migrate structure if it's the old format
+      migrateDataIfNecessary();
     } catch (e) {
       console.error("Error parsing fitness data from localStorage, initializing fresh", e);
       fitnessData = initData();
+      saveData();
     }
   } else {
     fitnessData = initData();
+    saveData();
+  }
+}
+
+// Automatic migration utility for older storage formats
+function migrateDataIfNecessary() {
+  let migrated = false;
+  
+  // Initialize base wrapper if not present
+  if (!fitnessData) {
+    fitnessData = initData();
+    migrated = true;
+  }
+  
+  for (const user of ["aman", "rishit"]) {
+    if (!fitnessData[user]) {
+      fitnessData[user] = initData()[user];
+      migrated = true;
+      continue;
+    }
+    
+    // Ensure nested objects exist
+    if (!fitnessData[user].workouts) {
+      fitnessData[user].workouts = {};
+      migrated = true;
+    }
+    if (!fitnessData[user].weights) {
+      fitnessData[user].weights = {};
+      migrated = true;
+    }
+    if (!fitnessData[user].notes) {
+      fitnessData[user].notes = {};
+      migrated = true;
+    }
+    if (!fitnessData[user].measurements) {
+      fitnessData[user].measurements = {};
+      migrated = true;
+    }
+    if (!fitnessData[user].photos) {
+      fitnessData[user].photos = {};
+      migrated = true;
+    }
+    if (fitnessData[user].goalWeight === undefined) {
+      fitnessData[user].goalWeight = 80.0;
+      migrated = true;
+    }
+    
+    // 1. Migrate direct date-based workout properties (e.g. key like "2026-08-15")
+    for (const key in fitnessData[user]) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(key)) {
+        fitnessData[user].workouts[key] = fitnessData[user][key];
+        delete fitnessData[user][key];
+        migrated = true;
+      }
+    }
+    
+    // 2. Migrate old _weightHistory array to weights dictionary
+    if (fitnessData[user]._weightHistory) {
+      const history = fitnessData[user]._weightHistory;
+      if (Array.isArray(history)) {
+        history.forEach(entry => {
+          if (entry.date && entry.weight) {
+            fitnessData[user].weights[entry.date] = parseFloat(entry.weight);
+          }
+        });
+      }
+      delete fitnessData[user]._weightHistory;
+      migrated = true;
+    }
+    
+    // 3. Migrate old _generalNotes to notes.general
+    if (fitnessData[user]._generalNotes !== undefined) {
+      fitnessData[user].notes.general = fitnessData[user]._generalNotes;
+      delete fitnessData[user]._generalNotes;
+      migrated = true;
+    }
+    
+    // Ensure starting weight is set in weights dictionary
+    if (!fitnessData[user].weights["2026-06-15"]) {
+      fitnessData[user].weights["2026-06-15"] = STARTING_WEIGHTS[user];
+      migrated = true;
+    }
+  }
+  
+  if (migrated) {
     saveData();
   }
 }
@@ -835,13 +924,15 @@ function getWorkoutForDate(dateStr) {
   return weeklySchedule.find(w => w.day === weekday) || weeklySchedule[6]; // Default to Sunday Rest Day
 }
 
-// Ensures a workout log record exists in fitnessData for the specified date
 function ensureDateRecord(user, dateStr) {
   if (!fitnessData[user]) {
-    fitnessData[user] = {};
+    fitnessData[user] = { workouts: {}, weights: {}, notes: {}, measurements: {}, photos: {}, goalWeight: 80.0 };
   }
-  if (!fitnessData[user][dateStr]) {
-    fitnessData[user][dateStr] = {
+  if (!fitnessData[user].workouts) {
+    fitnessData[user].workouts = {};
+  }
+  if (!fitnessData[user].workouts[dateStr]) {
+    fitnessData[user].workouts[dateStr] = {
       completedExercises: [],
       completionPercentage: 0,
       notes: ""
@@ -868,12 +959,12 @@ function switchUser(user) {
   updatePageContent();
 }
 
-// Switch between page panels (Today, Calendar, Weights, Library, Notes)
+// Switch between page panels (Summary, Today, Calendar, Weights, Library, Notes)
 function switchPage(pageId) {
   activePage = pageId;
 
   // Toggle active styling on navigation buttons
-  const navIds = ["today", "calendar", "weights", "library", "notes"];
+  const navIds = ["summary", "today", "calendar", "weights", "library", "notes"];
   navIds.forEach(id => {
     const btn = document.getElementById(`nav-btn-${id}`);
     if (btn) btn.classList.toggle("active", id === pageId);
@@ -891,7 +982,9 @@ function switchPage(pageId) {
 
 // Route rendering depending on active page state
 function updatePageContent() {
-  if (activePage === "today") {
+  if (activePage === "summary") {
+    renderSummary();
+  } else if (activePage === "today") {
     renderCheckIn();
   } else if (activePage === "calendar") {
     renderCalendar();
@@ -911,7 +1004,7 @@ function updatePageContent() {
 /* ── RENDER PAGE 1: DAILY CHECK-IN ────────────────────────── */
 function renderCheckIn() {
   ensureDateRecord(currentUser, selectedDate);
-  const record = fitnessData[currentUser][selectedDate];
+  const record = fitnessData[currentUser].workouts[selectedDate];
   const workout = getWorkoutForDate(selectedDate);
 
   // Set date text in navigator
@@ -926,9 +1019,31 @@ function renderCheckIn() {
   // Populate workout notes
   document.getElementById("today-notes-input").value = record.notes || "";
 
+  // Missed yesterday's workout check (subtle notification)
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = dateToYYYYMMDD(yesterday);
+  const banner = document.getElementById("yesterday-missed-banner");
+  
+  if (yesterdayStr >= START_DATE_STR && yesterdayStr <= END_DATE_STR && getWeekdayName(yesterdayStr) !== "Sunday") {
+    ensureDateRecord(currentUser, yesterdayStr);
+    const yesterdayRecord = fitnessData[currentUser].workouts[yesterdayStr];
+    if (yesterdayRecord.completedExercises.length === 0) {
+      banner.innerHTML = `<i data-lucide="alert-triangle"></i> <span>You missed yesterday's workout. Don't worry, get back on track today! 💪</span>`;
+      banner.style.display = "flex";
+    } else {
+      banner.style.display = "none";
+    }
+  } else {
+    banner.style.display = "none";
+  }
+
   // Render checklist items
   const checklistContainer = document.getElementById("checklist-container");
   checklistContainer.innerHTML = "";
+
+  // If selectedDate is in the future, checklist rows should look disabled/read-only
+  const isFutureDate = selectedDate > dateToYYYYMMDD(new Date());
 
   workout.exercises.forEach(ex => {
     const isChecked = record.completedExercises.includes(ex.exerciseId);
@@ -936,7 +1051,14 @@ function renderCheckIn() {
     // Create row div
     const row = document.createElement("div");
     row.className = `checklist-row ${isChecked ? "checked" : ""}`;
-    row.onclick = () => toggleExerciseCheck(ex.exerciseId);
+    if (isFutureDate) {
+      row.style.opacity = "0.6";
+      row.style.cursor = "not-allowed";
+      row.title = "Cannot log workouts for future dates.";
+      row.onclick = () => alert("Cannot log workouts for future dates.");
+    } else {
+      row.onclick = () => toggleExerciseCheck(ex.exerciseId);
+    }
 
     // Create left wrapper
     const left = document.createElement("div");
@@ -950,6 +1072,7 @@ function renderCheckIn() {
     input.type = "checkbox";
     input.className = "custom-checkbox-input";
     input.checked = isChecked;
+    input.disabled = isFutureDate;
     input.readOnly = true;
 
     const box = document.createElement("div");
@@ -992,14 +1115,30 @@ function renderCheckIn() {
     checklistContainer.appendChild(row);
   });
 
+  // Disable notes input for future dates
+  const notesInput = document.getElementById("today-notes-input");
+  if (notesInput) {
+    if (isFutureDate) {
+      notesInput.disabled = true;
+      notesInput.placeholder = "Notes are disabled for future dates.";
+    } else {
+      notesInput.disabled = false;
+      notesInput.placeholder = "Enter notes for this date (e.g. increase weights, injury, energy levels...)";
+    }
+  }
+
   lucide.createIcons();
   updateProgressBar();
 }
 
 // Toggles checked state for an exercise in Today's checklist
 function toggleExerciseCheck(exerciseId) {
+  if (selectedDate > dateToYYYYMMDD(new Date())) {
+    alert("Cannot log workouts for future dates.");
+    return;
+  }
   ensureDateRecord(currentUser, selectedDate);
-  const record = fitnessData[currentUser][selectedDate];
+  const record = fitnessData[currentUser].workouts[selectedDate];
   const index = record.completedExercises.indexOf(exerciseId);
 
   if (index === -1) {
@@ -1020,7 +1159,7 @@ function toggleExerciseCheck(exerciseId) {
 
 // Updates progress bar visual states dynamically
 function updateProgressBar() {
-  const record = fitnessData[currentUser][selectedDate];
+  const record = fitnessData[currentUser].workouts[selectedDate];
   const workout = getWorkoutForDate(selectedDate);
   const total = workout.exercises.length;
   const completed = record ? record.completedExercises.length : 0;
@@ -1033,8 +1172,9 @@ function updateProgressBar() {
 
 // Saves text entered in today's notes input instantly (autosave)
 function saveTodayNotes() {
+  if (selectedDate > dateToYYYYMMDD(new Date())) return;
   ensureDateRecord(currentUser, selectedDate);
-  fitnessData[currentUser][selectedDate].notes = document.getElementById("today-notes-input").value;
+  fitnessData[currentUser].workouts[selectedDate].notes = document.getElementById("today-notes-input").value;
   saveData();
 }
 
@@ -1063,6 +1203,71 @@ function renderCalendar() {
     const title = document.createElement("div");
     title.className = "month-title";
     title.textContent = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    
+    // Calculate stats for this month
+    let monthCompleted = 0;
+    let monthMissed = 0;
+    const todayStr = dateToYYYYMMDD(new Date());
+    const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let d = 1; d <= totalDaysInMonth; d++) {
+      const dStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      if (isWithinSubscription(dStr) && getWeekdayName(dStr) !== "Sunday") {
+        ensureDateRecord(currentUser, dStr);
+        const rec = fitnessData[currentUser].workouts[dStr];
+        const completedCount = (rec && rec.completedExercises) ? rec.completedExercises.length : 0;
+        if (completedCount > 0) {
+          monthCompleted++;
+        } else {
+          if (dStr < todayStr) {
+            monthMissed++;
+          }
+        }
+      }
+    }
+
+    const monthTotal = monthCompleted + monthMissed;
+    const monthPercent = monthTotal > 0 ? Math.round((monthCompleted / monthTotal) * 100) : 0;
+
+    // Monthly weight change
+    const lastDay = new Date(year, month + 1, 0);
+    const lastDayStr = dateToYYYYMMDD(lastDay > new Date() ? new Date() : lastDay);
+    const weights = fitnessData[currentUser].weights || {};
+    const loggedDates = Object.keys(weights).sort();
+    let currMonthWeight = STARTING_WEIGHTS[currentUser];
+    for (const dStr of loggedDates) {
+      if (dStr <= lastDayStr) {
+        currMonthWeight = weights[dStr];
+      }
+    }
+
+    const prevLastDay = new Date(year, month, 0);
+    let prevMonthWeight = STARTING_WEIGHTS[currentUser];
+    if (prevLastDay >= new Date(START_DATE_STR)) {
+      const prevLastDayStr = dateToYYYYMMDD(prevLastDay);
+      for (const dStr of loggedDates) {
+        if (dStr <= prevLastDayStr) {
+          prevMonthWeight = weights[dStr];
+        }
+      }
+    }
+    const weightDiff = currMonthWeight - prevMonthWeight;
+    const weightDiffStr = weightDiff === 0 ? "0.0 kg" : (weightDiff > 0 ? `+${weightDiff.toFixed(1)} kg` : `${weightDiff.toFixed(1)} kg`);
+
+    // Create stats sub row
+    const statsSub = document.createElement("div");
+    statsSub.style.fontSize = "10px";
+    statsSub.style.fontWeight = "500";
+    statsSub.style.color = "var(--text-sub)";
+    statsSub.style.marginTop = "6px";
+    statsSub.style.display = "flex";
+    statsSub.style.justifyContent = "space-between";
+    statsSub.style.padding = "0 4px";
+    statsSub.innerHTML = `
+      <span>Done: ${monthCompleted} (${monthPercent}%)</span>
+      <span style="color: ${weightDiff < 0 ? "var(--success)" : (weightDiff > 0 ? "#ef4444" : "var(--text-muted)")};">${weightDiffStr}</span>
+    `;
+    title.appendChild(statsSub);
     monthCard.appendChild(title);
 
     // Weekdays row (Mon-Sun structure)
@@ -1081,7 +1286,6 @@ function renderCalendar() {
     daysGrid.className = "days-grid";
 
     // Calculate empty padding cells before 1st of month
-    // JS getDay() returns 0=Sunday, 1=Monday... We map to 0=Monday, ..., 6=Sunday
     let firstDayIndex = new Date(year, month, 1).getDay();
     let padCount = firstDayIndex === 0 ? 6 : firstDayIndex - 1; // shift so Monday is 0
 
@@ -1092,7 +1296,6 @@ function renderCalendar() {
     }
 
     // Render calendar days
-    const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
     for (let day = 1; day <= totalDaysInMonth; day++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
       const dayCell = document.createElement("div");
@@ -1111,10 +1314,8 @@ function renderCalendar() {
         dayCell.classList.add("out-of-bounds");
         statusSpan.textContent = "-";
       } else {
-        // Evaluate active status indicator based on data record
         ensureDateRecord(currentUser, dateStr);
-        const record = fitnessData[currentUser][dateStr];
-        const workout = getWorkoutForDate(dateStr);
+        const record = fitnessData[currentUser].workouts[dateStr];
         const isSunday = getWeekdayName(dateStr) === "Sunday";
 
         const hasCompletedExercises = record && record.completedExercises.length > 0;
@@ -1155,75 +1356,107 @@ function renderCalendar() {
 
 /* ── RENDER PAGE 3: WEIGHT TRACKER ────────────────────────── */
 function renderWeightTracker() {
-  const history = fitnessData[currentUser]._weightHistory || [];
+  const weights = fitnessData[currentUser].weights || {};
   const startingWeight = STARTING_WEIGHTS[currentUser];
+  const goalWeight = fitnessData[currentUser].goalWeight || 80.0;
   
-  // Set starting weight label
-  document.getElementById("weight-stat-start").textContent = `${startingWeight} kg`;
-
-  // Find latest logged weight
+  // Sort dates chronologically ascending
+  const sortedDates = Object.keys(weights).sort();
+  
+  // Find current/latest logged weight
   let latestWeight = startingWeight;
-  let latestDate = "15 June 2026";
-
-  if (history.length > 0) {
-    // Sort entries by date descending to find the newest entry
-    history.sort((a, b) => b.date.localeCompare(a.date));
-    latestWeight = history[0].weight;
-    latestDate = formatDateLong(history[0].date);
+  let latestDateText = "15 June 2026";
+  let latestDateStr = START_DATE_STR;
+  
+  if (sortedDates.length > 0) {
+    latestDateStr = sortedDates[sortedDates.length - 1];
+    latestWeight = weights[latestDateStr];
+    latestDateText = formatDateLong(latestDateStr);
   }
 
-  const changeVal = Math.round((latestWeight - startingWeight) * 10) / 10;
-  let changeText = "0.0 kg";
-  let changeClass = "";
+  // Weight Lost
+  const lost = startingWeight - latestWeight;
+  const lostStr = lost === 0 ? "0.0 kg" : (lost > 0 ? `${lost.toFixed(1)} kg` : `+${Math.abs(lost).toFixed(1)} kg`);
+  let lostTrend = "Overall lost";
+  let lostClass = "";
+  if (lost > 0) {
+    lostClass = "text-success";
+  } else if (lost < 0) {
+    lostClass = "text-danger";
+    lostTrend = "Overall gained";
+  }
 
-  if (changeVal > 0) {
-    changeText = `+${changeVal} kg`;
-    changeClass = "text-danger"; // Weight gain color (optional)
-  } else if (changeVal < 0) {
-    changeText = `${changeVal} kg`;
-    changeClass = "text-success"; // Weight loss color
+  // Remaining weight to Goal
+  const remaining = latestWeight - goalWeight;
+  let remainingText = "0.0 kg";
+  let remainingTrend = "Remaining";
+  let remainingClass = "";
+  
+  if (remaining > 0) {
+    remainingText = `${remaining.toFixed(1)} kg`;
+  } else {
+    remainingText = "0.0 kg";
+    remainingTrend = "Goal Achieved! 🎉";
+    remainingClass = "text-success";
   }
 
   // Update Stats Cards
+  document.getElementById("weight-stat-start").textContent = `${startingWeight} kg`;
   document.getElementById("weight-stat-latest").textContent = `${latestWeight} kg`;
-  document.getElementById("weight-stat-latest-date").textContent = latestDate;
+  document.getElementById("weight-stat-latest-date").textContent = latestDateText;
   
-  const changeEl = document.getElementById("weight-stat-change");
-  changeEl.textContent = changeText;
-  changeEl.className = `stat-val ${changeClass}`;
+  document.getElementById("weight-stat-goal").textContent = `${goalWeight} kg`;
+  
+  const lostEl = document.getElementById("weight-stat-lost");
+  lostEl.textContent = lostStr;
+  lostEl.className = `stat-val ${lostClass}`;
+  document.getElementById("weight-stat-lost-trend").textContent = lostTrend;
 
-  // Default input date to today's date if today is within bounds
+  const remainingEl = document.getElementById("weight-stat-remaining");
+  remainingEl.textContent = remainingText;
+  remainingEl.className = `stat-val ${remainingClass}`;
+  document.getElementById("weight-stat-remaining-trend").textContent = remainingTrend;
+
+  // Default input dates to today if within bounds, else baseline
   const todayStr = dateToYYYYMMDD(new Date());
-  document.getElementById("weight-input-date").value = isWithinSubscription(todayStr) ? todayStr : START_DATE_STR;
+  const defaultDate = isWithinSubscription(todayStr) ? todayStr : START_DATE_STR;
+  
+  document.getElementById("weight-input-date").value = defaultDate;
   document.getElementById("weight-input-val").value = "";
+  
+  document.getElementById("measure-input-date").value = defaultDate;
+  document.getElementById("photo-input-date").value = defaultDate;
 
-  // Render History Table body
+  // Render Weight History Table body (dates descending)
   const tbody = document.getElementById("weight-history-tbody");
   tbody.innerHTML = "";
 
-  if (history.length === 0) {
+  const descDates = [...sortedDates].reverse();
+
+  if (descDates.length === 0) {
     tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No weight entries logged yet.</td></tr>`;
   } else {
-    history.forEach((entry, idx) => {
+    descDates.forEach(dateStr => {
+      const weightVal = weights[dateStr];
       const tr = document.createElement("tr");
 
       const tdDate = document.createElement("td");
-      tdDate.textContent = formatDateLong(entry.date);
+      tdDate.textContent = formatDateLong(dateStr);
 
       const tdWeight = document.createElement("td");
       tdWeight.style.fontWeight = "600";
-      tdWeight.textContent = `${entry.weight} kg`;
+      tdWeight.textContent = `${weightVal} kg`;
 
       const tdAction = document.createElement("td");
       
-      // Prevent deleting the initial starting date entry to preserve baseline
-      if (entry.date === START_DATE_STR) {
+      if (dateStr === START_DATE_STR) {
         tdAction.innerHTML = `<span style="font-size: 11px; color:var(--text-muted);">Baseline</span>`;
       } else {
         const delBtn = document.createElement("button");
+        delBtn.type = "button";
         delBtn.className = "btn btn-danger-subtle btn-sm";
         delBtn.innerHTML = `<i data-lucide="trash-2" style="width:13px;height:13px;"></i> Delete`;
-        delBtn.onclick = () => deleteWeightEntry(entry.date);
+        delBtn.onclick = () => deleteWeightEntry(dateStr);
         tdAction.appendChild(delBtn);
       }
 
@@ -1234,52 +1467,414 @@ function renderWeightTracker() {
     });
   }
 
+  // Render Monthly Weight Summary card
+  renderMonthlyWeightSummary();
+
+  // Render Measurements History
+  renderMeasurements();
+
+  // Render Progress Photos Gallery dropdown and gallery
+  updatePhotoGalleryDropdown();
+
   lucide.createIcons();
 }
 
-// Log a new weight entry from form submission
+// Render Monthly Weight Summary inside card container
+function renderMonthlyWeightSummary() {
+  const container = document.getElementById("weight-monthly-summary-container");
+  container.innerHTML = "";
+
+  const monthlyChanges = calculateMonthlyWeightChanges(currentUser);
+  
+  if (monthlyChanges.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); font-size:12px;">No summary data.</div>`;
+    return;
+  }
+
+  monthlyChanges.forEach(item => {
+    const pill = document.createElement("div");
+    pill.style.background = "rgba(255, 255, 255, 0.02)";
+    pill.style.border = "1px solid var(--border-color)";
+    pill.style.borderRadius = "var(--radius-sm)";
+    pill.style.padding = "8px 12px";
+    pill.style.display = "flex";
+    pill.style.flexDirection = "column";
+    pill.style.alignItems = "center";
+    pill.style.gap = "4px";
+
+    const label = document.createElement("span");
+    label.style.fontSize = "11px";
+    label.style.color = "var(--text-sub)";
+    label.style.fontWeight = "600";
+    label.textContent = item.label;
+
+    const val = document.createElement("span");
+    val.style.fontSize = "13px";
+    val.style.fontWeight = "700";
+    
+    if (item.change === 0) {
+      val.textContent = "0.0 kg";
+      val.style.color = "var(--text-muted)";
+    } else if (item.change < 0) {
+      val.textContent = `${item.change.toFixed(1)} kg`;
+      val.style.color = "var(--success)";
+    } else {
+      val.textContent = `+${item.change.toFixed(1)} kg`;
+      val.style.color = "#ef4444";
+    }
+
+    pill.appendChild(label);
+    pill.appendChild(val);
+    container.appendChild(pill);
+  });
+}
+
+// Log a new weight entry
 function logNewWeight(event) {
   event.preventDefault();
   const weight = parseFloat(document.getElementById("weight-input-val").value);
-  const date = document.getElementById("weight-input-date").value;
+  const dateStr = document.getElementById("weight-input-date").value;
 
-  if (!isWithinSubscription(date)) {
+  if (dateStr > dateToYYYYMMDD(new Date())) {
+    alert("Cannot log weight for future dates.");
+    return;
+  }
+  if (!isWithinSubscription(dateStr)) {
     alert(`Please select a date within the subscription period: ${formatDateLong(START_DATE_STR)} to ${formatDateLong(END_DATE_STR)}`);
     return;
   }
-
-  if (isNaN(weight) || weight <= 0) {
-    alert("Please enter a valid weight numerical value.");
+  if (isNaN(weight) || weight <= 0 || weight > 300) {
+    alert("Please enter a valid weight numerical value (0 to 300 kg).");
     return;
   }
 
-  if (!fitnessData[currentUser]._weightHistory) {
-    fitnessData[currentUser]._weightHistory = [];
+  if (!fitnessData[currentUser].weights) {
+    fitnessData[currentUser].weights = {};
   }
 
-  const history = fitnessData[currentUser]._weightHistory;
-  const existingIdx = history.findIndex(h => h.date === date);
-
-  if (existingIdx !== -1) {
-    // Overwrite existing record for date
-    history[existingIdx].weight = weight;
-  } else {
-    // Insert new weight entry
-    history.push({ date, weight });
+  // Prevent duplicate logs confirmation
+  if (fitnessData[currentUser].weights[dateStr] !== undefined) {
+    if (!confirm(`A weight entry (${fitnessData[currentUser].weights[dateStr]} kg) already exists for ${formatDateLong(dateStr)}. Do you want to overwrite it?`)) {
+      return;
+    }
   }
 
-  // Sort history array by date descending
-  history.sort((a, b) => b.date.localeCompare(a.date));
+  fitnessData[currentUser].weights[dateStr] = weight;
 
   saveData();
   renderWeightTracker();
+  if (activePage === "summary") renderSummary();
 }
 
 // Delete custom weight entry
 function deleteWeightEntry(dateStr) {
+  if (dateStr === START_DATE_STR) {
+    alert("Cannot delete the baseline starting weight.");
+    return;
+  }
   if (confirm(`Are you sure you want to delete the weight entry for ${formatDateLong(dateStr)}?`)) {
-    const history = fitnessData[currentUser]._weightHistory || [];
-    fitnessData[currentUser]._weightHistory = history.filter(h => h.date !== dateStr);
+    delete fitnessData[currentUser].weights[dateStr];
+    saveData();
+    renderWeightTracker();
+    if (activePage === "summary") renderSummary();
+  }
+}
+
+// Render Measurements table
+function renderMeasurements() {
+  const measurements = fitnessData[currentUser].measurements || {};
+  const tbody = document.getElementById("measurements-history-tbody");
+  tbody.innerHTML = "";
+
+  const sortedDates = Object.keys(measurements).sort().reverse();
+
+  if (sortedDates.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No measurements logged yet.</td></tr>`;
+  } else {
+    sortedDates.forEach(dateStr => {
+      const entry = measurements[dateStr];
+      const tr = document.createElement("tr");
+
+      const tdDate = document.createElement("td");
+      tdDate.textContent = formatDateLong(dateStr);
+
+      const tdChest = document.createElement("td");
+      tdChest.textContent = entry.chest ? `${entry.chest} cm` : "--";
+
+      const tdWaist = document.createElement("td");
+      tdWaist.textContent = entry.waist ? `${entry.waist} cm` : "--";
+
+      const tdArms = document.createElement("td");
+      tdArms.textContent = entry.arms ? `${entry.arms} cm` : "--";
+
+      const tdThighs = document.createElement("td");
+      tdThighs.textContent = entry.thighs ? `${entry.thighs} cm` : "--";
+
+      const tdAction = document.createElement("td");
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "btn btn-danger-subtle btn-sm";
+      delBtn.innerHTML = `<i data-lucide="trash-2" style="width:13px;height:13px;"></i> Delete`;
+      delBtn.onclick = () => deleteMeasurement(dateStr);
+      tdAction.appendChild(delBtn);
+
+      tr.appendChild(tdDate);
+      tr.appendChild(tdChest);
+      tr.appendChild(tdWaist);
+      tr.appendChild(tdArms);
+      tr.appendChild(tdThighs);
+      tr.appendChild(tdAction);
+      tbody.appendChild(tr);
+    });
+  }
+}
+
+// Log new measurements
+function logNewMeasurements(event) {
+  event.preventDefault();
+  const dateStr = document.getElementById("measure-input-date").value;
+  const chest = parseFloat(document.getElementById("measure-input-chest").value);
+  const waist = parseFloat(document.getElementById("measure-input-waist").value);
+  const arms = parseFloat(document.getElementById("measure-input-arms").value);
+  const thighs = parseFloat(document.getElementById("measure-input-thighs").value);
+
+  if (dateStr > dateToYYYYMMDD(new Date())) {
+    alert("Cannot log measurements for future dates.");
+    return;
+  }
+  if (!isWithinSubscription(dateStr)) {
+    alert("Date must be within subscription period.");
+    return;
+  }
+  if (isNaN(chest) || chest <= 0 || isNaN(waist) || waist <= 0 || isNaN(arms) || arms <= 0 || isNaN(thighs) || thighs <= 0) {
+    alert("Please enter valid positive numbers for all measurement fields.");
+    return;
+  }
+
+  if (!fitnessData[currentUser].measurements) {
+    fitnessData[currentUser].measurements = {};
+  }
+
+  fitnessData[currentUser].measurements[dateStr] = { chest, waist, arms, thighs };
+
+  saveData();
+  renderWeightTracker();
+
+  // Reset input fields
+  document.getElementById("measure-input-chest").value = "";
+  document.getElementById("measure-input-waist").value = "";
+  document.getElementById("measure-input-arms").value = "";
+  document.getElementById("measure-input-thighs").value = "";
+}
+
+// Delete measurement entry
+function deleteMeasurement(dateStr) {
+  if (confirm(`Are you sure you want to delete measurements for ${formatDateLong(dateStr)}?`)) {
+    delete fitnessData[currentUser].measurements[dateStr];
+    saveData();
+    renderWeightTracker();
+  }
+}
+
+// Compress image via Canvas to avoid filling up localStorage
+function compressImage(file, maxWidth, maxHeight, callback) {
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const img = new Image();
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Compress as JPEG (0.6 quality gives ~10-15KB)
+      const base64 = canvas.toDataURL("image/jpeg", 0.6);
+      callback(base64);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Save progress photos from form submission
+function saveProgressPhotos(event) {
+  event.preventDefault();
+  const dateStr = document.getElementById("photo-input-date").value;
+
+  if (dateStr > dateToYYYYMMDD(new Date())) {
+    alert("Cannot log photos for future dates.");
+    return;
+  }
+  if (!isWithinSubscription(dateStr)) {
+    alert("Date must be within subscription period.");
+    return;
+  }
+
+  const frontFile = document.getElementById("photo-input-front").files[0];
+  const sideFile = document.getElementById("photo-input-side").files[0];
+
+  if (!frontFile && !sideFile) {
+    alert("Please select at least one photo (Front or Side) to upload.");
+    return;
+  }
+
+  let frontBase64 = null;
+  let sideBase64 = null;
+
+  const handleSave = () => {
+    if (!fitnessData[currentUser].photos) {
+      fitnessData[currentUser].photos = {};
+    }
+
+    const existing = fitnessData[currentUser].photos[dateStr] || {};
+
+    fitnessData[currentUser].photos[dateStr] = {
+      front: frontBase64 || existing.front || null,
+      side: sideBase64 || existing.side || null
+    };
+
+    saveData();
+    renderWeightTracker();
+
+    // Clear file inputs
+    document.getElementById("photo-input-front").value = "";
+    document.getElementById("photo-input-side").value = "";
+    
+    // Set dropdown to new date automatically
+    const select = document.getElementById("gallery-date-select");
+    if (select) {
+      select.value = dateStr;
+      loadGalleryPhotos(dateStr);
+    }
+  };
+
+  // Resize and compress sequentially
+  if (frontFile && sideFile) {
+    compressImage(frontFile, 400, 400, (b64Front) => {
+      frontBase64 = b64Front;
+      compressImage(sideFile, 400, 400, (b64Side) => {
+        sideBase64 = b64Side;
+        handleSave();
+      });
+    });
+  } else if (frontFile) {
+    compressImage(frontFile, 400, 400, (b64Front) => {
+      frontBase64 = b64Front;
+      handleSave();
+    });
+  } else if (sideFile) {
+    compressImage(sideFile, 400, 400, (b64Side) => {
+      sideBase64 = b64Side;
+      handleSave();
+    });
+  }
+}
+
+// Populates dates for progress photos gallery dropdown
+function updatePhotoGalleryDropdown() {
+  const select = document.getElementById("gallery-date-select");
+  if (!select) return;
+
+  const photos = fitnessData[currentUser].photos || {};
+  const dates = Object.keys(photos).sort().reverse();
+  
+  const savedVal = select.value;
+  select.innerHTML = "";
+
+  if (dates.length === 0) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "No entries";
+    select.appendChild(opt);
+    loadGalleryPhotos("");
+    return;
+  }
+
+  dates.forEach(dStr => {
+    const opt = document.createElement("option");
+    opt.value = dStr;
+    opt.textContent = formatDateLong(dStr);
+    select.appendChild(opt);
+  });
+
+  // Restore previous selection if still valid, else default to latest date
+  if (dates.includes(savedVal)) {
+    select.value = savedVal;
+  } else {
+    select.value = dates[0];
+  }
+  
+  loadGalleryPhotos(select.value);
+}
+
+// Load active photos in gallery from selected date
+function loadGalleryPhotos(dateStr) {
+  const frontImg = document.getElementById("gallery-front-img");
+  const frontPlace = document.getElementById("gallery-front-placeholder");
+  const sideImg = document.getElementById("gallery-side-img");
+  const sidePlace = document.getElementById("gallery-side-placeholder");
+  const delBtn = document.getElementById("delete-photos-btn");
+
+  if (!dateStr) {
+    frontImg.style.display = "none";
+    frontPlace.style.display = "inline";
+    sideImg.style.display = "none";
+    sidePlace.style.display = "inline";
+    if (delBtn) delBtn.style.display = "none";
+    return;
+  }
+
+  const entry = (fitnessData[currentUser].photos || {})[dateStr];
+  
+  if (entry && entry.front) {
+    frontImg.src = entry.front;
+    frontImg.style.display = "inline";
+    frontPlace.style.display = "none";
+  } else {
+    frontImg.style.display = "none";
+    frontPlace.style.display = "inline";
+  }
+
+  if (entry && entry.side) {
+    sideImg.src = entry.side;
+    sideImg.style.display = "inline";
+    sidePlace.style.display = "none";
+  } else {
+    sideImg.style.display = "none";
+    sidePlace.style.display = "inline";
+  }
+
+  if (delBtn) {
+    delBtn.style.display = "inline-block";
+  }
+}
+
+// Delete photo gallery entry
+function deleteCurrentPhotos() {
+  const select = document.getElementById("gallery-date-select");
+  if (!select) return;
+  const dateStr = select.value;
+  if (!dateStr) return;
+
+  if (confirm(`Are you sure you want to delete the progress photo entry for ${formatDateLong(dateStr)}?`)) {
+    delete fitnessData[currentUser].photos[dateStr];
     saveData();
     renderWeightTracker();
   }
@@ -1298,9 +1893,18 @@ function filterLibrary() {
   grid.innerHTML = "";
 
   const filtered = exerciseLibrary.filter(ex => {
-    const nameMatch = ex.name.toLowerCase().includes(query);
-    const muscleMatch = ex.muscles.some(m => m.toLowerCase().includes(query));
-    return nameMatch || muscleMatch;
+    // 1. Muscle filter match
+    if (activeLibraryFilter !== "all") {
+      const hasMuscle = ex.muscles.some(m => m.toLowerCase() === activeLibraryFilter.toLowerCase());
+      if (!hasMuscle) return false;
+    }
+    // 2. Search query match
+    if (query !== "") {
+      const nameMatch = ex.name.toLowerCase().includes(query);
+      const muscleMatch = ex.muscles.some(m => m.toLowerCase().includes(query));
+      return nameMatch || muscleMatch;
+    }
+    return true;
   });
 
   if (filtered.length === 0) {
@@ -1347,13 +1951,33 @@ function filterLibrary() {
 
 /* ── RENDER PAGE 5: GENERAL NOTES ─────────────────────────── */
 function renderNotes() {
-  const notes = fitnessData[currentUser]._generalNotes || "";
+  const notes = (fitnessData[currentUser].notes && fitnessData[currentUser].notes.general) || "";
   document.getElementById("general-notes-input").value = notes;
+
+  // Render last backup status info
+  const backupText = document.getElementById("last-backup-text");
+  const backupIcon = document.getElementById("backup-status-icon");
+  if (backupText && backupIcon) {
+    const lastBackup = fitnessData.lastBackup;
+    if (lastBackup) {
+      backupText.innerHTML = `Last Backup: <strong style="color: var(--success);">${formatDateLong(lastBackup)}</strong>`;
+      backupIcon.setAttribute("data-lucide", "check-circle-2");
+      backupIcon.style.color = "var(--success)";
+    } else {
+      backupText.innerHTML = `Last Backup: <strong style="color: var(--text-muted);">Never</strong>`;
+      backupIcon.setAttribute("data-lucide", "info");
+      backupIcon.style.color = "var(--text-muted)";
+    }
+    lucide.createIcons();
+  }
 }
 
 // Saves text entered in the general notes textarea automatically (autosave)
 function saveGeneralNotes() {
-  fitnessData[currentUser]._generalNotes = document.getElementById("general-notes-input").value;
+  if (!fitnessData[currentUser].notes) {
+    fitnessData[currentUser].notes = {};
+  }
+  fitnessData[currentUser].notes.general = document.getElementById("general-notes-input").value;
   saveData();
 }
 
@@ -1365,6 +1989,24 @@ function saveGeneralNotes() {
 function openExerciseModal(exerciseId) {
   const exercise = exerciseLibrary.find(e => e.id === exerciseId);
   if (!exercise) return;
+
+  // Calculate history of completion for this exercise
+  const completionDates = [];
+  const workouts = fitnessData[currentUser].workouts || {};
+  for (const dateStr in workouts) {
+    const rec = workouts[dateStr];
+    if (rec.completedExercises && rec.completedExercises.includes(exerciseId)) {
+      completionDates.push(dateStr);
+    }
+  }
+  completionDates.sort(); // Sort chronological ascending
+
+  const totalCompletedCount = completionDates.length;
+  const formattedDates = completionDates.map(d => {
+    const [y, m, dNum] = d.split("-").map(Number);
+    const dateObj = new Date(y, m - 1, dNum);
+    return dateObj.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+  });
 
   const modalBody = document.getElementById("modal-exercise-body");
   modalBody.innerHTML = `
@@ -1405,9 +2047,23 @@ function openExerciseModal(exerciseId) {
         </ul>
       </div>
 
-      <div class="modal-section" style="margin-bottom:0;">
+      <div class="modal-section">
         <h4 class="modal-section-title">Recommended Rest Period</h4>
         <p class="modal-text">${exercise.restTime}</p>
+      </div>
+
+      <div class="modal-section" style="margin-bottom:0; border-top: 1px solid var(--border-color); padding-top:16px;">
+        <h4 class="modal-section-title">Personal Exercise History</h4>
+        <p class="modal-text">Total Completed: <strong>${totalCompletedCount} times</strong></p>
+        ${totalCompletedCount > 0 ? `
+          <div style="max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-top: 8px; font-size: 12px;">
+            <ul style="list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 0;">
+              ${formattedDates.map(fd => `<li style="display: flex; align-items: center; gap: 4px; color: var(--text-main);"><span style="color: var(--accent);">✓</span> ${fd}</li>`).join("")}
+            </ul>
+          </div>
+        ` : `
+          <p class="modal-text" style="color: var(--text-muted); font-style: italic; margin-top: 4px;">You haven't completed this exercise yet.</p>
+        `}
       </div>
     </div>
   `;
@@ -1422,8 +2078,9 @@ function closeExerciseModal(event) {
 /* ── CALENDAR DAY HISTORY MODAL ──────────────────────────── */
 function openDayModal(dateStr) {
   ensureDateRecord(currentUser, dateStr);
-  const record = fitnessData[currentUser][dateStr];
+  const record = fitnessData[currentUser].workouts[dateStr];
   const workout = getWorkoutForDate(dateStr);
+  const isFutureDate = dateStr > dateToYYYYMMDD(new Date());
 
   const modalBody = document.getElementById("modal-day-body");
   modalBody.innerHTML = `
@@ -1452,9 +2109,9 @@ function openDayModal(dateStr) {
         ${workout.exercises.map(ex => {
           const isChecked = record.completedExercises.includes(ex.exerciseId);
           return `
-            <div class="c-modal-chk-row ${isChecked ? "checked" : ""}" onclick="toggleModalExercise('${dateStr}', '${ex.exerciseId}')">
+            <div class="c-modal-chk-row ${isChecked ? "checked" : ""}" ${isFutureDate ? `style="opacity:0.6; cursor:not-allowed;" onclick="alert('Cannot log workouts for future dates.')"` : `onclick="toggleModalExercise('${dateStr}', '${ex.exerciseId}')"`}>
               <div class="custom-checkbox-wrapper">
-                <input type="checkbox" class="custom-checkbox-input" ${isChecked ? "checked" : ""}>
+                <input type="checkbox" class="custom-checkbox-input" ${isChecked ? "checked" : ""} ${isFutureDate ? "disabled" : ""}>
                 <div class="custom-checkbox-box"></div>
               </div>
               <div class="checklist-label">
@@ -1468,7 +2125,7 @@ function openDayModal(dateStr) {
 
       <div class="c-modal-notes-box">
         <label for="c-modal-notes-input">Notes for this Date</label>
-        <textarea id="c-modal-notes-input" placeholder="Type notes for this date..." oninput="saveModalDateNotes('${dateStr}')">${record.notes || ""}</textarea>
+        <textarea id="c-modal-notes-input" placeholder="${isFutureDate ? "Notes are disabled for future dates." : "Type notes for this date..."}" ${isFutureDate ? "disabled" : ""} oninput="saveModalDateNotes('${dateStr}')">${record.notes || ""}</textarea>
       </div>
     </div>
   `;
@@ -1478,7 +2135,11 @@ function openDayModal(dateStr) {
 
 // Toggles checked state for an exercise inside the Calendar day details modal
 function toggleModalExercise(dateStr, exerciseId) {
-  const record = fitnessData[currentUser][dateStr];
+  if (dateStr > dateToYYYYMMDD(new Date())) {
+    alert("Cannot log workouts for future dates.");
+    return;
+  }
+  const record = fitnessData[currentUser].workouts[dateStr];
   const index = record.completedExercises.indexOf(exerciseId);
 
   if (index === -1) {
@@ -1509,8 +2170,9 @@ function toggleModalExercise(dateStr, exerciseId) {
 
 // Saves text entered in the day modal notes textarea
 function saveModalDateNotes(dateStr) {
+  if (dateStr > dateToYYYYMMDD(new Date())) return;
   const text = document.getElementById("c-modal-notes-input").value;
-  fitnessData[currentUser][dateStr].notes = text;
+  fitnessData[currentUser].workouts[dateStr].notes = text;
   saveData();
 
   // Update checkin page if dates align
@@ -1530,6 +2192,10 @@ function closeDayModal(event) {
 
 // Trigger file download containing fitnessData JSON string
 function downloadBackup() {
+  fitnessData.lastBackup = dateToYYYYMMDD(new Date());
+  saveData();
+  renderNotes(); // Refresh label immediately
+
   const dataStr = JSON.stringify(fitnessData, null, 2);
   const dataBlob = new Blob([dataStr], { type: "application/json" });
   
@@ -1566,10 +2232,11 @@ function handleRestoreUpload(event) {
     try {
       const parsed = JSON.parse(e.target.result);
       
-      // Validation check for primary user structures
-      if (parsed && parsed.aman && parsed.rishit) {
+      // Validation check for primary structures
+      if (parsed && (parsed.aman || parsed.rishit)) {
         if (confirm("Are you sure you want to restore this backup? This will overwrite your current workout and weight logs permanently.")) {
           fitnessData = parsed;
+          migrateDataIfNecessary(); // Formats backup in case it was old
           saveData();
           alert("Backup successfully restored!");
           window.location.reload(); // Reload site to refresh all DOM layouts
@@ -1633,6 +2300,351 @@ window.addEventListener("appinstalled", (evt) => {
 
 
 /* ============================================================
+   10.5. SUMMARY PAGE STATS & AUXILIARY UTILITIES
+   ============================================================ */
+
+// Calculate streaks backwards from today/selectedDate
+function calculateStreaks(user) {
+  const start = new Date(START_DATE_STR);
+  const realToday = new Date();
+  
+  // Bound realToday by END_DATE
+  const end = new Date(END_DATE_STR);
+  const todayBound = realToday > end ? end : realToday;
+  
+  const todayStr = dateToYYYYMMDD(todayBound);
+  if (todayStr < START_DATE_STR) {
+    return { currentStreak: 0, bestStreak: 0 };
+  }
+  
+  let currentDate = new Date(start);
+  const dates = [];
+  
+  while (dateToYYYYMMDD(currentDate) <= todayStr) {
+    dates.push(dateToYYYYMMDD(currentDate));
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  let currentStreak = 0;
+  let bestStreak = 0;
+  let tempStreak = 0;
+  
+  // Calculate best streak
+  for (let i = 0; i < dates.length; i++) {
+    const dStr = dates[i];
+    const isToday = (dStr === todayStr);
+    const record = fitnessData[user].workouts[dStr];
+    const completedCount = (record && record.completedExercises) ? record.completedExercises.length : 0;
+    const isSunday = getWeekdayName(dStr) === "Sunday";
+    
+    let isSuccess = false;
+    if (completedCount > 0 || isSunday) {
+      isSuccess = true;
+    }
+    
+    if (isToday) {
+      if (isSuccess) {
+        tempStreak++;
+        if (tempStreak > bestStreak) {
+          bestStreak = tempStreak;
+        }
+      }
+    } else {
+      if (isSuccess) {
+        tempStreak++;
+        if (tempStreak > bestStreak) {
+          bestStreak = tempStreak;
+        }
+      } else {
+        tempStreak = 0; // broken
+      }
+    }
+  }
+  
+  // Calculate current streak
+  let startIdx = dates.length - 1;
+  const lastDate = dates[startIdx];
+  const lastRecord = fitnessData[user].workouts[lastDate];
+  const lastCompleted = (lastRecord && lastRecord.completedExercises) ? lastRecord.completedExercises.length : 0;
+  const lastSunday = getWeekdayName(lastDate) === "Sunday";
+  
+  if (lastCompleted > 0 || lastSunday) {
+    for (let i = startIdx; i >= 0; i--) {
+      const dStr = dates[i];
+      const rec = fitnessData[user].workouts[dStr];
+      const comp = (rec && rec.completedExercises) ? rec.completedExercises.length : 0;
+      const sun = getWeekdayName(dStr) === "Sunday";
+      if (comp > 0 || sun) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+  } else {
+    // Today is pending, count from yesterday
+    for (let i = startIdx - 1; i >= 0; i--) {
+      const dStr = dates[i];
+      const rec = fitnessData[user].workouts[dStr];
+      const comp = (rec && rec.completedExercises) ? rec.completedExercises.length : 0;
+      const sun = getWeekdayName(dStr) === "Sunday";
+      if (comp > 0 || sun) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+  }
+  
+  return { currentStreak, bestStreak };
+}
+
+// Calculate workouts completed, missed, rest days, and completion percentage
+function calculateWorkoutStats(user) {
+  const start = new Date(START_DATE_STR);
+  const realToday = new Date();
+  
+  const end = new Date(END_DATE_STR);
+  const todayBound = realToday > end ? end : realToday;
+  const todayStr = dateToYYYYMMDD(todayBound);
+  
+  if (todayStr < START_DATE_STR) {
+    return { completed: 0, missed: 0, restDays: 0, percent: 0 };
+  }
+  
+  let currentDate = new Date(start);
+  let completed = 0;
+  let missed = 0;
+  let restDays = 0;
+  
+  while (dateToYYYYMMDD(currentDate) <= todayStr) {
+    const dStr = dateToYYYYMMDD(currentDate);
+    const isToday = (dStr === todayStr);
+    const record = fitnessData[user].workouts[dStr];
+    const completedCount = (record && record.completedExercises) ? record.completedExercises.length : 0;
+    const isSunday = getWeekdayName(dStr) === "Sunday";
+    
+    if (isSunday) {
+      restDays++;
+    } else {
+      if (completedCount > 0) {
+        completed++;
+      } else {
+        if (!isToday) {
+          missed++;
+        }
+      }
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  const total = completed + missed;
+  const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+  
+  return { completed, missed, restDays, percent };
+}
+
+// Calculate weight changes month-over-month
+function calculateMonthlyWeightChanges(user) {
+  const startWeight = STARTING_WEIGHTS[user];
+  const weights = fitnessData[user].weights || {};
+  
+  const start = new Date(START_DATE_STR);
+  const end = new Date(END_DATE_STR);
+  const realToday = new Date();
+  const todayBound = realToday > end ? end : realToday;
+  
+  const loggedDates = Object.keys(weights).sort();
+  const months = [];
+  
+  let currentDate = new Date(start.getFullYear(), start.getMonth(), 1);
+  const endMonth = new Date(todayBound.getFullYear(), todayBound.getMonth(), 1);
+  
+  while (currentDate <= endMonth) {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const lastDay = new Date(year, month + 1, 0);
+    const lastDayStr = dateToYYYYMMDD(lastDay > todayBound ? todayBound : lastDay);
+    
+    let activeWeight = startWeight;
+    for (const dStr of loggedDates) {
+      if (dStr <= lastDayStr) {
+        activeWeight = weights[dStr];
+      } else {
+        break;
+      }
+    }
+    
+    months.push({
+      label: currentDate.toLocaleDateString("en-US", { month: "long" }),
+      year,
+      month,
+      weight: activeWeight
+    });
+    
+    currentDate.setMonth(currentDate.getMonth() + 1);
+  }
+  
+  const summary = [];
+  if (months.length > 0) {
+    const juneWeight = months[0].weight;
+    const juneChange = juneWeight - startWeight;
+    summary.push({ label: months[0].label, change: juneChange });
+  }
+  for (let i = 1; i < months.length; i++) {
+    const prevWeight = months[i - 1].weight;
+    const currWeight = months[i].weight;
+    const change = currWeight - prevWeight;
+    summary.push({ label: months[i].label, change });
+  }
+  return summary;
+}
+
+// Render Summary Dashboard page values
+function renderSummary() {
+  const streakData = calculateStreaks(currentUser);
+  const stats = calculateWorkoutStats(currentUser);
+  
+  // Update Streak UI
+  document.getElementById("summary-current-streak").textContent = `${streakData.currentStreak} Days`;
+  document.getElementById("summary-best-streak").textContent = `${streakData.bestStreak} Days`;
+  
+  const currentStreakTrend = document.getElementById("summary-current-streak-trend");
+  if (streakData.currentStreak > 0) {
+    currentStreakTrend.textContent = "Streak is active! 🔥";
+  } else {
+    currentStreakTrend.textContent = "Keep it up! 🔥";
+  }
+
+  // Update Completion UI
+  document.getElementById("summary-completion-percent").textContent = `${stats.percent}%`;
+  document.getElementById("summary-completion-ratio").textContent = `Completed: ${stats.completed} of ${stats.completed + stats.missed}`;
+
+  // Update Workouts Logged UI
+  document.getElementById("summary-total-completed").textContent = `${stats.completed}`;
+  document.getElementById("summary-total-missed").textContent = `Missed: ${stats.missed} | Rest: ${stats.restDays}`;
+
+  // Weight Change delta
+  const startWeight = STARTING_WEIGHTS[currentUser];
+  const weights = fitnessData[currentUser].weights || {};
+  const sortedDates = Object.keys(weights).sort();
+  let latestWeight = startWeight;
+  if (sortedDates.length > 0) {
+    latestWeight = weights[sortedDates[sortedDates.length - 1]];
+  }
+
+  const lost = startWeight - latestWeight;
+  const lostStr = lost === 0 ? "0.0 kg" : (lost > 0 ? `${lost.toFixed(1)} kg` : `+${Math.abs(lost).toFixed(1)} kg`);
+  const weightChangeEl = document.getElementById("summary-weight-change");
+  weightChangeEl.textContent = lostStr;
+  
+  const weightChangeTrend = document.getElementById("summary-weight-change-trend");
+  if (lost > 0) {
+    weightChangeEl.className = "stat-val text-success";
+    weightChangeTrend.textContent = "Overall lost";
+  } else if (lost < 0) {
+    weightChangeEl.className = "stat-val text-danger";
+    weightChangeTrend.textContent = "Overall gained";
+  } else {
+    weightChangeEl.className = "stat-val";
+    weightChangeTrend.textContent = "Overall change";
+  }
+
+  // Remaining Weight to Goal
+  const goalWeight = fitnessData[currentUser].goalWeight || 80.0;
+  const remaining = latestWeight - goalWeight;
+  const remainingEl = document.getElementById("summary-remaining-weight");
+  const goalWeightEl = document.getElementById("summary-goal-weight");
+
+  goalWeightEl.textContent = `Goal: ${goalWeight} kg`;
+
+  if (remaining > 0) {
+    remainingEl.textContent = `${remaining.toFixed(1)} kg`;
+    remainingEl.className = "stat-val";
+  } else {
+    remainingEl.textContent = "0.0 kg";
+    remainingEl.className = "stat-val text-success";
+    goalWeightEl.textContent = "Goal Achieved! 🎉";
+  }
+
+  lucide.createIcons();
+}
+
+// Prompt Goal Weight configuration
+function promptGoalWeight() {
+  const currentGoal = fitnessData[currentUser].goalWeight || 80.0;
+  const newGoalStr = prompt(`Enter new goal weight (kg) for ${currentUser.charAt(0).toUpperCase() + currentUser.slice(1)}:`, currentGoal);
+  if (newGoalStr === null) return;
+  const newGoal = parseFloat(newGoalStr);
+  if (isNaN(newGoal) || newGoal <= 0 || newGoal > 300) {
+    alert("Please enter a valid positive weight value.");
+    return;
+  }
+  fitnessData[currentUser].goalWeight = newGoal;
+  saveData();
+  renderWeightTracker();
+  if (activePage === "summary") renderSummary();
+}
+
+// Toggle active exercise library muscle filter pills
+let activeLibraryFilter = "all";
+function setLibraryFilter(muscle) {
+  activeLibraryFilter = muscle;
+  const pills = document.querySelectorAll(".filter-pill");
+  pills.forEach(p => {
+    p.classList.toggle("active", p.textContent.trim().toLowerCase() === muscle.toLowerCase() || (muscle === "all" && p.textContent.trim() === "All"));
+  });
+  filterLibrary();
+}
+
+/* ============================================================
+   10.8. DEVELOPER & FUTURE MAINTAINABILITY GUIDE
+   ============================================================
+   Welcome! Follow these simple guidelines to update this app.
+   All modifications should be made directly in this script.js file.
+
+   1. HOW TO CHANGE WORKOUT TYPES OR NAMES:
+      Locate `weeklySchedule` configuration array around line 604. 
+      Update the `type` or `focus` values of any weekday item.
+      E.g., Change Monday's focus: `focus: "Chest, Back & Shoulders"`
+
+   2. HOW TO ADD OR EDIT EXERCISES IN DATABASE:
+      Locate `exerciseLibrary` configuration array around line 47.
+      Add or edit an object with the following structure:
+      {
+        id: "unique-exercise-id",
+        name: "Exercise Display Name",
+        muscles: ["Chest", "Triceps"],
+        description: "A short guide on what the exercise is...",
+        steps: ["Step 1 description...", "Step 2 description..."],
+        mistakes: ["Common mistake..."],
+        breathing: "Breathing directions...",
+        tips: ["Safety tip..."],
+        restTime: "60-90 seconds",
+        image: "https://unsplash.com/..."
+      }
+
+   3. HOW TO UPDATE WEEKLY SCHEDULE / ASSIGNED EXERCISES:
+      Locate `weeklySchedule` configuration array around line 604.
+      Under each day, update the `exercises` array by adding/removing
+      exercise references matching the IDs inside the `exerciseLibrary`.
+      E.g., `exercises: [ { exerciseId: "bench-press", reps: "8-12 reps", sets: 3 } ]`
+
+   4. HOW TO EXTEND SUBSCRIPTION DATES:
+      Locate `START_DATE_STR` and `END_DATE_STR` constants around line 695.
+      Change the date string values in "YYYY-MM-DD" format.
+      E.g., Extend end date: `const END_DATE_STR = "2028-12-31";`
+
+   5. HOW TO ADD ANOTHER USER:
+      Step A: Locate `STARTING_WEIGHTS` around line 698. Add a new key and weight:
+              `const STARTING_WEIGHTS = { aman: 94.6, rishit: 92.7, newuser: 85.0 };`
+      Step B: Locate `initData()` around line 789. Copy & append a new user block:
+              `newuser: { workouts: {}, weights: { "2026-06-15": 85.0 }, notes: { general: "" }, measurements: {}, photos: {}, goalWeight: 75.0 }`
+      Step C: In `index.html` (Header Section), copy the tab button markup:
+              `<button id="tab-user-newuser" class="user-tab-btn" onclick="switchUser('newuser')">New User</button>`
+   ============================================================ */
+
+
+/* ============================================================
    11. INITIALIZATION ON LOAD
    ============================================================ */
 window.addEventListener("DOMContentLoaded", () => {
@@ -1651,7 +2663,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Draw initial page elements
   switchUser("aman"); // Default dashboard opens on Aman
-  switchPage("today");
+  switchPage("summary");
 
   // Register PWA Service Worker for offline support and quick loads
   if ("serviceWorker" in navigator) {
