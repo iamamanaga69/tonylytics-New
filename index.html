@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DuoGym" />
+  <meta name="description" content="DuoGym Tracker - Date-based personal gym tracking and exercise diary for Aman and Rishit." />
+  <meta name="author" content="DuoGym" />
+  <title>DuoGym Tracker</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="user-aman"> <!-- Default to Aman's styling -->
+
+  <!-- APP CONTAINER -->
+  <div class="app-layout">
+    
+    <!-- HEADER BAR -->
+    <header class="app-header">
+      <div class="header-logo">
+        <span class="logo-emoji">💪</span>
+        <div class="logo-text">
+          <h1>DuoGym</h1>
+          <p>Tracker & Diary</p>
+        </div>
+      </div>
+
+      <!-- User Tab Selector -->
+      <div class="user-tabs">
+        <button id="tab-user-aman" class="user-tab-btn active" onclick="switchUser('aman')">
+          <span class="user-avatar">A</span> Aman
+        </button>
+        <button id="tab-user-rishit" class="user-tab-btn" onclick="switchUser('rishit')">
+          <span class="user-avatar">R</span> Rishit
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN APP WRAPPER -->
+    <div class="app-body">
+      
+      <!-- NAVIGATION SIDEBAR -->
+      <aside class="app-sidebar">
+        <nav class="sidebar-nav">
+          <button id="nav-btn-today" class="nav-item active" onclick="switchPage('today')">
+            <i data-lucide="check-square"></i>
+            <span>Today's Check-In</span>
+          </button>
+          <button id="nav-btn-calendar" class="nav-item" onclick="switchPage('calendar')">
+            <i data-lucide="calendar"></i>
+            <span>Gym Calendar</span>
+          </button>
+          <button id="nav-btn-weights" class="nav-item" onclick="switchPage('weights')">
+            <i data-lucide="scale"></i>
+            <span>Weight Tracker</span>
+          </button>
+          <button id="nav-btn-library" class="nav-item" onclick="switchPage('library')">
+            <i data-lucide="book-open"></i>
+            <span>Exercise Library</span>
+          </button>
+          <button id="nav-btn-notes" class="nav-item" onclick="switchPage('notes')">
+            <i data-lucide="file-text"></i>
+            <span>Notes & Backup</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- MAIN CONTENT AREA -->
+      <main class="app-content">
+
+        <!-- 1. TODAY'S CHECK-IN PAGE -->
+        <section id="page-today" class="page-section active">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Daily Check-In</h2>
+              <p class="page-subtitle">Track your workout for the selected date</p>
+            </div>
+            
+            <!-- Date Navigator -->
+            <div class="date-navigator">
+              <button class="btn-icon" onclick="adjustDate(-1)" title="Previous Day">
+                <i data-lucide="chevron-left"></i>
+              </button>
+              <div class="date-display-wrapper">
+                <span id="checkin-date-text" class="date-text">Monday, 15 June 2026</span>
+                <input type="date" id="checkin-date-picker" class="date-picker-hidden" min="2026-06-15" max="2027-06-15" onchange="setDateFromPicker(this.value)">
+                <button class="btn-icon-subtle" onclick="triggerDatePicker()" title="Select Custom Date">
+                  <i data-lucide="calendar-days"></i>
+                </button>
+              </div>
+              <button class="btn-icon" onclick="adjustDate(1)" title="Next Day">
+                <i data-lucide="chevron-right"></i>
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="jumpToToday()">Today</button>
+            </div>
+          </div>
+
+          <!-- CHECK-IN GRID -->
+          <div class="dashboard-grid">
+            
+            <!-- Workout Card -->
+            <div class="glass-card workout-main-card">
+              <div class="workout-header">
+                <span id="workout-day-badge" class="badge">Monday Workout</span>
+                <h3 id="workout-name-text">Upper Body</h3>
+                <p id="workout-focus-text" class="workout-focus">Chest, Back & Arms</p>
+              </div>
+
+              <!-- Today's Progress -->
+              <div class="workout-progress-box">
+                <div class="progress-info">
+                  <span class="progress-title">Completion Progress</span>
+                  <span id="workout-progress-percent" class="progress-val">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div id="workout-progress-fill" class="progress-bar-fill" style="width: 0%"></div>
+                </div>
+                <p id="workout-count-text" class="progress-count-text">Completed: 0 of 0 exercises</p>
+              </div>
+
+              <!-- Exercise Checklist -->
+              <div id="checklist-container" class="checklist-items">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+
+            <!-- Notes & Reminders Side Panel -->
+            <div class="side-panel">
+              <!-- Today's Notes Card -->
+              <div class="glass-card notes-card">
+                <div class="card-header">
+                  <i data-lucide="pencil" class="header-icon"></i>
+                  <h4>Workout Notes</h4>
+                </div>
+                <textarea id="today-notes-input" placeholder="Enter notes for this date (e.g. increase weights, injury, energy levels...)" oninput="saveTodayNotes()"></textarea>
+                <div class="autosave-indicator">
+                  <i data-lucide="cloud-lightning"></i> Saved automatically
+                </div>
+              </div>
+
+              <!-- Daily Reminders -->
+              <div class="glass-card reminders-card">
+                <div class="card-header">
+                  <i data-lucide="bell" class="header-icon"></i>
+                  <h4>Daily Reminders</h4>
+                </div>
+                <ul class="reminders-list">
+                  <li>
+                    <span class="reminder-icon">💧</span>
+                    <div>
+                      <h5>Hydration</h5>
+                      <p>Drink 3–4 litres of water</p>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="reminder-icon">😴</span>
+                    <div>
+                      <h5>Sleep</h5>
+                      <p>Get 7–8 hours of quality sleep</p>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="reminder-icon">🚶</span>
+                    <div>
+                      <h5>Steps</h5>
+                      <p>Walk 8,000–10,000 steps</p>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="reminder-icon">⏱️</span>
+                    <div>
+                      <h5>Rest Intervals</h5>
+                      <p>Rest 60–90 seconds between sets</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- 2. GYM CALENDAR PAGE -->
+        <section id="page-calendar" class="page-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Gym Calendar</h2>
+              <p class="page-subtitle">Track consistency and review history (15 Jun 2026 - 15 Jun 2027)</p>
+            </div>
+            
+            <!-- Calendar Legend -->
+            <div class="calendar-legend">
+              <div class="legend-item"><span class="legend-dot status-completed">✓</span> Workout Done</div>
+              <div class="legend-item"><span class="legend-dot status-missed">○</span> Workout Missed</div>
+              <div class="legend-item"><span class="legend-dot status-rest">R</span> Rest Day</div>
+            </div>
+          </div>
+
+          <!-- Calendar Grid container -->
+          <div id="calendar-months-grid" class="months-grid">
+            <!-- Populated dynamically via JS: 13 months total -->
+          </div>
+        </section>
+
+        <!-- 3. WEIGHT TRACKER PAGE -->
+        <section id="page-weights" class="page-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Weight Tracker</h2>
+              <p class="page-subtitle">Log your weight and monitor progress over time</p>
+            </div>
+          </div>
+
+          <!-- Weight Dashboard Grid -->
+          <div class="weight-dashboard">
+            <!-- Stats -->
+            <div class="weight-stats">
+              <div class="glass-card stat-card">
+                <span class="stat-label">Starting Weight</span>
+                <span id="weight-stat-start" class="stat-val">94.6 kg</span>
+                <span class="stat-date">15 June 2026</span>
+              </div>
+              <div class="glass-card stat-card">
+                <span class="stat-label">Latest Weight</span>
+                <span id="weight-stat-latest" class="stat-val">-- kg</span>
+                <span id="weight-stat-latest-date" class="stat-date">--</span>
+              </div>
+              <div class="glass-card stat-card">
+                <span class="stat-label">Total Change</span>
+                <span id="weight-stat-change" class="stat-val">--</span>
+                <span class="stat-trend">Overall change</span>
+              </div>
+            </div>
+
+            <!-- Forms & History Layout -->
+            <div class="weight-grid-body">
+              
+              <!-- Log Weight Form -->
+              <div class="glass-card weight-form-card">
+                <div class="card-header">
+                  <i data-lucide="plus" class="header-icon"></i>
+                  <h4>Log Weight</h4>
+                </div>
+                <form id="weight-log-form" onsubmit="logNewWeight(event)">
+                  <div class="form-group">
+                    <label for="weight-input-val">Weight (kg)</label>
+                    <input type="number" step="0.1" id="weight-input-val" required placeholder="e.g. 93.5">
+                  </div>
+                  <div class="form-group">
+                    <label for="weight-input-date">Date</label>
+                    <input type="date" id="weight-input-date" required min="2026-06-15" max="2027-06-15">
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    <i data-lucide="save"></i> Save Weight Entry
+                  </button>
+                </form>
+              </div>
+
+              <!-- History Table -->
+              <div class="glass-card weight-history-card">
+                <div class="card-header">
+                  <i data-lucide="history" class="header-icon"></i>
+                  <h4>Weight History</h4>
+                </div>
+                <div class="table-wrapper">
+                  <table class="weight-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Weight</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="weight-history-tbody">
+                      <!-- Populated dynamically via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. EXERCISE LIBRARY PAGE -->
+        <section id="page-library" class="page-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Exercise Library</h2>
+              <p class="page-subtitle">Learn proper form, breathing cues, and safety tips</p>
+            </div>
+            
+            <!-- Search bar -->
+            <div class="search-bar">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="library-search-input" placeholder="Search by exercise name or muscle group..." oninput="filterLibrary()">
+            </div>
+          </div>
+
+          <!-- Library Grid -->
+          <div id="library-cards-grid" class="library-grid">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </section>
+
+        <!-- 5. NOTES & BACKUP PAGE -->
+        <section id="page-notes" class="page-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Notes & Backup</h2>
+              <p class="page-subtitle">Manage your personal logs and database archive</p>
+            </div>
+          </div>
+
+          <div class="notes-backup-grid">
+            
+            <!-- General Notes Card -->
+            <div class="glass-card general-notes-card">
+              <div class="card-header">
+                <i data-lucide="file-edit" class="header-icon"></i>
+                <h4>General Gym Notes</h4>
+              </div>
+              <p class="card-description">Write down goals, plans, reminders, or observations. These notes are unique to your profile.</p>
+              <textarea id="general-notes-input" placeholder="Write anything here... (e.g. increase Chest Press next month, left shoulder feels tight, supplements log...)" oninput="saveGeneralNotes()"></textarea>
+              <div class="autosave-indicator">
+                <i data-lucide="cloud-lightning"></i> Saved automatically
+              </div>
+            </div>
+
+            <!-- Backup Control Card -->
+            <div class="glass-card backup-card">
+              <div class="card-header">
+                <i data-lucide="database" class="header-icon"></i>
+                <h4>Backup System</h4>
+              </div>
+              <p class="card-description">Export your complete progress diary. You can save this backup file to your Google Drive to keep it secure.</p>
+              
+              <div class="backup-actions">
+                <button class="btn btn-primary" onclick="downloadBackup()">
+                  <i data-lucide="download"></i> Download Backup JSON
+                </button>
+                <div class="divider">or</div>
+                <button class="btn btn-secondary" onclick="triggerRestoreUpload()">
+                  <i data-lucide="upload"></i> Restore Backup File
+                </button>
+                <input type="file" id="backup-file-upload" style="display: none;" accept=".json" onchange="handleRestoreUpload(event)">
+              </div>
+
+              <div class="backup-instructions">
+                <h5>How to use Google Drive:</h5>
+                <ol>
+                  <li>Click <strong>Download Backup</strong> to save the JSON file locally.</li>
+                  <li>Upload the downloaded file into your Google Drive folder for safe-keeping.</li>
+                  <li>If changing devices or clearing browser cache, download it from Google Drive and use <strong>Restore Backup File</strong> to load all records.</li>
+                </ol>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- EXERCISE DETAILS MODAL -->
+  <div class="modal-overlay" id="exercise-modal" onclick="closeExerciseModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeExerciseModal()">
+        <i data-lucide="x"></i>
+      </button>
+      <div id="modal-exercise-body">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDAR CELL DETAIL MODAL -->
+  <div class="modal-overlay" id="calendar-day-modal" onclick="closeDayModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeDayModal()">
+        <i data-lucide="x"></i>
+      </button>
+      <div id="modal-day-body">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main script file -->
+  <script src="script.js"></script>
+  <script>
+    // Initialize icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
