@@ -1,0 +1,18 @@
+{
+  "name": "DuoGym Tracker",
+  "short_name": "DuoGym",
+  "description": "Date-based personal gym tracking and exercise diary for Aman and Rishit.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#070a13",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/861/861073.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

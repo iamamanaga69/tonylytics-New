@@ -1608,4 +1608,11 @@ window.addEventListener("DOMContentLoaded", () => {
   // Draw initial page elements
   switchUser("aman"); // Default dashboard opens on Aman
   switchPage("today");
+
+  // Register PWA Service Worker for offline support and quick loads
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js")
+      .then(() => console.log("Service Worker Registered"))
+      .catch(err => console.error("Service Worker registration failed:", err));
+  }
 });
