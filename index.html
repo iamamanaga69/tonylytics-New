@@ -127,36 +127,7 @@
     </div>
   </div>
 
-    <!-- Floating Stopwatch & Timer FAB -->
-  <button id="stopwatch-toggle-btn" class="fab-btn" onclick="toggleStopwatch()" title="Toggle Stopwatch" aria-label="Open stopwatch timer">
-    <i data-lucide="timer" style="width: 24px; height: 24px;"></i>
-  </button>
-
-  <!-- Floating Stopwatch Panel Overlay -->
-  <div id="stopwatch-overlay" class="stopwatch-panel" style="display: none;" role="dialog" aria-label="Workout Timer">
-    <div class="stopwatch-header">
-      <span style="display: flex; align-items: center; gap: 6px;">
-        <i data-lucide="timer" style="width: 14px; height: 14px; color: var(--accent);"></i>
-        Timer
-      </span>
-      <button class="btn-icon-subtle" onclick="toggleStopwatch()" title="Minimize" style="padding: 2px;">
-        <i data-lucide="minimize-2" style="width: 14px; height: 14px;"></i>
-      </button>
-    </div>
-    
-    <div class="stopwatch-time" id="sw-display">00:00.0</div>
-    
-    <div class="stopwatch-controls">
-      <button id="sw-start-btn" class="btn btn-primary btn-sm" onclick="startStopwatch()">Start</button>
-      <button id="sw-reset-btn" class="btn btn-secondary btn-sm" onclick="resetStopwatch()">Reset</button>
-    </div>
-    
-    <div class="stopwatch-presets">
-      <button class="preset-btn" onclick="startCountdown(30)">+30s</button>
-      <button class="preset-btn" onclick="startCountdown(60)">+60s</button>
-      <button class="preset-btn" onclick="startCountdown(90)">+90s</button>
-    </div>
-  </div>
+  <!-- Floating Stopwatch & Timer removed -->
 
   <!-- Exercise Info Modal Drawer -->
   <div id="exercise-info-modal" class="diet-modal-overlay" onclick="if(event.target === this) closeExerciseInfoModal()" role="dialog" aria-hidden="true" aria-labelledby="ex-modal-title">
