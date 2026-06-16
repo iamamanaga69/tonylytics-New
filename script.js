@@ -3134,10 +3134,10 @@ window.addEventListener("DOMContentLoaded", () => {
   // Detect WebView mode (running as native app)
   const isWebView = window.location.protocol === "file:" || window.location.href.includes("android_asset");
 
-  // Show Download App button if on web browser, hide if running inside native app WebView
+  // Show Download App button if on web browser, hide if running inside native app WebView or standalone PWA
   const downloadBtn = document.getElementById("download-app-btn");
   if (downloadBtn) {
-    if (isWebView) {
+    if (isWebView || isStandalone) {
       downloadBtn.style.display = "none";
     } else {
       downloadBtn.style.display = "flex";
