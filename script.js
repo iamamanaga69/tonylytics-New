@@ -823,6 +823,7 @@ function switchPage(pageId) {
 
 // Route rendering depending on active page state
 function updatePageContent() {
+  clearAllRunningTimers();
   if (activePage === "today") {
     renderCheckIn();
   } else if (activePage === "notes") {
@@ -933,6 +934,54 @@ function renderCheckIn() {
 
     row.appendChild(left);
 
+    // Inject inline timer container
+    const timerContainer = document.createElement("div");
+    timerContainer.className = "ex-timer-container";
+
+    const target = parseTargetSeconds(ex.reps);
+    let displayVal = formatTimerTime(target);
+    let isCounting = false;
+
+    const activeTimer = activeTimers[ex.exerciseId];
+    if (activeTimer) {
+      displayVal = formatTimerTime(activeTimer.remainingSeconds);
+      isCounting = (activeTimer.state === 'running');
+    }
+
+    const timerDisplay = document.createElement("span");
+    timerDisplay.className = "ex-timer-display";
+    timerDisplay.id = `timer-val-${ex.exerciseId}`;
+    
+    if (isChecked) {
+      timerDisplay.textContent = "DONE";
+      timerDisplay.classList.add("completed");
+    } else {
+      timerDisplay.textContent = displayVal;
+      if (isCounting) {
+        timerDisplay.classList.add("counting");
+      }
+    }
+
+    const timerBtn = document.createElement("button");
+    timerBtn.className = "btn-timer-play";
+    timerBtn.id = `timer-btn-${ex.exerciseId}`;
+    timerBtn.style.display = isChecked ? "none" : "flex";
+    
+    if (isCounting) {
+      timerBtn.innerHTML = `<i data-lucide="pause" style="width: 14px; height: 14px;"></i>`;
+    } else {
+      timerBtn.innerHTML = `<i data-lucide="play" style="width: 14px; height: 14px;"></i>`;
+    }
+    
+    timerBtn.onclick = (e) => {
+      e.stopPropagation(); // Prevent toggling the checklist row check state
+      toggleInlineTimer(ex.exerciseId, ex.reps);
+    };
+
+    timerContainer.appendChild(timerDisplay);
+    timerContainer.appendChild(timerBtn);
+    row.appendChild(timerContainer);
+
     // If exercise steps/instructions exist, show a small info (i) button
     if (exerciseInstructions[ex.exerciseId]) {
       const infoBtn = document.createElement("button");
@@ -970,8 +1019,22 @@ function toggleExerciseCheck(exerciseId) {
   if (index === -1) {
     record.completedExercises.push(exerciseId);
     playSuccessSound(); // Play motivational chime sound
+    
+    // Stop running timer if checked manually
+    const timer = activeTimers[exerciseId];
+    if (timer) {
+      if (timer.intervalId) clearInterval(timer.intervalId);
+      delete activeTimers[exerciseId];
+    }
   } else {
     record.completedExercises.splice(index, 1);
+    
+    // Stop running timer on uncheck
+    const timer = activeTimers[exerciseId];
+    if (timer) {
+      if (timer.intervalId) clearInterval(timer.intervalId);
+      delete activeTimers[exerciseId];
+    }
   }
 
   // Recalculate percentage
@@ -2867,6 +2930,149 @@ function startCountdown(seconds) {
   countdownEndTime = Date.now() + stopwatchTime;
   updateStopwatchDisplay();
   startStopwatch();
+}
+
+
+/* ============================================================
+   12.5 EXERCISE TIMERS LOGIC & STATE HELPERS
+   ============================================================ */
+let activeTimers = {}; // { exerciseId: { intervalId, remainingSeconds, targetSeconds, state } }
+
+function parseTargetSeconds(repsText) {
+  if (!repsText) return 60;
+  const text = repsText.toLowerCase();
+  
+  if (text.includes("min")) {
+    const matches = text.match(/\d+/g);
+    if (matches && matches.length > 0) {
+      const mins = Math.max(...matches.map(Number));
+      return mins * 60;
+    }
+  }
+  
+  if (text.includes("sec")) {
+    const matches = text.match(/\d+/g);
+    if (matches && matches.length > 0) {
+      const secs = Math.max(...matches.map(Number));
+      return secs;
+    }
+  }
+
+  if (text.includes("mobility") || text.includes("stretch") || text.includes("stretching") || text.includes("warm-up") || text.includes("cool-down")) {
+    return 300;
+  }
+  
+  return 60; // default rest/effort timer
+}
+
+function formatTimerTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function toggleInlineTimer(exerciseId, repsText) {
+  if (selectedDate > dateToYYYYMMDD(new Date())) {
+    alert("Cannot start timers for future dates.");
+    return;
+  }
+  
+  ensureDateRecord(currentUser, selectedDate);
+  const record = fitnessData[currentUser].workouts[selectedDate];
+  if (record.completedExercises.includes(exerciseId)) return;
+
+  let timer = activeTimers[exerciseId];
+  if (!timer) {
+    const target = parseTargetSeconds(repsText);
+    timer = {
+      intervalId: null,
+      remainingSeconds: target,
+      targetSeconds: target,
+      state: 'idle'
+    };
+    activeTimers[exerciseId] = timer;
+  }
+
+  // If starting this timer, pause any other running exercise timers first
+  if (timer.state !== 'running') {
+    Object.keys(activeTimers).forEach(id => {
+      if (id !== exerciseId && activeTimers[id].state === 'running') {
+        clearInterval(activeTimers[id].intervalId);
+        activeTimers[id].intervalId = null;
+        activeTimers[id].state = 'paused';
+        
+        const otherBtn = document.getElementById(`timer-btn-${id}`);
+        const otherDisplay = document.getElementById(`timer-val-${id}`);
+        if (otherBtn) otherBtn.innerHTML = `<i data-lucide="play" style="width: 14px; height: 14px;"></i>`;
+        if (otherDisplay) otherDisplay.classList.remove("counting");
+      }
+    });
+  }
+
+  const btn = document.getElementById(`timer-btn-${exerciseId}`);
+  const display = document.getElementById(`timer-val-${exerciseId}`);
+
+  if (timer.state === 'running') {
+    clearInterval(timer.intervalId);
+    timer.intervalId = null;
+    timer.state = 'paused';
+    if (btn) btn.innerHTML = `<i data-lucide="play" style="width: 14px; height: 14px;"></i>`;
+    if (display) display.classList.remove("counting");
+  } else {
+    timer.state = 'running';
+    if (btn) btn.innerHTML = `<i data-lucide="pause" style="width: 14px; height: 14px;"></i>`;
+    if (display) display.classList.add("counting");
+    
+    timer.intervalId = setInterval(() => {
+      timer.remainingSeconds--;
+      
+      const liveDisplay = document.getElementById(`timer-val-${exerciseId}`);
+      const liveBtn = document.getElementById(`timer-btn-${exerciseId}`);
+
+      if (liveDisplay) {
+        liveDisplay.textContent = formatTimerTime(timer.remainingSeconds);
+      }
+
+      if (timer.remainingSeconds <= 0) {
+        clearInterval(timer.intervalId);
+        timer.intervalId = null;
+        timer.state = 'completed';
+        
+        // Haptic feedback (vibration) for Android
+        if (navigator.vibrate) {
+          navigator.vibrate([200, 100, 200]);
+        }
+
+        // Auto check/complete exercise
+        const rec = fitnessData[currentUser].workouts[selectedDate];
+        if (!rec.completedExercises.includes(exerciseId)) {
+          toggleExerciseCheck(exerciseId);
+        }
+        
+        if (liveBtn) liveBtn.style.display = "none";
+        if (liveDisplay) {
+          liveDisplay.textContent = "DONE";
+          liveDisplay.classList.remove("counting");
+          liveDisplay.classList.add("completed");
+        }
+        
+        delete activeTimers[exerciseId];
+      }
+    }, 1000);
+  }
+  
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  }
+}
+
+function clearAllRunningTimers() {
+  Object.keys(activeTimers).forEach(id => {
+    if (activeTimers[id].intervalId) {
+      clearInterval(activeTimers[id].intervalId);
+    }
+  });
+  activeTimers = {};
 }
 
 
