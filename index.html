@@ -137,61 +137,19 @@
               <div id="checklist-container" class="checklist-items">
                 <!-- Populated dynamically via JS -->
               </div>
-            </div>
 
-            <!-- Notes & Reminders Side Panel -->
-            <div class="side-panel">
-              <!-- Today's Notes Card -->
-              <div class="glass-card notes-card">
-                <div class="card-header">
-                  <i data-lucide="pencil" class="header-icon"></i>
-                  <h4>Workout Notes</h4>
+              <!-- Integrated Slim Notes -->
+              <div class="workout-notes-integrated">
+                <div class="notes-header-slim">
+                  <i data-lucide="pencil" style="width: 12px; height: 12px; color: var(--accent);"></i>
+                  <span>Workout Notes</span>
                 </div>
-                <textarea id="today-notes-input" placeholder="Enter notes for this date (e.g. increase weights, injury, energy levels...)" oninput="saveTodayNotes()"></textarea>
+                <textarea id="today-notes-input" placeholder="Tap to write notes (e.g. weight, reps, feels...)" oninput="saveTodayNotes()"></textarea>
                 <div class="autosave-indicator">
-                  <i data-lucide="cloud-lightning"></i> Saved automatically
+                  <i data-lucide="cloud-lightning"></i> Auto-saved
                 </div>
-              </div>
-
-              <!-- Daily Reminders -->
-              <div class="glass-card reminders-card">
-                <div class="card-header">
-                  <i data-lucide="bell" class="header-icon"></i>
-                  <h4>Daily Reminders</h4>
-                </div>
-                <ul class="reminders-list">
-                  <li>
-                    <span class="reminder-icon">💧</span>
-                    <div>
-                      <h5>Hydration</h5>
-                      <p>Drink 3–4 litres of water</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="reminder-icon">😴</span>
-                    <div>
-                      <h5>Sleep</h5>
-                      <p>Get 7–8 hours of quality sleep</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="reminder-icon">🚶</span>
-                    <div>
-                      <h5>Steps</h5>
-                      <p>Walk 8,000–10,000 steps</p>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="reminder-icon">⏱️</span>
-                    <div>
-                      <h5>Rest Intervals</h5>
-                      <p>Rest 60–90 seconds between sets</p>
-                    </div>
-                  </li>
-                </ul>
               </div>
             </div>
-
           </div>
 
         </section>
