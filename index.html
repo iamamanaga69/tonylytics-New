@@ -59,20 +59,6 @@
     <!-- MAIN APP WRAPPER -->
     <div class="app-body">
       
-      <!-- NAVIGATION SIDEBAR -->
-      <aside class="app-sidebar">
-        <nav class="sidebar-nav">
-          <button id="nav-btn-today" class="nav-item active" onclick="switchPage('today')">
-            <i data-lucide="check-square"></i>
-            <span>Today's Check-In</span>
-          </button>
-          <!-- Diet Tracker disabled -->
-          <button id="nav-btn-notes" class="nav-item" onclick="switchPage('notes')">
-            <i data-lucide="database"></i>
-            <span>Backup Manager</span>
-          </button>
-        </nav>
-      </aside>
 
       <!-- MAIN CONTENT AREA -->
       <main class="app-content">
@@ -139,57 +125,40 @@
 
         </section>
 
-        <!-- 5. BACKUP MANAGER PAGE -->
-        <section id="page-notes" class="page-section">
-          <div class="page-header">
-            <div>
-              <h2 class="page-title">Backup Manager</h2>
-              <p class="page-subtitle">Manage your database archive and restore progress</p>
-            </div>
-          </div>
-
-          <div class="notes-backup-grid">
-            
-            <!-- Backup Control Card -->
-            <div class="glass-card backup-card">
-              <div class="card-header">
-                <i data-lucide="database" class="header-icon"></i>
-                <h4>Backup System</h4>
-              </div>
-              <p class="card-description">Export your complete progress and diet logs. You can share this backup directly to Google Drive, WhatsApp, or Email to keep it secure.</p>
-              
-              <div class="backup-actions">
-                <button class="btn btn-primary" onclick="shareBackupData()">
-                  <i data-lucide="share-2"></i> Share Backup Archive
-                </button>
-                <div class="divider">or</div>
-                <button class="btn btn-secondary" onclick="triggerRestoreUpload()">
-                  <i data-lucide="upload"></i> Restore Backup File
-                </button>
-                <input type="file" id="backup-file-upload" style="display: none;" accept=".json" onchange="handleRestoreUpload(event)">
-              </div>
-
-              <!-- Last Backup Date & Status Info -->
-              <div class="backup-status-row" style="margin: 16px 0; padding: 10px 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="info" id="backup-status-icon" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
-                <span id="last-backup-text" style="color: var(--text-sub);">Last Backup: <strong style="color: var(--text-main);">Never</strong></span>
-              </div>
-
-              <div class="backup-instructions">
-                <h5>How to Secure Your Data:</h5>
-                <ol>
-                  <li>Click <strong>Share Backup Archive</strong> to open your device's native share menu.</li>
-                  <li>Save the backup file to Google Drive, WhatsApp, or send it to yourself via Email.</li>
-                  <li>If changing devices or clearing browser cache, locate the file and click <strong>Restore Backup File</strong> to restore all logs.</li>
-                </ol>
-              </div>
-            </div>
-
-          </div>
-        </section>
 
 
       </main>
+    </div>
+  </div>
+
+    <!-- Floating Stopwatch & Timer FAB -->
+  <button id="stopwatch-toggle-btn" class="fab-btn" onclick="toggleStopwatch()" title="Toggle Stopwatch" aria-label="Open stopwatch timer">
+    <i data-lucide="timer" style="width: 24px; height: 24px;"></i>
+  </button>
+
+  <!-- Floating Stopwatch Panel Overlay -->
+  <div id="stopwatch-overlay" class="stopwatch-panel" style="display: none;" role="dialog" aria-label="Workout Timer">
+    <div class="stopwatch-header">
+      <span style="display: flex; align-items: center; gap: 6px;">
+        <i data-lucide="timer" style="width: 14px; height: 14px; color: var(--accent);"></i>
+        Timer
+      </span>
+      <button class="btn-icon-subtle" onclick="toggleStopwatch()" title="Minimize" style="padding: 2px;">
+        <i data-lucide="minimize-2" style="width: 14px; height: 14px;"></i>
+      </button>
+    </div>
+    
+    <div class="stopwatch-time" id="sw-display">00:00.0</div>
+    
+    <div class="stopwatch-controls">
+      <button id="sw-start-btn" class="btn btn-primary btn-sm" onclick="startStopwatch()">Start</button>
+      <button id="sw-reset-btn" class="btn btn-secondary btn-sm" onclick="resetStopwatch()">Reset</button>
+    </div>
+    
+    <div class="stopwatch-presets">
+      <button class="preset-btn" onclick="startCountdown(30)">+30s</button>
+      <button class="preset-btn" onclick="startCountdown(60)">+60s</button>
+      <button class="preset-btn" onclick="startCountdown(90)">+90s</button>
     </div>
   </div>
 

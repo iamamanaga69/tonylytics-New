@@ -795,12 +795,12 @@ function switchUser(user) {
   updatePageContent();
 }
 
-// Switch between page panels (Summary, Today, Notes, Diet)
+// Switch between page panels (Today only)
 function switchPage(pageId) {
   activePage = pageId;
 
   // Toggle active styling on navigation buttons
-  const navIds = ["summary", "today", "notes", "diet"];
+  const navIds = ["today"];
   navIds.forEach(id => {
     const btn = document.getElementById(`nav-btn-${id}`);
     if (btn) btn.classList.toggle("active", id === pageId);
@@ -2766,6 +2766,103 @@ function copyScheduleToToday() {
   }
 }
 
+/* ============================================================
+   11. STOPWATCH & REST TIMER UTILITIES
+   ============================================================ */
+let stopwatchInterval = null;
+let stopwatchTime = 0; // in milliseconds
+let stopwatchRunning = false;
+let isCountdown = false;
+let countdownEndTime = 0;
+
+function toggleStopwatch() {
+  const panel = document.getElementById("stopwatch-overlay");
+  if (!panel) return;
+  const isHidden = panel.style.display === "none";
+  panel.style.display = isHidden ? "flex" : "none";
+  
+  // Refresh icons inside the panel
+  lucide.createIcons();
+}
+
+function updateStopwatchDisplay() {
+  const display = document.getElementById("sw-display");
+  if (!display) return;
+  
+  let totalMs = stopwatchTime;
+  if (isCountdown) {
+    totalMs = Math.max(0, countdownEndTime - Date.now());
+    if (totalMs === 0) {
+      stopStopwatch();
+      playSuccessSound();
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }
+  }
+
+  const mins = Math.floor(totalMs / 60000);
+  const secs = Math.floor((totalMs % 60000) / 1000);
+  const tenths = Math.floor((totalMs % 1000) / 100);
+
+  display.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}.${tenths}`;
+}
+
+function startStopwatch() {
+  const startBtn = document.getElementById("sw-start-btn");
+  if (!startBtn) return;
+
+  if (stopwatchRunning) {
+    stopStopwatch();
+  } else {
+    stopwatchRunning = true;
+    startBtn.textContent = "Pause";
+    startBtn.classList.replace("btn-primary", "btn-danger");
+    
+    if (isCountdown) {
+      countdownEndTime = Date.now() + stopwatchTime;
+    }
+    
+    const startTime = Date.now() - (isCountdown ? 0 : stopwatchTime);
+    
+    stopwatchInterval = setInterval(() => {
+      if (isCountdown) {
+        stopwatchTime = Math.max(0, countdownEndTime - Date.now());
+        updateStopwatchDisplay();
+      } else {
+        stopwatchTime = Date.now() - startTime;
+        updateStopwatchDisplay();
+      }
+    }, 100);
+  }
+}
+
+function stopStopwatch() {
+  stopwatchRunning = false;
+  const startBtn = document.getElementById("sw-start-btn");
+  if (startBtn) {
+    startBtn.textContent = "Start";
+    startBtn.classList.replace("btn-danger", "btn-primary");
+  }
+  if (stopwatchInterval) {
+    clearInterval(stopwatchInterval);
+    stopwatchInterval = null;
+  }
+}
+
+function resetStopwatch() {
+  stopStopwatch();
+  stopwatchTime = 0;
+  isCountdown = false;
+  updateStopwatchDisplay();
+}
+
+function startCountdown(seconds) {
+  stopStopwatch();
+  isCountdown = true;
+  stopwatchTime = seconds * 1000;
+  countdownEndTime = Date.now() + stopwatchTime;
+  updateStopwatchDisplay();
+  startStopwatch();
+}
 
 
 /* ============================================================
