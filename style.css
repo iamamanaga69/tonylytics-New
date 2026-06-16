@@ -324,6 +324,7 @@ body.user-rishit .install-btn {
   flex: 1;
   padding: 24px 32px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.01) 0%, rgba(7, 10, 19, 0) 100%), var(--bg-dark);
 }
 
@@ -1683,8 +1684,7 @@ body.user-rishit .filter-pill.active {
 
   .app-content {
     padding: 14px;
-    /* Account for height of header (70px) + bottom nav (approx 62px) */
-    height: calc(100dvh - 132px);
+    height: auto;
   }
 
   .dashboard-grid {
