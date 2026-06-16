@@ -1694,7 +1694,8 @@ body.user-rishit .filter-pill.active {
 
   .app-content {
     padding: 14px;
-    height: auto;
+    padding-bottom: 60px;
+    height: 100%;
   }
 
   .dashboard-grid {
