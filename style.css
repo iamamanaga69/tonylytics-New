@@ -18,8 +18,8 @@
 :root {
   /* Common Colors: Pure Pitch Black & Clean Charcoal (no bloated navy/blue) */
   --bg-dark: #040406;
-  --bg-card: rgba(15, 15, 20, 0.7);
-  --bg-card-hover: rgba(22, 22, 28, 0.85);
+  --bg-card: rgba(18, 18, 24, 0.95);
+  --bg-card-hover: rgba(26, 26, 34, 0.95);
   --bg-modal: #08080a;
   --border-color: rgba(255, 255, 255, 0.05);
   --border-hover: rgba(255, 255, 255, 0.12);
@@ -364,13 +364,14 @@ body.user-rishit .install-btn {
 /* 4. GLASS CARDS & UI BASE COMPONENTS */
 .glass-card {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 20px;
   box-shadow: var(--shadow-lg);
   transition: var(--transition);
+  /* Hardware accelerate for battery efficiency */
+  transform: translateZ(0);
+  will-change: transform, opacity;
 }
 
 .glass-card:hover {

@@ -2531,6 +2531,11 @@ function playSuccessSound() {
     
     osc2.start(ctx.currentTime + 0.08);
     osc2.stop(ctx.currentTime + 0.3);
+
+    // Auto-close AudioContext to free hardware resources and save battery
+    setTimeout(() => {
+      ctx.close().catch(err => console.warn("Error closing AudioContext:", err));
+    }, 400);
   } catch (e) {
     console.warn("Web Audio API not supported or allowed yet:", e);
   }
