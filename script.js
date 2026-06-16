@@ -784,12 +784,17 @@ function ensureDateRecord(user, dateStr) {
 function switchUser(user) {
   currentUser = user;
   
+  // Save selected user to localStorage
+  localStorage.setItem("duogym_selected_user", user);
+  
   // Update body css class for accent colors
   document.body.className = `user-${user}`;
 
   // Update tabs DOM classes
-  document.getElementById("tab-user-aman").classList.toggle("active", user === "aman");
-  document.getElementById("tab-user-rishit").classList.toggle("active", user === "rishit");
+  const tabAman = document.getElementById("tab-user-aman");
+  const tabRishit = document.getElementById("tab-user-rishit");
+  if (tabAman) tabAman.classList.toggle("active", user === "aman");
+  if (tabRishit) tabRishit.classList.toggle("active", user === "rishit");
 
   // Re-render the active page elements
   updatePageContent();
@@ -2882,9 +2887,23 @@ window.addEventListener("DOMContentLoaded", () => {
     selectedDate = START_DATE_STR;
   }
 
+  // Detect standalone PWA mode
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+  // Load last selected user preference (default to "aman")
+  const savedUser = localStorage.getItem("duogym_selected_user") || "aman";
+
   // Draw initial page elements
-  switchUser("aman"); // Default dashboard opens on Aman
+  switchUser(savedUser);
   switchPage("today");
+
+  // If running as an installed standalone app, lock the profile and hide user tabs to reduce distraction
+  if (isStandalone) {
+    const switcher = document.querySelector(".user-tabs");
+    if (switcher) {
+      switcher.style.display = "none";
+    }
+  }
 
   // Register PWA Service Worker for offline support and quick loads
   if ("serviceWorker" in navigator) {
