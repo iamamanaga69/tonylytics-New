@@ -2370,3 +2370,46 @@ body.user-rishit .filter-pill.active {
   0% { opacity: 0.75; }
   100% { opacity: 1; }
 }
+
+/* WORKOUT BANNER IMAGE OVERLAY */
+.workout-banner {
+  position: relative;
+  height: 120px;
+  background-image: url('gym_motivation_banner.png');
+  background-size: cover;
+  background-position: center;
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  margin: -24px -24px 20px -24px; /* offset the workout-main-card 24px padding */
+}
+
+.workout-banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(4, 4, 6, 0.95) 0%, rgba(4, 4, 6, 0.2) 70%, rgba(4, 4, 6, 0.5) 100%);
+  z-index: 1;
+}
+
+.workout-banner-quote {
+  position: relative;
+  z-index: 2;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.75px;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  text-transform: uppercase;
+}
+
+/* Enhancing Logo shadow */
+.logo-emoji {
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent-shadow);
+}

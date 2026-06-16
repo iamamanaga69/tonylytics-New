@@ -843,6 +843,30 @@ function renderCheckIn() {
   const record = fitnessData[currentUser].workouts[selectedDate];
   const workout = getWorkoutForDate(selectedDate);
 
+  // Dynamic stable motivational quote selector
+  const quotes = [
+    "NO EXCUSES. PURE HUSTLE.",
+    "CRUSH YOUR GOALS TODAY.",
+    "FAT VIBE GONE. SHRED TIME.",
+    "SWEAT IS JUST FAT CRYING.",
+    "THE ONLY BAD WORKOUT IS THE ONE THAT DIDN'T HAPPEN.",
+    "HUSTLE FOR THAT MUSCLE.",
+    "DISCIPLINE OUTLASTS MOTIVATION.",
+    "BE BETTER THAN YOU WERE YESTERDAY.",
+    "CHAMPIONS TRAIN, LOAFERS COMPLAIN.",
+    "PAIN IS WEAKNESS LEAVING THE BODY."
+  ];
+  let charSum = 0;
+  for (let i = 0; i < selectedDate.length; i++) {
+    charSum += selectedDate.charCodeAt(i);
+  }
+  const quoteIndex = charSum % quotes.length;
+  const quoteText = quotes[quoteIndex];
+  const quoteEl = document.getElementById("workout-banner-quote");
+  if (quoteEl) {
+    quoteEl.textContent = quoteText;
+  }
+
   // Set date text in navigator
   document.getElementById("checkin-date-text").textContent = formatDateLong(selectedDate);
   document.getElementById("checkin-date-picker").value = selectedDate;

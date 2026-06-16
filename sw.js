@@ -1,10 +1,11 @@
-const CACHE_NAME = "duogym-cache-v10";
+const CACHE_NAME = "duogym-cache-v11";
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
   "./manifest.json",
+  "./gym_motivation_banner.png",
   "https://unpkg.com/lucide@latest",
   "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
 ];
