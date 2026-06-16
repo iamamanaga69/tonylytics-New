@@ -2057,6 +2057,7 @@ function ensureDietDateRecord(data, dateStr) {
 
 // Main page switch renderer entry point
 function renderDietTracker() {
+  if (activePage !== "diet") return;
   if (!selectedDietDate) {
     selectedDietDate = selectedDate; // Sync with calendar date context
   }
