@@ -62,11 +62,7 @@
       <!-- NAVIGATION SIDEBAR -->
       <aside class="app-sidebar">
         <nav class="sidebar-nav">
-          <button id="nav-btn-summary" class="nav-item active" onclick="switchPage('summary')">
-            <i data-lucide="layout-dashboard"></i>
-            <span>Summary Dashboard</span>
-          </button>
-          <button id="nav-btn-today" class="nav-item" onclick="switchPage('today')">
+          <button id="nav-btn-today" class="nav-item active" onclick="switchPage('today')">
             <i data-lucide="check-square"></i>
             <span>Today's Check-In</span>
           </button>
@@ -84,41 +80,8 @@
       <!-- MAIN CONTENT AREA -->
       <main class="app-content">
 
-        <!-- 0. SUMMARY DASHBOARD PAGE -->
-        <section id="page-summary" class="page-section active">
-          <div class="page-header">
-            <div>
-              <h2 class="page-title">Summary Dashboard</h2>
-              <p class="page-subtitle">Your gym performance and progress overview</p>
-            </div>
-          </div>
-          
-          <div class="dashboard-grid">
-            <div class="glass-card stat-card">
-              <span class="stat-label">Current Streak</span>
-              <span id="summary-current-streak" class="stat-val">0 Days</span>
-              <span class="stat-trend" id="summary-current-streak-trend">Keep it up! 🔥</span>
-            </div>
-            <div class="glass-card stat-card">
-              <span class="stat-label">Best Streak</span>
-              <span id="summary-best-streak" class="stat-val">0 Days</span>
-              <span class="stat-trend">All-time record 🏆</span>
-            </div>
-            <div class="glass-card stat-card">
-              <span class="stat-label">Completion %</span>
-              <span id="summary-completion-percent" class="stat-val">0%</span>
-              <span id="summary-completion-ratio" class="stat-trend">Completed: 0 of 0</span>
-            </div>
-            <div class="glass-card stat-card">
-              <span class="stat-label">Workouts Logged</span>
-              <span id="summary-total-completed" class="stat-val">0</span>
-              <span id="summary-total-missed" class="stat-trend">Missed: 0</span>
-            </div>
-          </div>
-        </section>
-
         <!-- 1. TODAY'S CHECK-IN PAGE -->
-        <section id="page-today" class="page-section">
+        <section id="page-today" class="page-section active">
           <div class="page-header">
             <div>
               <h2 class="page-title">Daily Check-In</h2>
@@ -709,7 +672,38 @@
     </div>
   </div>
 
-
+  <!-- Exercise Info Modal Drawer -->
+  <div id="exercise-info-modal" class="diet-modal-overlay" onclick="if(event.target === this) closeExerciseInfoModal()" role="dialog" aria-hidden="true" aria-labelledby="ex-modal-title">
+    <div class="diet-modal-card" style="max-height: 80vh;">
+      <div class="diet-modal-drag"></div>
+      <div class="diet-modal-header">
+        <h4 id="ex-modal-title" style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px;">
+          <i data-lucide="info" style="color: var(--accent); width: 18px; height: 18px;"></i>
+          Exercise Steps
+        </h4>
+        <button class="diet-modal-close-btn" onclick="closeExerciseInfoModal()" title="Close dialog" aria-label="Close details dialog">
+          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+      <div style="overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 14px;">
+        <h3 id="ex-modal-name" style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">Push-ups</h3>
+        
+        <div>
+          <h5 style="font-size: 11px; text-transform: uppercase; color: var(--accent); font-weight: 700; letter-spacing: 0.5px; margin: 0 0 6px 0;">How to Perform</h5>
+          <ol id="ex-modal-steps" style="font-size: 13px; color: var(--text-sub); padding-left: 16px; line-height: 1.6; display: flex; flex-direction: column; gap: 6px; margin: 0;">
+            <!-- Populated dynamically -->
+          </ol>
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px;">
+          <h5 style="font-size: 11px; text-transform: uppercase; color: var(--success); font-weight: 700; letter-spacing: 0.5px; margin: 0 0 6px 0; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="sparkles" style="width: 12px; height: 12px;"></i> Pro Tips
+          </h5>
+          <p id="ex-modal-tips" style="font-size: 12px; color: var(--text-sub); line-height: 1.5; margin: 0;"></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Main script file -->
   <script src="script.js"></script>

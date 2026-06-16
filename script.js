@@ -44,7 +44,363 @@
 /* ============================================================
    2. EXERCISE DATABASE (exerciseLibrary)
    ============================================================ */
-const exerciseLibrary = [];
+const exerciseInstructions = {
+  "warm-up": {
+    name: "Warm-Up Routine",
+    steps: [
+      "Light treadmill walking or cycling for 5 minutes.",
+      "Dynamic stretches: arm circles, leg swings, hip openers.",
+      "Keep movement light to warm joints and raise heart rate."
+    ],
+    tips: "Do not perform static stretching before lifting; keep movements dynamic."
+  },
+  "push-ups": {
+    name: "Push-ups",
+    steps: [
+      "Start in a plank position with hands slightly wider than shoulders.",
+      "Lower chest towards the floor, keeping elbows at a 45-degree angle.",
+      "Push straight back up to full extension."
+    ],
+    tips: "Ensure core and glutes are fully engaged. Don't let hips sag."
+  },
+  "db-bench-press": {
+    name: "Dumbbell Bench Press",
+    steps: [
+      "Lie flat on bench, hold dumbbells at chest level.",
+      "Press dumbbells straight up, keeping wrists aligned.",
+      "Lower dumbbells slowly until elbows are just past 90 degrees."
+    ],
+    tips: "Squeeze shoulder blades together and keep feet flat on the floor."
+  },
+  "incline-db-press": {
+    name: "Incline Dumbbell Press",
+    steps: [
+      "Set bench to 30-45 degrees, lie back with dumbbells.",
+      "Press dumbbells straight up above upper chest.",
+      "Lower the weights slowly to shoulder level."
+    ],
+    tips: "Focus on upper chest contraction. Avoid flaring elbows out."
+  },
+  "chest-fly": {
+    name: "Chest Fly",
+    steps: [
+      "Lie on flat bench, dumbbells extended above chest.",
+      "Lower weights out to the sides in a wide arc.",
+      "Squeeze chest to return weights back to center."
+    ],
+    tips: "Keep a slight, static bend in your elbows. Stretch, don't press."
+  },
+  "tricep-pushdown": {
+    name: "Tricep Pushdown",
+    steps: [
+      "Stand facing cable, grab attachment with overhand grip.",
+      "Push cable down extending arms fully.",
+      "Slowly return to start, flexing elbow to 90 degrees."
+    ],
+    tips: "Keep elbows pinned to your ribs throughout the movement."
+  },
+  "overhead-tricep-ext": {
+    name: "Overhead Dumbbell Tricep Extension",
+    steps: [
+      "Hold dumbbell overhead with both hands.",
+      "Lower the weight behind head by bending elbows.",
+      "Extend elbows to press dumbbells back overhead."
+    ],
+    tips: "Keep elbows close to head and pointing forward, not flared out."
+  },
+  "incline-walk": {
+    name: "Incline Treadmill Walk",
+    steps: [
+      "Set treadmill incline to 5-10%.",
+      "Walk at a steady, brisk pace (3.0-3.5 mph).",
+      "Pump arms naturally to support breathing."
+    ],
+    tips: "Avoid holding onto handrails; let your core and legs support you."
+  },
+  "cool-down": {
+    name: "Cool-Down Routine",
+    steps: [
+      "Perform gentle static stretches for chest, back, and hamstrings.",
+      "Hold each stretch for 20-30 seconds without bouncing.",
+      "Focus on slow deep breathing to lower heart rate."
+    ],
+    tips: "Static stretching is perfect here to improve flexibility and recovery."
+  },
+  "lat-pulldown": {
+    name: "Lat Pulldown",
+    steps: [
+      "Grip pulldown bar wider than shoulder-width.",
+      "Pull bar down to upper chest, leading with elbows.",
+      "Slowly return bar back to start with control."
+    ],
+    tips: "Pull from your elbows, squeeze shoulder blades down and back."
+  },
+  "db-row": {
+    name: "One-Arm Dumbbell Row",
+    steps: [
+      "Place one knee and hand on flat bench, hold dumbbell in other hand.",
+      "Pull dumbbell up to hip level, leading with elbow.",
+      "Lower dumbbell straight down under control."
+    ],
+    tips: "Keep back flat and neck neutral. Pull towards your hip, not chest."
+  },
+  "seated-row": {
+    name: "Seated Cable Row",
+    steps: [
+      "Sit at rowing station, grip handle attachment.",
+      "Pull attachment to lower stomach, keeping spine straight.",
+      "Slowly return arms back to straight start position."
+    ],
+    tips: "Squeeze shoulder blades at contraction; do not use torso momentum."
+  },
+  "face-pulls": {
+    name: "Face Pulls",
+    steps: [
+      "Grip rope attachment at chest height, step back.",
+      "Pull rope towards forehead, separating hands.",
+      "Hold briefly, feeling contraction in upper back."
+    ],
+    tips: "Keep chest up and elbows flared high. Great for rear delts and posture."
+  },
+  "rear-delt-fly": {
+    name: "Rear Delt Fly",
+    steps: [
+      "Sit on edge of bench, hinge forward from hips.",
+      "Raise dumbbells out to sides, keeping slight elbow bend.",
+      "Lower weights back down slowly."
+    ],
+    tips: "Focus on upper back contraction. Avoid using momentum."
+  },
+  "db-curl": {
+    name: "Dumbbell Curl",
+    steps: [
+      "Hold dumbbells at sides, palms facing in.",
+      "Curl weights up while rotating palms to face forward.",
+      "Lower dumbbells back to sides with control."
+    ],
+    tips: "Keep elbows locked close to your sides throughout the curl."
+  },
+  "hammer-curl": {
+    name: "Hammer Curl",
+    steps: [
+      "Hold dumbbells at sides with palms facing in.",
+      "Curl weights up, keeping palms facing in (neutral grip).",
+      "Lower dumbbells back down slowly."
+    ],
+    tips: "Keep wrists straight and do not swing the body."
+  },
+  "walking-cycling": {
+    name: "Brisk Walk or Cycling",
+    steps: [
+      "Walk briskly outdoors/treadmill or cycle at moderate pace.",
+      "Maintain active recovery breathing."
+    ],
+    tips: "Recovery-focused cardio. Keep effort level moderate."
+  },
+  "goblet-squat": {
+    name: "Goblet Squat",
+    steps: [
+      "Hold dumbbell vertically against chest.",
+      "Squat down until thighs are parallel to floor.",
+      "Push through heels to return to standing position."
+    ],
+    tips: "Keep your chest up and weight on your heels. Avoid knee valgus."
+  },
+  "leg-press": {
+    name: "Leg Press",
+    steps: [
+      "Sit in machine, place feet shoulder-width on platform.",
+      "Lower platform until knees are bent to 90 degrees.",
+      "Push platform away extending legs."
+    ],
+    tips: "Do not lock out your knees at the top. Keep feet flat."
+  },
+  "walking-lunges": {
+    name: "Walking Lunges",
+    steps: [
+      "Step forward and lower hips until back knee is near floor.",
+      "Drive through front heel to step forward into next lunge.",
+      "Alternate legs continuously."
+    ],
+    tips: "Keep front knee tracked over ankle. Maintain upright posture."
+  },
+  "romanian-deadlift": {
+    name: "Romanian Deadlift",
+    steps: [
+      "Stand holding weights in front of thighs.",
+      "Hinge hips back, lowering weights down along shins.",
+      "Squeeze glutes and hamstrings to return to upright."
+    ],
+    tips: "Keep back flat and neck neutral. Hinge hips, do not squat."
+  },
+  "leg-curl": {
+    name: "Leg Curl",
+    steps: [
+      "Position roller pad behind ankles.",
+      "Curl heels towards glutes contracting hamstrings.",
+      "Slowly return pad back to starting position."
+    ],
+    tips: "Keep hips pressed flat against the pad. Control the eccentric phase."
+  },
+  "calf-raise": {
+    name: "Calf Raises",
+    steps: [
+      "Stand on edge of platform on balls of feet.",
+      "Raise up on toes as high as possible.",
+      "Lower heels down below platform level."
+    ],
+    tips: "Hold the bottom stretch for 1 second and the top squeeze for 1 second."
+  },
+  "plank": {
+    name: "Plank",
+    steps: [
+      "Rest forearms on floor, extend legs behind.",
+      "Hold body in a straight line parallel to floor.",
+      "Engage core and hold position."
+    ],
+    tips: "Breathe continuously. Squeeze glutes and core to protect lower back."
+  },
+  "leg-raises": {
+    name: "Leg Raises",
+    steps: [
+      "Lie on back, hands under glutes.",
+      "Raise legs straight up until vertical.",
+      "Lower legs back down slowly, keeping back flat."
+    ],
+    tips: "Do not let lower back arch off the floor as you lower legs."
+  },
+  "db-shoulder-press": {
+    name: "Dumbbell Shoulder Press",
+    steps: [
+      "Hold dumbbells at shoulder level, elbows bent.",
+      "Press weights straight up overhead.",
+      "Lower dumbbells back to shoulders under control."
+    ],
+    tips: "Keep wrists stacked directly over elbows. Engage core."
+  },
+  "lateral-raises": {
+    name: "Lateral Raises",
+    steps: [
+      "Hold dumbbells at sides.",
+      "Raise arms out to sides with a slight elbow bend.",
+      "Lower dumbbells back to sides slowly."
+    ],
+    tips: "Lead with elbows. Tilt weights slightly forward at top."
+  },
+  "front-raises": {
+    name: "Front Raises",
+    steps: [
+      "Hold dumbbells in front of thighs.",
+      "Raise weights straight forward to shoulder height.",
+      "Lower back down slowly."
+    ],
+    tips: "Minimize body swing. Control the movement."
+  },
+  "upright-row": {
+    name: "Upright Row",
+    steps: [
+      "Hold weights in front of thighs.",
+      "Pull weights up to chest level, leading with elbows.",
+      "Lower weights back down slowly."
+    ],
+    tips: "Keep weights close to body. Keep elbows higher than wrists."
+  },
+  "shrugs": {
+    name: "Shrugs",
+    steps: [
+      "Hold dumbbells at sides.",
+      "Elevate shoulders straight up towards ears.",
+      "Hold briefly, then lower slowly."
+    ],
+    tips: "Do not roll your shoulders. Move straight up and down."
+  },
+  "dead-bug": {
+    name: "Dead Bug",
+    steps: [
+      "Lie on back, arms pointing up, knees bent at 90 degrees.",
+      "Lower opposite arm and leg toward floor slowly.",
+      "Return to start, then repeat on opposite side."
+    ],
+    tips: "Press lower back flat against floor. Do not let lower back arch."
+  },
+  "side-plank": {
+    name: "Side Plank",
+    steps: [
+      "Lie on side, prop torso on elbow.",
+      "Raise hips until body is straight.",
+      "Hold position while breathing steadily."
+    ],
+    tips: "Keep elbow directly under shoulder. Hips stacked and high."
+  },
+  "squat-variation": {
+    name: "Squat Variation",
+    steps: [
+      "Stand with feet shoulder-width.",
+      "Lower hips back and down like sitting in a chair.",
+      "Drive through heels to stand back up."
+    ],
+    tips: "Keep chest up and knees aligned with toes."
+  },
+  "hip-thrust": {
+    name: "Hip Thrust",
+    steps: [
+      "Upper back on bench, barbell or weight on hips.",
+      "Drive through heels to raise hips flat.",
+      "Lower hips down under control."
+    ],
+    tips: "Tuck chin, squeeze glutes at the top."
+  },
+  "leg-extension": {
+    name: "Leg Extension",
+    steps: [
+      "Position ankles behind roller pad.",
+      "Extend legs straight out, contracting thighs.",
+      "Lower pad slowly back to start."
+    ],
+    tips: "Squeeze quads at top. Maintain flat back on seat."
+  },
+  "rope-tricep-pushdown": {
+    name: "Rope Tricep Pushdown",
+    steps: [
+      "Hold rope ends, elbows locked at sides.",
+      "Push down, separating rope ends at bottom.",
+      "Return slowly to start."
+    ],
+    tips: "Flex triceps hard at bottom lock-out."
+  },
+  "cycling-treadmill": {
+    name: "Cycling or Incline treadmill",
+    steps: [
+      "Cycle at moderate resistance or walk on incline.",
+      "Maintain active recovery heart rate."
+    ],
+    tips: "A good aerobic burn session to wrap up."
+  },
+  "walking": {
+    name: "Recovery Walk",
+    steps: [
+      "Walk at comfortable pace outdoors or on treadmill.",
+      "Support blood flow and active recovery."
+    ],
+    tips: "Low intensity walk to enhance recovery."
+  },
+  "light-stretching": {
+    name: "Light stretching",
+    steps: [
+      "Static stretches focusing on major muscles.",
+      "Do not stretch to the point of pain."
+    ],
+    tips: "Perfect for flexibility and relaxation."
+  },
+  "mobility-work": {
+    name: "Mobility work",
+    steps: [
+      "Dynamic movements: hip openers, cat-cow, thoracic twists.",
+      "Work through active joint ranges of motion."
+    ],
+    tips: "Improves joint health and ease of movement."
+  }
+};
 
 /* ============================================================
    3. WEEKLY WORKOUT SCHEDULE (weeklySchedule)
@@ -52,86 +408,117 @@ const exerciseLibrary = [];
 const weeklySchedule = [
   {
     day: "Monday",
-    type: "Upper Body",
-    focus: "Chest, Back & Arms",
+    type: "Chest + Triceps",
+    focus: "Build chest shape, pushing strength, arm size",
     exercises: [
-      { name: "Warm-Up: Treadmill Walk", sets: "", reps: "5 Minutes", exerciseId: "incline-treadmill" },
-      { name: "Chest Press Machine",     sets: "3", reps: "12",        exerciseId: "chest-press" },
-      { name: "Lat Pulldown",            sets: "3", reps: "12",        exerciseId: "lat-pulldown" },
-      { name: "Seated Cable Row",        sets: "3", reps: "12",        exerciseId: "seated-cable-row" },
-      { name: "Shoulder Press Machine",  sets: "3", reps: "12",        exerciseId: "shoulder-press" },
-      { name: "Bicep Curl Machine",      sets: "2", reps: "12",        exerciseId: "bicep-curl" },
-      { name: "Tricep Pushdown",         sets: "2", reps: "12",        exerciseId: "tricep-pushdown" },
-      { name: "Stretching",             sets: "",  reps: "5 Minutes",  exerciseId: "full-body-stretching" }
+      { name: "Warm-Up (8-10 min)", sets: "", reps: "Stretch & Mobility", exerciseId: "warm-up" },
+      { name: "Push-ups", sets: "3", reps: "8-12", exerciseId: "push-ups" },
+      { name: "Dumbbell Bench Press", sets: "4", reps: "8-10", exerciseId: "db-bench-press" },
+      { name: "Incline Dumbbell Press", sets: "3", reps: "10", exerciseId: "incline-db-press" },
+      { name: "Chest Fly", sets: "3", reps: "12", exerciseId: "chest-fly" },
+      { name: "Tricep Pushdown", sets: "3", reps: "12", exerciseId: "tricep-pushdown" },
+      { name: "Overhead Dumbbell Tricep Extension", sets: "3", reps: "10-12", exerciseId: "overhead-tricep-ext" },
+      { name: "Incline Treadmill Walk (Cardio)", sets: "", reps: "15-20 Min", exerciseId: "incline-walk" },
+      { name: "Cool-Down (3-5 min)", sets: "", reps: "Static Stretching", exerciseId: "cool-down" }
     ]
   },
   {
     day: "Tuesday",
-    type: "Cardio & Mobility",
-    focus: "Heart Health & Flexibility",
+    type: "Back + Biceps + Rear Delts",
+    focus: "Improve posture, width, and pulling strength",
     exercises: [
-      { name: "Incline Treadmill Walk", sets: "",  reps: "20 Minutes", exerciseId: "incline-treadmill" },
-      { name: "Cycling",                sets: "",  reps: "15 Minutes", exerciseId: "cycling" },
-      { name: "Hamstring Stretch",      sets: "2", reps: "30 sec",     exerciseId: "hamstring-stretch" },
-      { name: "Quad Stretch",           sets: "2", reps: "30 sec",     exerciseId: "quad-stretch" },
-      { name: "Shoulder Stretch",       sets: "2", reps: "30 sec",     exerciseId: "shoulder-stretch" }
+      { name: "Warm-Up (8-10 min)", sets: "", reps: "Stretch & Mobility", exerciseId: "warm-up" },
+      { name: "Lat Pulldown", sets: "4", reps: "10", exerciseId: "lat-pulldown" },
+      { name: "One-Arm Dumbbell Row", sets: "3", reps: "10 each", exerciseId: "db-row" },
+      { name: "Seated Cable Row", sets: "3", reps: "10", exerciseId: "seated-row" },
+      { name: "Face Pulls", sets: "3", reps: "15", exerciseId: "face-pulls" },
+      { name: "Rear Delt Fly", sets: "3", reps: "12-15", exerciseId: "rear-delt-fly" },
+      { name: "Dumbbell Curl", sets: "3", reps: "12", exerciseId: "db-curl" },
+      { name: "Hammer Curl", sets: "3", reps: "10-12", exerciseId: "hammer-curl" },
+      { name: "Brisk Walk or Cycling (Cardio)", sets: "", reps: "15 Min", exerciseId: "walking-cycling" },
+      { name: "Cool-Down (3-5 min)", sets: "", reps: "Static Stretching", exerciseId: "cool-down" }
     ]
   },
   {
     day: "Wednesday",
-    type: "Lower Body",
-    focus: "Legs & Core",
+    type: "Legs + Calves + Core",
+    focus: "Fat burning, lower-body strength, better balance",
     exercises: [
-      { name: "Leg Press",           sets: "3", reps: "12",     exerciseId: "leg-press" },
-      { name: "Leg Extension",       sets: "3", reps: "12",     exerciseId: "leg-extension" },
-      { name: "Leg Curl",            sets: "3", reps: "12",     exerciseId: "leg-curl" },
-      { name: "Standing Calf Raise",  sets: "3", reps: "15",     exerciseId: "calf-raise" },
-      { name: "Glute Bridge",        sets: "3", reps: "12",     exerciseId: "glute-bridge" },
-      { name: "Plank",               sets: "3", reps: "20 sec", exerciseId: "plank" },
-      { name: "Dead Bug",            sets: "3", reps: "12",     exerciseId: "dead-bug" }
+      { name: "Warm-Up (8-10 min)", sets: "", reps: "Stretch & Mobility", exerciseId: "warm-up" },
+      { name: "Goblet Squat", sets: "4", reps: "10-12", exerciseId: "goblet-squat" },
+      { name: "Leg Press", sets: "4", reps: "12", exerciseId: "leg-press" },
+      { name: "Walking Lunges", sets: "3", reps: "20 steps", exerciseId: "walking-lunges" },
+      { name: "Romanian Deadlift", sets: "3", reps: "10", exerciseId: "romanian-deadlift" },
+      { name: "Leg Curl", sets: "3", reps: "12", exerciseId: "leg-curl" },
+      { name: "Standing Calf Raise", sets: "4", reps: "15", exerciseId: "calf-raise" },
+      { name: "Plank", sets: "3", reps: "30-45 sec", exerciseId: "plank" },
+      { name: "Leg Raises", sets: "3", reps: "12", exerciseId: "leg-raises" },
+      { name: "Easy Treadmill Walk (Cardio)", sets: "", reps: "10-15 Min", exerciseId: "walking" },
+      { name: "Cool-Down (3-5 min)", sets: "", reps: "Static Stretching", exerciseId: "cool-down" }
     ]
   },
   {
     day: "Thursday",
-    type: "Active Recovery",
-    focus: "Light Movement & Flexibility",
+    type: "Shoulders + Traps + Core",
+    focus: "Broader look, better frame, better posture",
     exercises: [
-      { name: "Brisk Walking",        sets: "",  reps: "20 Minutes", exerciseId: "brisk-walking" },
-      { name: "Light Cycling",        sets: "",  reps: "10 Minutes", exerciseId: "cycling" },
-      { name: "Full Body Stretching",  sets: "",  reps: "10 Minutes", exerciseId: "full-body-stretching" }
+      { name: "Warm-Up (8-10 min)", sets: "", reps: "Stretch & Mobility", exerciseId: "warm-up" },
+      { name: "Dumbbell Shoulder Press", sets: "4", reps: "10", exerciseId: "db-shoulder-press" },
+      { name: "Lateral Raises", sets: "4", reps: "15", exerciseId: "lateral-raises" },
+      { name: "Front Raises", sets: "3", reps: "12", exerciseId: "front-raises" },
+      { name: "Upright Row", sets: "3", reps: "10", exerciseId: "upright-row" },
+      { name: "Shrugs", sets: "3", reps: "12", exerciseId: "shrugs" },
+      { name: "Face Pulls", sets: "3", reps: "15", exerciseId: "face-pulls" },
+      { name: "Dead Bug", sets: "3", reps: "12", exerciseId: "dead-bug" },
+      { name: "Side Plank", sets: "3", reps: "20-30 sec", exerciseId: "side-plank" },
+      { name: "Incline Walk (Cardio)", sets: "", reps: "15-20 Min", exerciseId: "incline-walk" },
+      { name: "Cool-Down (3-5 min)", sets: "", reps: "Static Stretching", exerciseId: "cool-down" }
     ]
   },
   {
     day: "Friday",
-    type: "Full Body",
-    focus: "Complete Workout",
+    type: "Upper Body Mix",
+    focus: "Extra volume for chest, back, shoulders",
     exercises: [
-      { name: "Chest Press Machine",    sets: "2", reps: "12", exerciseId: "chest-press" },
-      { name: "Lat Pulldown",           sets: "2", reps: "12", exerciseId: "lat-pulldown" },
-      { name: "Seated Cable Row",       sets: "2", reps: "12", exerciseId: "seated-cable-row" },
-      { name: "Leg Press",              sets: "2", reps: "12", exerciseId: "leg-press" },
-      { name: "Leg Curl",               sets: "2", reps: "12", exerciseId: "leg-curl" },
-      { name: "Shoulder Press Machine", sets: "2", reps: "12", exerciseId: "shoulder-press" }
+      { name: "Warm-Up (8-10 min)", sets: "", reps: "Stretch & Mobility", exerciseId: "warm-up" },
+      { name: "Dumbbell Bench Press", sets: "3", reps: "10", exerciseId: "db-bench-press" },
+      { name: "Lat Pulldown", sets: "3", reps: "10", exerciseId: "lat-pulldown" },
+      { name: "Incline Dumbbell Press", sets: "3", reps: "10", exerciseId: "incline-db-press" },
+      { name: "Seated Row", sets: "3", reps: "10", exerciseId: "seated-row" },
+      { name: "Lateral Raises", sets: "3", reps: "15", exerciseId: "lateral-raises" },
+      { name: "Face Pulls", sets: "3", reps: "15", exerciseId: "face-pulls" },
+      { name: "Dumbbell Curl", sets: "2", reps: "12", exerciseId: "db-curl" },
+      { name: "Tricep Pushdown", sets: "2", reps: "12", exerciseId: "tricep-pushdown" },
+      { name: "Treadmill Walk (Cardio)", sets: "", reps: "15-20 Min", exerciseId: "walking" },
+      { name: "Cool-Down (3-5 min)", sets: "", reps: "Static Stretching", exerciseId: "cool-down" }
     ]
   },
   {
     day: "Saturday",
-    type: "Cardio & Core",
-    focus: "Heart & Abs",
+    type: "Legs + Glutes + Arms",
+    focus: "Extra calorie burn, full-body conditioning",
     exercises: [
-      { name: "Incline Walk", sets: "",  reps: "20 Minutes", exerciseId: "incline-treadmill" },
-      { name: "Cycling",      sets: "",  reps: "10 Minutes", exerciseId: "cycling" },
-      { name: "Plank",        sets: "3", reps: "25 sec",    exerciseId: "plank" },
-      { name: "Crunches",     sets: "3", reps: "15",        exerciseId: "crunches" },
-      { name: "Dead Bug",     sets: "3", reps: "12",        exerciseId: "dead-bug" }
+      { name: "Warm-Up (8-10 min)", sets: "", reps: "Stretch & Mobility", exerciseId: "warm-up" },
+      { name: "Squat variation", sets: "3", reps: "10", exerciseId: "squat-variation" },
+      { name: "Leg Press", sets: "3", reps: "12", exerciseId: "leg-press" },
+      { name: "Glute Bridge or Hip Thrust", sets: "3", reps: "12", exerciseId: "hip-thrust" },
+      { name: "Leg Extension", sets: "3", reps: "12", exerciseId: "leg-extension" },
+      { name: "Calf Raise", sets: "4", reps: "15", exerciseId: "calf-raise" },
+      { name: "Hammer Curl", sets: "3", reps: "12", exerciseId: "hammer-curl" },
+      { name: "Rope Tricep Pushdown", sets: "3", reps: "12", exerciseId: "rope-tricep-pushdown" },
+      { name: "Plank", sets: "3", reps: "45 sec", exerciseId: "plank" },
+      { name: "Cycling or Incline Treadmill (Cardio)", sets: "", reps: "15-20 Min", exerciseId: "cycling-treadmill" },
+      { name: "Cool-Down (3-5 min)", sets: "", reps: "Static Stretching", exerciseId: "cool-down" }
     ]
   },
   {
     day: "Sunday",
-    type: "Rest Day",
-    focus: "Recovery & Light Activity",
+    type: "Recovery Day",
+    focus: "Let the body recover and grow",
     exercises: [
-      { name: "No Gym — Optional casual walk", sets: "", reps: "20-30 Minutes", exerciseId: "brisk-walking" }
+      { name: "Walking (Cardio)", sets: "", reps: "30-45 Min", exerciseId: "walking" },
+      { name: "Light stretching", sets: "", reps: "15-20 Min", exerciseId: "light-stretching" },
+      { name: "Mobility work", sets: "", reps: "10-15 Min", exerciseId: "mobility-work" }
     ]
   }
 ];
@@ -431,9 +818,7 @@ function switchPage(pageId) {
 
 // Route rendering depending on active page state
 function updatePageContent() {
-  if (activePage === "summary") {
-    renderSummary();
-  } else if (activePage === "today") {
+  if (activePage === "today") {
     renderCheckIn();
   } else if (activePage === "notes") {
     renderNotes();
@@ -546,6 +931,21 @@ function renderCheckIn() {
 
     row.appendChild(left);
 
+    // If exercise steps/instructions exist, show a small info (i) button
+    if (exerciseInstructions[ex.exerciseId]) {
+      const infoBtn = document.createElement("button");
+      infoBtn.className = "btn-icon-subtle";
+      infoBtn.style.padding = "4px";
+      infoBtn.style.marginLeft = "8px";
+      infoBtn.style.flexShrink = "0";
+      infoBtn.innerHTML = `<i data-lucide="info" style="width: 14px; height: 14px;"></i>`;
+      infoBtn.onclick = (e) => {
+        e.stopPropagation(); // Prevent toggling the checklist item
+        showExerciseInfo(ex.exerciseId);
+      };
+      row.appendChild(infoBtn);
+    }
+
     checklistContainer.appendChild(row);
   });
 
@@ -577,6 +977,7 @@ function toggleExerciseCheck(exerciseId) {
 
   if (index === -1) {
     record.completedExercises.push(exerciseId);
+    playSuccessSound(); // Play motivational chime sound
   } else {
     record.completedExercises.splice(index, 1);
   }
@@ -977,32 +1378,7 @@ function calculateMonthlyWeightChanges(user) {
   return summary;
 }
 
-// Render Summary Dashboard page values
-function renderSummary() {
-  const streakData = calculateStreaks(currentUser);
-  const stats = calculateWorkoutStats(currentUser);
-  
-  // Update Streak UI
-  document.getElementById("summary-current-streak").textContent = `${streakData.currentStreak} Days`;
-  document.getElementById("summary-best-streak").textContent = `${streakData.bestStreak} Days`;
-  
-  const currentStreakTrend = document.getElementById("summary-current-streak-trend");
-  if (streakData.currentStreak > 0) {
-    currentStreakTrend.textContent = "Streak is active! 🔥";
-  } else {
-    currentStreakTrend.textContent = "Keep it up! 🔥";
-  }
 
-  // Update Completion UI
-  document.getElementById("summary-completion-percent").textContent = `${stats.percent}%`;
-  document.getElementById("summary-completion-ratio").textContent = `Completed: ${stats.completed} of ${stats.completed + stats.missed}`;
-
-  // Update Workouts Logged UI
-  document.getElementById("summary-total-completed").textContent = `${stats.completed}`;
-  document.getElementById("summary-total-missed").textContent = `Missed: ${stats.missed} | Rest: ${stats.restDays}`;
-
-  lucide.createIcons();
-}
 
 // Prompt Goal Weight configuration
 function promptGoalWeight() {
@@ -1016,8 +1392,6 @@ function promptGoalWeight() {
   }
   fitnessData[currentUser].goalWeight = newGoal;
   saveData();
-  renderWeightTracker();
-  if (activePage === "summary") renderSummary();
 }
 
 // Toggle active exercise library muscle filter pills
@@ -2088,6 +2462,80 @@ function closeAddFoodModal() {
   activeLoggingMeal = "";
 }
 
+function showExerciseInfo(exerciseId) {
+  const info = exerciseInstructions[exerciseId];
+  if (!info) return;
+
+  const modal = document.getElementById("exercise-info-modal");
+  const title = document.getElementById("ex-modal-name");
+  const stepsList = document.getElementById("ex-modal-steps");
+  const tipsText = document.getElementById("ex-modal-tips");
+
+  if (!modal || !title || !stepsList || !tipsText) return;
+
+  title.textContent = info.name;
+
+  stepsList.innerHTML = "";
+  if (info.steps && Array.isArray(info.steps)) {
+    info.steps.forEach(step => {
+      const li = document.createElement("li");
+      li.textContent = step;
+      stepsList.appendChild(li);
+    });
+  }
+
+  tipsText.textContent = info.tips || "";
+
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeExerciseInfoModal() {
+  const modal = document.getElementById("exercise-info-modal");
+  if (modal) {
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+  }
+}
+
+function playSuccessSound() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    
+    // First tone (G5, 783.99 Hz)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(783.99, ctx.currentTime);
+    gain1.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    
+    osc1.start(ctx.currentTime);
+    osc1.stop(ctx.currentTime + 0.15);
+    
+    // Second tone (C6, 1046.50 Hz) starting slightly later
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.08);
+    gain2.gain.setValueAtTime(0.15, ctx.currentTime + 0.08);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    
+    osc2.start(ctx.currentTime + 0.08);
+    osc2.stop(ctx.currentTime + 0.3);
+  } catch (e) {
+    console.warn("Web Audio API not supported or allowed yet:", e);
+  }
+}
+
 function renderCategoryChips() {
   const container = document.getElementById("diet-cat-chips-container");
   if (!container) return;
@@ -2338,7 +2786,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Draw initial page elements
   switchUser("aman"); // Default dashboard opens on Aman
-  switchPage("summary");
+  switchPage("today");
 
   // Register PWA Service Worker for offline support and quick loads
   if ("serviceWorker" in navigator) {
