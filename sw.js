@@ -1,4 +1,4 @@
-const CACHE_NAME = "duogym-cache-v19";
+const CACHE_NAME = "duogym-cache-v20";
 const ASSETS = [
   "./",
   "./index.html",
