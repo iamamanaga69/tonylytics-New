@@ -861,8 +861,8 @@ function renderCheckIn() {
     charSum += selectedDate.charCodeAt(i);
   }
   const quoteIndex = charSum % quotes.length;
-  const quoteText = quotes[quoteIndex];
-  const quoteEl = document.getElementById("workout-banner-quote");
+  const quoteText = `"${quotes[quoteIndex]}"`;
+  const quoteEl = document.getElementById("header-motivation-quote");
   if (quoteEl) {
     quoteEl.textContent = quoteText;
   }
