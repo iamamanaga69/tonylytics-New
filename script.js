@@ -846,9 +846,6 @@ function renderCheckIn() {
   document.getElementById("workout-name-text").textContent = workout.type;
   document.getElementById("workout-focus-text").textContent = workout.focus;
 
-  // Populate workout notes
-  document.getElementById("today-notes-input").value = record.notes || "";
-
   // Missed yesterday's workout check (subtle notification)
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -949,17 +946,7 @@ function renderCheckIn() {
     checklistContainer.appendChild(row);
   });
 
-  // Disable notes input for future dates
-  const notesInput = document.getElementById("today-notes-input");
-  if (notesInput) {
-    if (isFutureDate) {
-      notesInput.disabled = true;
-      notesInput.placeholder = "Notes are disabled for future dates.";
-    } else {
-      notesInput.disabled = false;
-      notesInput.placeholder = "Enter notes for this date (e.g. increase weights, injury, energy levels...)";
-    }
-  }
+
 
   lucide.createIcons();
   updateProgressBar();
@@ -1005,20 +992,8 @@ function updateProgressBar() {
   document.getElementById("workout-count-text").textContent = `Completed: ${completed} of ${total} exercises`;
 }
 
-// Saves text entered in today's notes input instantly (autosave)
-function saveTodayNotes() {
-  if (selectedDate > dateToYYYYMMDD(new Date())) return;
-  ensureDateRecord(currentUser, selectedDate);
-  fitnessData[currentUser].workouts[selectedDate].notes = document.getElementById("today-notes-input").value;
-  saveData();
-}
-
-
-/* ── RENDER PAGE 5: GENERAL NOTES ─────────────────────────── */
+/* ── RENDER BACKUP MANAGER ────────────────────────────────── */
 function renderNotes() {
-  const notes = (fitnessData[currentUser].notes && fitnessData[currentUser].notes.general) || "";
-  document.getElementById("general-notes-input").value = notes;
-
   // Render last backup status info
   const backupText = document.getElementById("last-backup-text");
   const backupIcon = document.getElementById("backup-status-icon");
@@ -1037,21 +1012,11 @@ function renderNotes() {
   }
 }
 
-// Saves text entered in the general notes textarea automatically (autosave)
-function saveGeneralNotes() {
-  if (!fitnessData[currentUser].notes) {
-    fitnessData[currentUser].notes = {};
-  }
-  fitnessData[currentUser].notes.general = document.getElementById("general-notes-input").value;
-  saveData();
-}
-
 /* ============================================================
-   10. GOOGLE DRIVE BACKUP & RESTORE UTILITIES
+   10. BACKUP & RESTORE UTILITIES (NATIVE SHARE API / DOWNLOAD FALLBACK)
    ============================================================ */
 
-// Trigger file download containing fitnessData JSON string
-function downloadBackup() {
+async function shareBackupData() {
   fitnessData.lastBackup = dateToYYYYMMDD(new Date());
   saveData();
   renderNotes(); // Refresh label immediately
@@ -1062,24 +1027,54 @@ function downloadBackup() {
   exportData._rishitDietData = rishitDietData;
 
   const dataStr = JSON.stringify(exportData, null, 2);
-  const dataBlob = new Blob([dataStr], { type: "application/json" });
   
-  // Generate filename: GymTracker_Backup_YYYY-MM-DD.json
+  // Generate filename: DuoGym_Backup_YYYY-MM-DD.json
   const today = new Date();
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, "0");
   const dd = String(today.getDate()).padStart(2, "0");
-  const filename = `GymTracker_Backup_${yyyy}-${mm}-${dd}.json`;
+  const filename = `DuoGym_Backup_${yyyy}-${mm}-${dd}.json`;
 
-  const url = URL.createObjectURL(dataBlob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  try {
+    const file = new File([dataStr], filename, { type: "application/json" });
+    
+    // Check if Web Share API is available and can share file
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: "DuoGym Backup",
+        text: "Here is your DuoGym fitness and diet backup archive."
+      });
+    } else if (navigator.share) {
+      // Fallback: share as raw text
+      await navigator.share({
+        title: "DuoGym Backup Archive",
+        text: dataStr
+      });
+    } else {
+      // Direct file download fallback
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  } catch (err) {
+    console.warn("Share failed, falling back to download:", err);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
 }
 
 // Click hidden file input

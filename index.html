@@ -71,8 +71,8 @@
             <span>Diet Tracker</span>
           </button>
           <button id="nav-btn-notes" class="nav-item" onclick="switchPage('notes')">
-            <i data-lucide="file-text"></i>
-            <span>Notes & Backup</span>
+            <i data-lucide="database"></i>
+            <span>Backup Manager</span>
           </button>
         </nav>
       </aside>
@@ -137,58 +137,33 @@
               <div id="checklist-container" class="checklist-items">
                 <!-- Populated dynamically via JS -->
               </div>
-
-              <!-- Integrated Slim Notes -->
-              <div class="workout-notes-integrated">
-                <div class="notes-header-slim">
-                  <i data-lucide="pencil" style="width: 12px; height: 12px; color: var(--accent);"></i>
-                  <span>Workout Notes</span>
-                </div>
-                <textarea id="today-notes-input" placeholder="Tap to write notes (e.g. weight, reps, feels...)" oninput="saveTodayNotes()"></textarea>
-                <div class="autosave-indicator">
-                  <i data-lucide="cloud-lightning"></i> Auto-saved
-                </div>
-              </div>
             </div>
           </div>
 
         </section>
 
-        <!-- 5. NOTES & BACKUP PAGE -->
+        <!-- 5. BACKUP MANAGER PAGE -->
         <section id="page-notes" class="page-section">
           <div class="page-header">
             <div>
-              <h2 class="page-title">Notes & Backup</h2>
-              <p class="page-subtitle">Manage your personal logs and database archive</p>
+              <h2 class="page-title">Backup Manager</h2>
+              <p class="page-subtitle">Manage your database archive and restore progress</p>
             </div>
           </div>
 
           <div class="notes-backup-grid">
             
-            <!-- General Notes Card -->
-            <div class="glass-card general-notes-card">
-              <div class="card-header">
-                <i data-lucide="file-edit" class="header-icon"></i>
-                <h4>General Gym Notes</h4>
-              </div>
-              <p class="card-description">Write down goals, plans, reminders, or observations. These notes are unique to your profile.</p>
-              <textarea id="general-notes-input" placeholder="Write anything here... (e.g. increase Chest Press next month, left shoulder feels tight, supplements log...)" oninput="saveGeneralNotes()"></textarea>
-              <div class="autosave-indicator">
-                <i data-lucide="cloud-lightning"></i> Saved automatically
-              </div>
-            </div>
-
             <!-- Backup Control Card -->
             <div class="glass-card backup-card">
               <div class="card-header">
                 <i data-lucide="database" class="header-icon"></i>
                 <h4>Backup System</h4>
               </div>
-              <p class="card-description">Export your complete progress diary. You can save this backup file to your Google Drive to keep it secure.</p>
+              <p class="card-description">Export your complete progress and diet logs. You can share this backup directly to Google Drive, WhatsApp, or Email to keep it secure.</p>
               
               <div class="backup-actions">
-                <button class="btn btn-primary" onclick="downloadBackup()">
-                  <i data-lucide="download"></i> Download Backup JSON
+                <button class="btn btn-primary" onclick="shareBackupData()">
+                  <i data-lucide="share-2"></i> Share Backup Archive
                 </button>
                 <div class="divider">or</div>
                 <button class="btn btn-secondary" onclick="triggerRestoreUpload()">
@@ -204,11 +179,11 @@
               </div>
 
               <div class="backup-instructions">
-                <h5>How to use Google Drive:</h5>
+                <h5>How to Secure Your Data:</h5>
                 <ol>
-                  <li>Click <strong>Download Backup</strong> to save the JSON file locally.</li>
-                  <li>Upload the downloaded file into your Google Drive folder for safe-keeping.</li>
-                  <li>If changing devices or clearing browser cache, download it from Google Drive and use <strong>Restore Backup File</strong> to load all records.</li>
+                  <li>Click <strong>Share Backup Archive</strong> to open your device's native share menu.</li>
+                  <li>Save the backup file to Google Drive, WhatsApp, or send it to yourself via Email.</li>
+                  <li>If changing devices or clearing browser cache, locate the file and click <strong>Restore Backup File</strong> to restore all logs.</li>
                 </ol>
               </div>
             </div>
