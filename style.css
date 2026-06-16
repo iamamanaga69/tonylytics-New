@@ -2371,41 +2371,63 @@ body.user-rishit .filter-pill.active {
   100% { opacity: 1; }
 }
 
-/* WORKOUT BANNER IMAGE OVERLAY */
-.workout-banner {
+/* STANDALONE GYM HERO BANNER */
+.gym-hero-banner {
   position: relative;
-  height: 120px;
-  background-image: url('gym_motivation_banner.png');
+  height: 130px;
+  background-color: #0d0e14;
+  background-image: linear-gradient(135deg, rgba(0, 255, 136, 0.08) 0%, rgba(157, 78, 221, 0.08) 100%), url('gym_motivation_banner.png');
   background-size: cover;
   background-position: center;
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent); /* color matches active user profile! */
   overflow: hidden;
+  margin-bottom: 20px;
   display: flex;
   align-items: flex-end;
   padding: 16px;
-  margin: -24px -24px 20px -24px; /* offset the workout-main-card 24px padding */
+  box-shadow: var(--shadow-sm);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
-.workout-banner-overlay {
+.gym-hero-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to top, rgba(4, 4, 6, 0.95) 0%, rgba(4, 4, 6, 0.2) 70%, rgba(4, 4, 6, 0.5) 100%);
+  background: linear-gradient(to top, rgba(4, 4, 6, 0.95) 0%, rgba(4, 4, 6, 0.2) 75%);
   z-index: 1;
 }
 
-.workout-banner-quote {
+.gym-hero-content {
   position: relative;
   z-index: 2;
-  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gym-hero-tag {
+  font-size: 8px;
   font-weight: 800;
-  letter-spacing: 0.75px;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.gym-hero-quote {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
   color: #ffffff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
   text-transform: uppercase;
+  margin: 0;
 }
 
 /* Enhancing Logo shadow */
