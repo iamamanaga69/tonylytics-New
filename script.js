@@ -816,7 +816,7 @@ function switchPage(pageId) {
   activePage = pageId;
 
   // Toggle active styling on navigation buttons
-  const navIds = ["today"];
+  const navIds = ["today", "diet", "notes"];
   navIds.forEach(id => {
     const btn = document.getElementById(`nav-btn-${id}`);
     if (btn) btn.classList.toggle("active", id === pageId);
@@ -3130,6 +3130,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Detect standalone PWA mode
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+  // Detect WebView mode (running as native app)
+  const isWebView = window.location.protocol === "file:" || window.location.href.includes("android_asset");
+
+  // Show Download App button if on web browser, hide if running inside native app WebView
+  const downloadBtn = document.getElementById("download-app-btn");
+  if (downloadBtn) {
+    if (isWebView) {
+      downloadBtn.style.display = "none";
+    } else {
+      downloadBtn.style.display = "flex";
+    }
+  }
 
   // Load last selected user preference (default to "aman")
   const savedUser = localStorage.getItem("duogym_selected_user") || "aman";
