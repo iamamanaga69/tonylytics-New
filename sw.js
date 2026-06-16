@@ -1,11 +1,11 @@
-const CACHE_NAME = "duogym-cache-v20";
+const CACHE_NAME = "duogym-cache-v21";
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
   "./manifest.json",
-  "https://unpkg.com/lucide@latest",
+  "./lucide.min.js",
   "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
 ];
 
