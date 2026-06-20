@@ -104,9 +104,8 @@ button, input, textarea, select {
 .app-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
 }
 
 /* HEADER BAR */
@@ -158,62 +157,55 @@ button, input, textarea, select {
 
 /* USER TABS */
 .user-tabs {
+  position: relative;
   display: flex;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 4px;
-  border-radius: 30px;
-  border: 1px solid var(--border-color);
+  background: rgba(120, 120, 128, 0.2);
+  padding: 2px;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  width: 170px;
+  height: 34px;
+}
+
+.user-tabs-slider {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  background: rgba(255, 255, 255, 0.15);
+  border: 0.5px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2), 0 3px 1px rgba(0, 0, 0, 0.04);
+  border-radius: 99px;
+  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: 1;
+}
+
+body.user-rishit .user-tabs-slider {
+  transform: translateX(100%);
 }
 
 .user-tab-btn {
+  position: relative;
+  flex: 1;
   border: none;
   background: none;
-  padding: 6px 16px;
-  border-radius: 20px;
+  padding: 0;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: var(--text-sub);
-  transition: var(--transition);
-}
-
-.user-avatar {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: 10px;
+  color: var(--text-sub);
+  z-index: 2;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+  height: 100%;
+}
+
+.user-tab-btn.active {
+  color: var(--text-main) !important;
   font-weight: 700;
-  transition: var(--transition);
-}
-
-/* Active tab style changes depending on the user theme active */
-#tab-user-aman.active {
-  background: var(--success);
-  color: #070a13;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-#tab-user-aman.active .user-avatar {
-  background: rgba(7, 10, 19, 0.15);
-  color: #070a13;
-}
-
-#tab-user-rishit.active {
-  background: var(--accent);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-}
-#tab-user-rishit.active .user-avatar {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
 }
 
 /* INSTALL APP BUTTON */
@@ -321,25 +313,48 @@ body.user-rishit .install-btn {
 
 /* CONTENT CONTAINER */
 .app-content {
+  position: relative;
   flex: 1;
   padding: 24px 32px;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.01) 0%, rgba(7, 10, 19, 0) 100%), var(--bg-dark);
 }
 
 /* SECTION PAGES */
 .page-section {
-  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
   opacity: 0;
-  transform: translateY(10px);
-  transition: var(--transition-slow);
+  visibility: hidden;
+  transform: translate3d(20px, 0, 0) scale(0.995);
+  transition: opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1), transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.26s;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint style;
+  content-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: opacity, transform;
 }
 
 .page-section.active {
-  display: block;
+  position: relative;
+  height: auto;
   opacity: 1;
-  transform: translateY(0);
+  visibility: visible;
+  transform: translate3d(0, 0, 0) scale(1);
+  overflow: visible;
+  pointer-events: auto;
+  content-visibility: visible;
+  transition-delay: 0s;
 }
 
 .page-header {
@@ -375,20 +390,29 @@ body.user-rishit .install-btn {
 
 /* 4. GLASS CARDS & UI BASE COMPONENTS */
 .glass-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-lg);
-  transition: var(--transition);
-  /* Hardware accelerate for battery efficiency */
+  background: rgba(18, 18, 24, 0.7);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   transform: translateZ(0);
-  will-change: transform, opacity;
+  will-change: transform, box-shadow;
+}
+
+body.user-aman .glass-card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 255, 136, 0.08);
+}
+body.user-rishit .glass-card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 1px rgba(157, 78, 221, 0.1);
 }
 
 .glass-card:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-hover);
+  background: rgba(26, 26, 34, 0.75);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
 }
 
 .card-header {
@@ -600,7 +624,10 @@ body.user-rishit .install-btn {
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 320px;
-  gap: 24px;
+  gap: 16px;
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   align-items: start;
 }
 
@@ -1356,7 +1383,8 @@ body.user-rishit .filter-pill.active {
 /* 9. PAGE 5: NOTES & BACKUP UI */
 .notes-backup-grid {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: minmax(0, 500px);
+  justify-content: center;
   gap: 24px;
   align-items: start;
 }
@@ -1649,17 +1677,25 @@ body.user-rishit .filter-pill.active {
   }
 
   .app-sidebar {
-    width: 100%;
-    height: auto;
-    border-right: none;
-    border-top: 1px solid var(--border-color);
-    padding: 4px 8px;
-    padding-bottom: calc(4px + env(safe-area-inset-bottom));
-    background: rgba(9, 13, 25, 0.96);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    flex-shrink: 0;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    height: 64px;
+    border-radius: 30px;
+    background: rgba(18, 18, 24, 0.82);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    padding: 0 12px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
     justify-content: center;
+    width: auto;
+    border-right: none;
+    border-top: none;
   }
 
   .sidebar-nav {
@@ -1670,16 +1706,45 @@ body.user-rishit .filter-pill.active {
   }
 
   .nav-item {
+    position: relative;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 6px 0;
     font-size: 10px;
+    font-weight: 500;
+    color: var(--text-sub);
     gap: 4px;
     flex: 1;
-    border-radius: var(--radius-sm);
     text-align: center;
     touch-action: manipulation;
+    background: none !important;
+    border: none;
+    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), color 0.2s ease;
+  }
+
+  .nav-item.active {
+    color: var(--accent);
+    transform: scale(1.08);
+    font-weight: 700;
+  }
+
+  .nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .nav-item.active::after {
+    opacity: 1;
+    transform: scale(1);
   }
 
   .nav-item i {
@@ -1688,14 +1753,14 @@ body.user-rishit .filter-pill.active {
   }
 
   .nav-item:active {
-    transform: scale(0.95);
-    background: rgba(255, 255, 255, 0.02);
+    transform: scale(0.92);
   }
 
   .app-content {
     padding: 14px;
-    padding-bottom: 60px;
+    padding-bottom: 110px; /* offset to allow scrolling past floating bottom nav */
     height: auto;
+  }
   }
 
   .dashboard-grid {
@@ -2011,7 +2076,7 @@ body.user-rishit .filter-pill.active {
   background: rgba(3, 5, 10, 0.8);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 999;
+  z-index: 2500;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -2461,3 +2526,1676 @@ body.user-rishit .filter-pill.active {
   border-radius: 50%;
   box-shadow: 0 0 10px var(--accent-shadow);
 }
+
+/* ============================================================
+   LIGHT MODE OVERRIDES
+   ============================================================ */
+body.light-mode {
+  --bg-dark: #f4f5f8;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --bg-modal: #ffffff;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.15);
+  
+  --text-main: #1c1c1e;
+  --text-sub: #636366;
+  --text-muted: #8e8e93;
+  --text-disabled: rgba(99, 99, 102, 0.15);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* Aman (Emerald green in light mode for readability/contrast) */
+body.light-mode.user-aman {
+  --accent: #0f766e;
+  --accent-hover: #115e59;
+  --accent-glow: rgba(15, 118, 110, 0.08);
+  --accent-gradient: linear-gradient(135deg, #0f766e, #0369a1);
+  --accent-shadow: rgba(15, 118, 110, 0.15);
+  --success: #0f766e;
+  --success-glow: rgba(15, 118, 110, 0.08);
+}
+
+/* Rishit (Electric violet/purple in light mode) */
+body.light-mode.user-rishit {
+  --accent: #6d28d9;
+  --accent-hover: #5b21b6;
+  --accent-glow: rgba(109, 40, 217, 0.08);
+  --accent-gradient: linear-gradient(135deg, #6d28d9, #be185d);
+  --accent-shadow: rgba(109, 40, 217, 0.15);
+}
+
+/* Specific component overrides for light mode */
+body.light-mode .app-header {
+  background: rgba(255, 255, 255, 0.88);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .logo-text h1 {
+  background: linear-gradient(135deg, #000000, #444444);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.light-mode .app-sidebar {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 769px) {
+  body.light-mode .app-sidebar {
+    background: rgba(255, 255, 255, 0.6);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: none;
+  }
+}
+
+body.light-mode .user-tabs {
+  background: rgba(120, 120, 128, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .user-tabs-slider {
+  background: #ffffff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
+}
+
+body.light-mode .nav-item:active {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-mode #theme-toggle-btn {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light-mode .glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+}
+
+body.light-mode.user-aman .glass-card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 0 1px rgba(15, 118, 110, 0.05);
+}
+body.light-mode.user-rishit .glass-card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 0 1px rgba(109, 40, 217, 0.05);
+}
+
+body.light-mode .glass-card:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+}
+
+/* Form Inputs styling override */
+body.light-mode input,
+body.light-mode select,
+body.light-mode textarea {
+  background: rgba(0, 0, 0, 0.03) !important;
+  color: #1c1c1e !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+body.light-mode input:focus,
+body.light-mode select:focus,
+body.light-mode textarea:focus {
+  border-color: var(--accent) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px var(--accent-glow) !important;
+}
+
+/* Calendar styling override */
+body.light-mode .date-text {
+  color: #1c1c1e;
+}
+
+body.light-mode .header-quote {
+  color: #636366;
+}
+
+body.light-mode .gym-hero-quote {
+  color: #1c1c1e;
+  text-shadow: none;
+}
+
+/* Modals */
+body.light-mode .diet-modal-overlay {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+body.light-mode .diet-modal-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .diet-modal-close-btn {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1c1c1e;
+}
+
+body.light-mode .diet-modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .diet-modal-drag-line {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .metric-num {
+  color: #1c1c1e;
+}
+
+body.light-mode .meal-logged-item {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .exercise-card-main {
+  background: rgba(0, 0, 0, 0.01) !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light-mode .exercise-card-main.checked {
+  background: var(--accent-glow) !important;
+  border-color: var(--accent) !important;
+}
+
+body.light-mode .custom-checkbox-box {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
+}
+
+body.light-mode .custom-checkbox-input:checked + .custom-checkbox-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+body.light-mode .custom-checkbox-box::after {
+  border-color: #ffffff;
+}
+
+body.light-mode .streak-count {
+  color: #1c1c1e;
+}
+
+body.light-mode .history-day-dot {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+body.light-mode .btn-secondary {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #1c1c1e !important;
+}
+
+body.light-mode .btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ============================================================
+   12. FITNESS ECOSYSTEM, COACH, WATER, & ACHIEVEMENTS STYLES
+   ============================================================ */
+
+/* Checklist Row Skipped State */
+.checklist-row.skipped {
+  background: rgba(255, 42, 95, 0.04);
+  border-color: rgba(255, 42, 95, 0.15);
+}
+.checklist-row.skipped .ex-name {
+  color: #ff2a5f;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.checklist-row.skipped .ex-details {
+  color: #ff2a5f;
+  opacity: 0.6;
+}
+.btn-skip-ex.active {
+  background: rgba(255, 42, 95, 0.12) !important;
+  border-radius: var(--radius-sm);
+}
+
+/* Water Tracker Cups */
+.water-cup-icon {
+  width: 100%;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  font-size: 14px;
+}
+.water-cup-icon.cup-empty {
+  border: 1px dashed var(--border-color);
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.01);
+}
+.water-cup-icon.cup-filled {
+  border: 1px solid #00d9ff;
+  color: #00d9ff;
+  background: rgba(0, 217, 255, 0.1);
+  box-shadow: 0 0 8px rgba(0, 217, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* Badges / Trophy Case */
+.badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: help;
+  padding: 8px 4px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid transparent;
+}
+.badge-item.locked {
+  filter: grayscale(1);
+  opacity: 0.25;
+}
+.badge-item.unlocked {
+  filter: none;
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  transform: scale(1.02);
+}
+body.user-aman .badge-item.unlocked {
+  border-color: rgba(0, 255, 136, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 255, 136, 0.05);
+}
+body.user-rishit .badge-item.unlocked {
+  border-color: rgba(157, 78, 221, 0.2);
+  box-shadow: 0 4px 12px rgba(157, 78, 221, 0.05);
+}
+.badge-item.unlocked .badge-icon {
+  animation: badge-shine 2s infinite ease-in-out;
+}
+@keyframes badge-shine {
+  0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255,255,255,0.1)); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 10px var(--accent)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255,255,255,0.1)); }
+}
+
+/* Light Mode Overrides */
+body.light-mode .coach-bubble {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+body.light-mode .mission-row {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+body.light-mode .water-cup-icon.cup-empty {
+  border-color: rgba(0,0,0,0.1);
+  color: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.02);
+}
+body.light-mode .water-cups-visual {
+  border-color: rgba(0,0,0,0.08) !important;
+}
+body.light-mode .badge-item.unlocked {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+}
+body.light-mode .checklist-row.skipped {
+  background: rgba(255, 42, 95, 0.05);
+  border-color: rgba(255, 42, 95, 0.2);
+}
+body.light-mode .checklist-row.skipped .ex-name,
+body.light-mode .checklist-row.skipped .ex-details {
+  color: #c51b43;
+}
+
+/* ============================================================
+   13. DIET TRACKER OVERHAUL & PROFILE SWITCHER ANIMATION
+   ============================================================ */
+
+/* User Profile Switching Animation */
+.profile-switching {
+  animation: profileFadeRipple 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes profileFadeRipple {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.96) translateY(10px);
+    filter: blur(4px);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.01) translateY(-2px);
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Premium Quick Stats Header Strip */
+.premium-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.stat-strip-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.stat-strip-icon {
+  font-size: 20px;
+}
+.stat-strip-info {
+  display: flex;
+  flex-direction: column;
+}
+.stat-strip-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.stat-strip-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Diet Date Navigator */
+.diet-date-navigator-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+/* Diet Form Inputs & Dropdowns */
+.diet-select-input, .diet-form-input {
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  outline: none;
+  font-size: 13px;
+  transition: var(--transition);
+}
+.diet-select-input {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.diet-form-input {
+  padding: 10px 14px;
+  font-size: 14px;
+}
+.diet-select-input:focus, .diet-form-input:focus {
+  border-color: var(--accent);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Portion Modal Stats Grid */
+.portion-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .premium-stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 10px;
+  }
+}
+
+/* Light Mode Overrides for Diet sub-pages */
+body.light-mode .premium-stats-strip {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+}
+body.light-mode .stat-strip-value {
+  color: #1c1c1e;
+}
+body.light-mode .diet-date-navigator-container {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+body.light-mode .diet-select-input, 
+body.light-mode .diet-form-input {
+  background: #ffffff !important;
+  color: #1c1c1e !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+body.light-mode .diet-select-input:focus, 
+body.light-mode .diet-form-input:focus {
+  background: #ffffff !important;
+  border-color: var(--accent) !important;
+}
+body.light-mode .portion-stats-grid {
+  background: #f5f6f8;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+body.light-mode .diet-tabs .btn {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #636366 !important;
+}
+body.light-mode .diet-tabs .btn.active {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+}
+body.light-mode .meal-food-item {
+  background: #f5f6f8 !important;
+  border-color: rgba(0, 0, 0, 0.04) !important;
+}
+body.light-mode .meal-food-item:hover {
+  background: #eef0f3 !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+
+/* Macro Badges Styles */
+.macro-badge {
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  text-align: center;
+  transition: var(--transition);
+}
+.macro-badge .macro-label {
+  font-size: 9px;
+  display: block;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.macro-badge .macro-value {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Dark Mode Colors */
+.macro-badge.protein {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+.macro-badge.protein .macro-label, .macro-badge.protein .macro-value {
+  color: #fca5a5;
+}
+
+.macro-badge.carbs {
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.15);
+}
+.macro-badge.carbs .macro-label, .macro-badge.carbs .macro-value {
+  color: #fef08a;
+}
+
+.macro-badge.fat {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+.macro-badge.fat .macro-label, .macro-badge.fat .macro-value {
+  color: #bfdbfe;
+}
+
+/* Light Mode Overrides */
+body.light-mode .stat-strip-label {
+  color: #636366 !important;
+}
+
+body.light-mode .macro-badge.protein {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
+body.light-mode .macro-badge.protein .macro-label, 
+body.light-mode .macro-badge.protein .macro-value {
+  color: #b91c1c !important;
+}
+
+body.light-mode .macro-badge.carbs {
+  background: rgba(234, 179, 8, 0.08) !important;
+  border-color: rgba(234, 179, 8, 0.2) !important;
+}
+body.light-mode .macro-badge.carbs .macro-label, 
+body.light-mode .macro-badge.carbs .macro-value {
+  color: #b45309 !important;
+}
+
+body.light-mode .macro-badge.fat {
+  background: rgba(59, 130, 246, 0.08) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+body.light-mode .macro-badge.fat .macro-label, 
+body.light-mode .macro-badge.fat .macro-value {
+  color: #1d4ed8 !important;
+}
+
+/* ============================================================
+   LOGIN PAGE STYLES
+   ============================================================ */
+
+/* Login page full-screen overlay */
+.login-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: max(14px, env(safe-area-inset-top)) 0 max(14px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  background: linear-gradient(135deg, #040406 0%, #0a1628 30%, #071a12 60%, #040406 100%);
+  background-size: 400% 400%;
+  animation: loginGradientShift 12s ease infinite;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.login-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.05);
+}
+
+@keyframes loginGradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Floating particles effect */
+.login-particles {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.login-particles::before,
+.login-particles::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.15;
+  animation: floatParticle 8s ease-in-out infinite;
+}
+
+.login-particles::before {
+  width: 300px; height: 300px;
+  background: var(--accent, #00ff88);
+  top: 20%; left: -5%;
+  animation-delay: 0s;
+}
+
+.login-particles::after {
+  width: 250px; height: 250px;
+  background: #9d4edd;
+  bottom: 10%; right: -5%;
+  animation-delay: -4s;
+}
+
+@keyframes floatParticle {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+/* Login card */
+.login-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(90%, 380px);
+  max-width: 380px;
+  margin: auto;
+  box-sizing: border-box;
+  background: rgba(18, 18, 24, 0.75);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 40px 28px 32px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.03) inset;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  z-index: 1;
+  animation: loginCardEntry 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+@keyframes loginCardEntry {
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Logo area */
+.login-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0, 255, 136, 0.15);
+  border: 2px solid rgba(0, 255, 136, 0.2);
+}
+
+.login-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #f9fafb;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: -12px 0 0 0;
+  font-weight: 400;
+}
+
+.auth-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.auth-mode-btn {
+  min-height: 42px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #9ca3af;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-mode-btn.active {
+  color: #040406;
+  background: var(--accent, #00ff88);
+  box-shadow: 0 3px 12px rgba(0, 255, 136, 0.2);
+}
+
+.auth-signup-only {
+  display: none !important;
+}
+
+.login-card.auth-signup .auth-signup-only {
+  display: flex !important;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  color: #69707d;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.auth-provider-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.auth-provider-btn {
+  min-width: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f9fafb;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-provider-btn:active {
+  transform: scale(0.97);
+}
+
+.provider-mark {
+  font-size: 13px;
+}
+
+.google-mark {
+  color: #4285f4;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.auth-terms {
+  margin: -4px 0 0;
+  color: #69707d;
+  font-size: 9px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* User selector toggle */
+.login-user-selector {
+  display: flex;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 4px;
+  position: relative;
+}
+
+.login-user-btn {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  background: none;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 11px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.login-user-btn.active {
+  color: #040406;
+  font-weight: 700;
+}
+
+.login-user-slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: var(--accent, #00ff88);
+  border-radius: 11px;
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 0;
+  box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3);
+}
+
+.login-user-slider.right {
+  transform: translateX(100%);
+  background: #9d4edd;
+  box-shadow: 0 2px 8px rgba(157, 78, 221, 0.3);
+}
+
+/* Password field */
+.login-field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-left: 4px;
+}
+
+.login-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0 14px;
+  transition: all 0.3s ease;
+  height: 52px;
+}
+
+.login-input-wrapper:focus-within {
+  border-color: var(--accent, #00ff88);
+  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.08);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.login-input-wrapper input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: #f9fafb;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 0;
+  height: 100%;
+  font-family: inherit;
+}
+
+.login-input-wrapper input::placeholder {
+  color: #555c68;
+}
+
+.login-eye-btn {
+  background: none;
+  border: none;
+  color: #555c68;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.login-eye-btn:hover {
+  color: #9ca3af;
+}
+
+/* Remember me */
+.login-remember {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 4px;
+}
+
+.login-remember-label {
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* iOS toggle switch */
+.login-toggle {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border: none;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.login-toggle.active {
+  background: var(--accent, #00ff88);
+}
+
+.login-toggle::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: #ffffff;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.login-toggle.active::after {
+  transform: translateX(18px);
+}
+
+/* Login button */
+.login-btn {
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: var(--accent-gradient, linear-gradient(135deg, #00ff88 0%, #00cc6a 100%));
+  color: #040406;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 255, 136, 0.35);
+}
+
+.login-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.login-btn.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.login-btn.loading .login-btn-text {
+  opacity: 0;
+}
+
+.login-btn .login-spinner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid rgba(4, 4, 6, 0.2);
+  border-top-color: #040406;
+  border-radius: 50%;
+  animation: loginSpin 0.7s linear infinite;
+  display: none;
+}
+
+.login-btn.loading .login-spinner {
+  display: block;
+}
+
+@keyframes loginSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error message */
+.login-error {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(255, 42, 95, 0.1);
+  border: 1px solid rgba(255, 42, 95, 0.2);
+  border-radius: 10px;
+  color: #ff6b8a;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  display: none;
+  animation: loginShake 0.4s ease;
+}
+
+.login-error.visible {
+  display: block;
+}
+
+@keyframes loginShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+/* Sync status indicator */
+.sync-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-sub);
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.3s ease;
+}
+
+.sync-badge .sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00ff88;
+  box-shadow: 0 0 6px rgba(0, 255, 136, 0.5);
+  transition: all 0.3s ease;
+}
+
+.sync-badge.syncing .sync-dot {
+  background: #ffb703;
+  box-shadow: 0 0 6px rgba(255, 183, 3, 0.5);
+  animation: syncPulse 1s ease-in-out infinite;
+}
+
+.sync-badge.offline .sync-dot {
+  background: #ff2a5f;
+  box-shadow: 0 0 6px rgba(255, 42, 95, 0.5);
+}
+
+@keyframes syncPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Logout button */
+.logout-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-sub);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 42, 95, 0.1);
+  border-color: rgba(255, 42, 95, 0.3);
+  color: #ff6b8a;
+}
+
+/* Light mode login overrides */
+body.light-mode .login-overlay {
+  background: linear-gradient(135deg, #f0f4f8 0%, #e2f0e8 30%, #e8eef4 60%, #f0f4f8 100%);
+  background-size: 400% 400%;
+  animation: loginGradientShift 12s ease infinite;
+}
+
+body.light-mode .login-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
+}
+
+body.light-mode .login-title {
+  color: #1c1c1e;
+}
+
+body.light-mode .login-subtitle {
+  color: #636366;
+}
+
+body.light-mode .login-user-selector {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .login-user-btn {
+  color: #636366;
+}
+
+body.light-mode .login-user-btn.active {
+  color: #ffffff;
+}
+
+body.light-mode .login-input-wrapper {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.light-mode .login-input-wrapper:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.08);
+}
+
+body.light-mode .login-input-wrapper input {
+  color: #1c1c1e;
+}
+
+body.light-mode .login-input-wrapper input::placeholder {
+  color: #aeaeb2;
+}
+
+body.light-mode .login-error {
+  background: rgba(255, 42, 95, 0.06);
+}
+
+body.light-mode .login-particles::before {
+  opacity: 0.08;
+}
+
+body.light-mode .login-particles::after {
+  opacity: 0.06;
+}
+
+body.light-mode .sync-badge {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #636366;
+}
+
+body.light-mode .logout-btn {
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #636366;
+}
+
+body.light-mode .logout-btn:hover {
+  background: rgba(255, 42, 95, 0.06);
+  border-color: rgba(255, 42, 95, 0.2);
+  color: #dc2626;
+}
+
+/* ============================================================
+   UPDATES FOR ITERATION 14: SETS TRACKER & ALARM & LAYOUTS
+   ============================================================ */
+
+/* Sets Tracker Numeric Input Fields */
+.timer-set-input {
+  width: 50px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 6px;
+  color: #ffffff !important;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: monospace;
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.timer-set-input::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.timer-set-input:focus {
+  border-color: var(--accent) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 0 6px rgba(0, 255, 136, 0.3) !important;
+}
+
+.timer-set-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: transparent !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Unified Timer Pill inside Checklist Items */
+.ex-timer-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--border-color) !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.ex-timer-container:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: var(--border-hover) !important;
+}
+
+/* Pulse Animation for active alarm icon */
+@keyframes alarmRing {
+  0% { transform: rotate(0); }
+  10% { transform: rotate(15deg); }
+  20% { transform: rotate(-15deg); }
+  30% { transform: rotate(10deg); }
+  40% { transform: rotate(-10deg); }
+  50% { transform: rotate(0); }
+  100% { transform: rotate(0); }
+}
+
+.alarm-icon-active {
+  animation: alarmRing 0.8s infinite ease-in-out;
+  transform-origin: top center;
+  display: inline-block;
+}
+
+/* checklist row fixes on mobile */
+@media (max-width: 480px) {
+  .checklist-row {
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+  .chk-left {
+    gap: 10px !important;
+  }
+  .ex-name {
+    font-size: 13px !important;
+  }
+  .ex-details {
+    font-size: 10px !important;
+  }
+  .ex-timer-container {
+    padding: 3px 6px !important;
+    gap: 4px !important;
+  }
+  .ex-timer-display {
+    font-size: 11px !important;
+  }
+}
+
+/* ============================================================
+   LIGHT MODE SYNC FOR SETS TRACKER, ALARM, AND DASHBOARD
+   ============================================================ */
+
+/* Sets Tracker Dashboard Container */
+.timer-sets-dashboard {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+}
+
+body.light-mode .timer-sets-dashboard {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Visual ring background track stroke */
+.timer-circle-bg {
+  stroke: rgba(255, 255, 255, 0.03);
+}
+
+body.light-mode .timer-circle-bg {
+  stroke: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Set Rows styling */
+.timer-set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.timer-set-row.completed {
+  background: rgba(0, 255, 136, 0.05) !important;
+  border-color: rgba(0, 255, 136, 0.25) !important;
+}
+
+body.light-mode .timer-set-row {
+  background: rgba(0, 0, 0, 0.015) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light-mode .timer-set-row.completed {
+  background: var(--accent-glow) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Log Button styling inside sets rows */
+.timer-log-set-btn {
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  transition: all 0.2s ease;
+}
+
+.timer-log-set-btn:hover {
+  opacity: 0.85;
+}
+
+.timer-log-set-btn.done {
+  background: var(--success) !important;
+  color: #000000 !important;
+  border: none !important;
+  cursor: default;
+}
+
+body.light-mode .timer-log-set-btn.done {
+  color: #ffffff !important;
+}
+
+/* Alarm Banner Styling */
+.timer-alarm-banner {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 183, 3, 0.15);
+  border: 1px solid rgba(255, 183, 3, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: -10px;
+  display: flex;
+}
+
+.timer-alarm-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffb703;
+}
+
+.timer-alarm-stop-btn {
+  border-color: rgba(255, 183, 3, 0.4) !important;
+  color: #ffb703 !important;
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+body.light-mode .timer-alarm-banner {
+  background: rgba(217, 119, 6, 0.1) !important;
+  border-color: rgba(217, 119, 6, 0.25) !important;
+}
+
+body.light-mode .timer-alarm-text {
+  color: #b45309 !important;
+}
+
+body.light-mode .timer-alarm-stop-btn {
+  border-color: rgba(217, 119, 6, 0.4) !important;
+  color: #b45309 !important;
+}
+
+/* Light Mode overrides for Sets Tracker numeric inputs */
+body.light-mode .timer-set-input {
+  background: rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  color: #1c1c1e !important;
+}
+
+body.light-mode .timer-set-input::placeholder {
+  color: rgba(0, 0, 0, 0.35) !important;
+}
+
+body.light-mode .timer-set-input:focus {
+  border-color: var(--accent) !important;
+  background: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-mode .timer-set-input:disabled {
+  background: rgba(0, 0, 0, 0.02) !important;
+  color: rgba(0, 0, 0, 0.3) !important;
+  border-color: transparent !important;
+}
+
+/* ==========================================================================
+   15. ACTIVITY CENTER MODULE
+   ========================================================================== */
+
+/* Sub-panel visibility */
+.act-sub-panel {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.act-sub-panel.active {
+  display: block;
+}
+
+/* Grids and responsiveness */
+.act-hero-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+}
+
+.act-dash-grid,
+.act-feed-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.act-streaks-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+#page-activity,
+#page-activity .glass-card,
+#page-activity .act-sub-panel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#page-activity {
+  overflow-x: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #page-activity .act-hero-grid,
+  #page-activity .act-dash-grid,
+  #page-activity .act-feed-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+  .act-streaks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  #page-activity .act-versus-grid {
+    grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+  #page-activity .act-versus-grid > div {
+    min-width: 0;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  #page-activity .act-sub-tabs .filter-pill {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 420px) {
+  #page-activity .act-hero-grid > .glass-card:first-child {
+    padding: 16px 12px !important;
+    gap: 10px !important;
+  }
+  #page-activity .act-hero-grid > .glass-card:first-child > div:first-child {
+    width: 128px !important;
+    height: 128px !important;
+  }
+}
+
+/* Bar Chart columns styling */
+.chart-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.chart-bar-fill {
+  width: 60%;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.6s ease;
+  min-height: 2px;
+  background: var(--accent);
+}
+
+/* Flame animation for streaks */
+@keyframes flameFlicker {
+  0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255, 183, 3, 0.4)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 6px rgba(255, 183, 3, 0.8)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255, 183, 3, 0.4)); }
+}
+
+.flame-active {
+  animation: flameFlicker 1.5s infinite alternate ease-in-out;
+}
+
+/* Light Mode Overrides for Activity Center */
+body.light-mode #page-activity .glass-card {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .chart-bar-fill {
+  background: var(--accent) !important;
+}
+
+body.light-mode #page-activity .diet-form-input {
+  background: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #1c1c1e !important;
+}
+
+body.light-mode .auth-mode-tabs,
+body.light-mode .auth-provider-btn {
+  background: rgba(0, 0, 0, 0.035);
+  border-color: rgba(0, 0, 0, 0.09);
+}
+
+body.light-mode .auth-provider-btn {
+  color: #1c1c1e;
+}
+
+@media (max-height: 720px) {
+  .login-overlay {
+    align-items: flex-start;
+  }
+
+  .login-card {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+
+  .login-logo {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+/* ==========================================================================
+   16. MOBILE PERFORMANCE & MOTION SMOOTHING
+   ========================================================================== */
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+.glass-card,
+.stat-card,
+.exercise-card,
+.meal-card,
+.nav-item,
+.filter-pill,
+.btn,
+button {
+  backface-visibility: hidden;
+}
+
+.glass-card,
+.exercise-card,
+.meal-card {
+  transform: translateZ(0);
+}
+
+.nav-item,
+.filter-pill,
+.btn,
+button {
+  touch-action: manipulation;
+}
+
+.diet-tabs,
+.diet-category-chips,
+.act-sub-tabs,
+.horizontal-scroll,
+[style*="overflow-x: auto"],
+[style*="overflow-x:auto"] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+}
+
+.diet-tabs > *,
+.diet-category-chips > *,
+.act-sub-tabs > * {
+  scroll-snap-align: start;
+}
+
+.app-content.is-page-switching .page-section.active {
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+

@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="DuoGym" />
-  <meta name="description" content="DuoGym Tracker - Date-based personal gym tracking and exercise diary for Aman and Rishit." />
-  <meta name="author" content="DuoGym" />
-  <title>DuoGym Tracker</title>
+  <meta name="apple-mobile-web-app-title" content="FitRivals" />
+  <meta name="description" content="FitRivals - personal training, activity tracking, and friendly fitness competition." />
+  <meta name="author" content="FitRivals" />
+  <title>FitRivals Tracker</title>
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json" />
@@ -17,7 +17,7 @@
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css" />
@@ -25,17 +25,86 @@
   <!-- Lucide Icons -->
   <script src="lucide.min.js"></script>
 </head>
-<body class="user-aman"> <!-- Default to Aman's styling -->
+<body class="user-aman">
+  <!-- Loading indicator: visible proof that HTML loaded (hidden by JS on init) -->
+  <div id="app-loading" style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#040406;color:#00ff88;font-family:sans-serif;font-size:18px;flex-direction:column;gap:12px;"><div style="width:40px;height:40px;border:3px solid rgba(0,255,136,0.2);border-top-color:#00ff88;border-radius:50%;animation:spin 0.8s linear infinite;"></div><span>Loading FitRivals...</span></div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+  <!-- LOGIN OVERLAY -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-particles"></div>
+    <div class="login-card">
+      <img src="icon.png" class="login-logo" alt="FitRivals" />
+      <h2 class="login-title">Welcome to FitRivals</h2>
+      <p class="login-subtitle">Train together. Compete every day.</p>
+
+      <div class="auth-mode-tabs" role="tablist" aria-label="Authentication mode">
+        <button id="auth-tab-signin" class="auth-mode-btn active" onclick="setAuthMode('signin')" type="button">Sign In</button>
+        <button id="auth-tab-signup" class="auth-mode-btn" onclick="setAuthMode('signup')" type="button">Sign Up</button>
+      </div>
+
+      <div id="auth-name-field" class="login-field auth-signup-only">
+        <label class="login-field-label">Display name</label>
+        <div class="login-input-wrapper">
+          <input type="text" id="auth-display-name" placeholder="What should rivals call you?" autocomplete="name" maxlength="40" />
+        </div>
+      </div>
+
+      <div class="login-field">
+        <label class="login-field-label"><span id="auth-identity-label">Username or email</span></label>
+        <div class="login-input-wrapper">
+          <input type="text" id="auth-identity" placeholder="Username or email" onkeydown="handleLoginKeypress(event)" autocomplete="username" autocapitalize="none" spellcheck="false" />
+        </div>
+      </div>
+
+      <div id="auth-email-field" class="login-field auth-signup-only">
+        <label class="login-field-label">Email</label>
+        <div class="login-input-wrapper">
+          <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email" autocapitalize="none" spellcheck="false" />
+        </div>
+      </div>
+
+      <div class="login-field">
+        <label class="login-field-label">Password</label>
+        <div class="login-input-wrapper">
+          <input type="password" id="login-password" placeholder="Minimum 8 characters" onkeydown="handleLoginKeypress(event)" autocomplete="current-password" />
+          <button class="login-eye-btn" onclick="toggleLoginPassword()" type="button" aria-label="Show password">🔒</button>
+        </div>
+      </div>
+
+      <!-- Remember Me -->
+      <div class="login-remember">
+        <span class="login-remember-label" onclick="toggleLoginRemember()">Remember me</span>
+        <button id="login-remember-toggle" class="login-toggle active" onclick="toggleLoginRemember()" type="button"></button>
+      </div>
+
+      <!-- Error Message -->
+      <div id="login-error" class="login-error"></div>
+
+      <!-- Login Button -->
+      <button id="login-btn" class="login-btn" onclick="handleLogin()">
+        <span class="login-btn-text">Sign In</span>
+        <div class="login-spinner"></div>
+      </button>
+
+      <div class="auth-divider"><span>or continue with</span></div>
+      <div class="auth-provider-grid">
+        <button class="auth-provider-btn" onclick="handleOAuthLogin('google')" type="button"><span class="provider-mark google-mark">G</span>Google</button>
+        <button class="auth-provider-btn" onclick="handleOAuthLogin('github')" type="button"><span class="provider-mark">◆</span>GitHub</button>
+      </div>
+      <p class="auth-terms">By continuing, you agree to keep the rivalry friendly.</p>
+    </div>
+  </div>
 
   <!-- APP CONTAINER -->
-  <div class="app-layout">
+  <div id="app-layout" class="app-layout" style="display: none;">
     
     <!-- HEADER BAR -->
     <header class="app-header">
       <div class="header-logo">
-        <img src="icon.png" class="logo-emoji" alt="DuoGym Logo" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+        <img src="icon.png" class="logo-emoji" alt="FitRivals Logo" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
         <div class="logo-text">
-          <h1>DuoGym</h1>
+          <h1>FitRivals</h1>
           <p>Tracker & Diary</p>
         </div>
       </div>
@@ -45,13 +114,26 @@
         <i data-lucide="download"></i> <span class="install-btn-text">Download App</span>
       </a>
 
-      <!-- User Tab Selector -->
-      <div class="user-tabs">
-        <button id="tab-user-aman" class="user-tab-btn active" onclick="switchUser('aman')">
-          <span class="user-avatar">A</span> Aman
+      <!-- Header Actions: Theme Toggle + User Tabs -->
+      <div style="display: flex; align-items: center; gap: 8px; z-index: 20;">
+        <!-- Sync Status Badge -->
+        <div id="sync-badge" class="sync-badge offline" title="Sync status">
+          <span class="sync-dot"></span>
+          <span id="sync-text">Local</span>
+        </div>
+
+        <!-- Theme Toggle Button -->
+        <button id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme" style="padding: 6px; border: none; background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; transition: var(--transition);">
+          <i data-lucide="sun" id="theme-icon" style="width: 18px; height: 18px;"></i>
         </button>
-        <button id="tab-user-rishit" class="user-tab-btn" onclick="switchUser('rishit')">
-          <span class="user-avatar">R</span> Rishit
+
+        <!-- Logged-in User Badge -->
+        <span id="header-logged-user" style="font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; display: none; margin-right: 4px;"></span>
+
+        <!-- Logout Button -->
+        <button id="header-logout-btn" class="logout-btn" onclick="handleLogout()" style="display: none;" title="Sign out">
+          <i data-lucide="log-out" style="width: 13px; height: 13px;"></i>
+          Out
         </button>
       </div>
     </header>
@@ -70,15 +152,51 @@
             <i data-lucide="salad"></i>
             <span>Diet Tracker</span>
           </button>
-          <button id="nav-btn-notes" class="nav-item" onclick="switchPage('notes')">
-            <i data-lucide="database"></i>
-            <span>Backup Manager</span>
+          <button id="nav-btn-dictionary" class="nav-item" onclick="switchPage('dictionary')">
+            <i data-lucide="book-open"></i>
+            <span>Exercise Library</span>
+          </button>
+          <button id="nav-btn-activity" class="nav-item" onclick="switchPage('activity')">
+            <i data-lucide="activity"></i>
+            <span>Activity Center</span>
           </button>
         </nav>
       </aside>
 
       <!-- MAIN CONTENT AREA -->
       <main class="app-content">
+
+        <!-- PREMIUM DYNAMIC QUICK STATS HEADER STRIP -->
+        <div class="premium-stats-strip" id="premium-stats-strip">
+          <div class="stat-strip-item">
+            <span class="stat-strip-icon">🔥</span>
+            <div class="stat-strip-info">
+              <span class="stat-strip-label">Streak</span>
+              <span id="header-streak-val" class="stat-strip-value">0 Days</span>
+            </div>
+          </div>
+          <div class="stat-strip-item">
+            <span class="stat-strip-icon">🥗</span>
+            <div class="stat-strip-info">
+              <span class="stat-strip-label">Calories</span>
+              <span id="header-cals-val" class="stat-strip-value">0 / 2200 kcal</span>
+            </div>
+          </div>
+          <div class="stat-strip-item">
+            <span class="stat-strip-icon">💧</span>
+            <div class="stat-strip-info">
+              <span class="stat-strip-label">Water</span>
+              <span id="header-water-val" class="stat-strip-value">0 / 3500 ml</span>
+            </div>
+          </div>
+          <div class="stat-strip-item">
+            <span class="stat-strip-icon">💪</span>
+            <div class="stat-strip-info">
+              <span class="stat-strip-label">Workout</span>
+              <span id="header-workout-val" class="stat-strip-value">0% Done</span>
+            </div>
+          </div>
+        </div>
 
         <!-- 1. TODAY'S CHECK-IN PAGE -->
         <section id="page-today" class="page-section active">
@@ -112,9 +230,7 @@
           <div id="yesterday-missed-banner" class="missed-notification-banner" style="display: none;"></div>
 
           <!-- CHECK-IN GRID -->
-          <div class="dashboard-grid">
-            
-            <!-- Workout Card -->
+          <div class="dashboard-grid">             <!-- Workout Card -->
             <div class="glass-card workout-main-card">
               <div class="workout-header">
                 <span id="workout-day-badge" class="badge">Monday Workout</span>
@@ -139,57 +255,111 @@
                 <!-- Populated dynamically via JS -->
               </div>
             </div>
-          </div>
 
-        </section>
-
-        <!-- 5. BACKUP MANAGER PAGE -->
-        <section id="page-notes" class="page-section">
-          <div class="page-header">
-            <div>
-              <h2 class="page-title">Backup Manager</h2>
-              <p class="page-subtitle">Manage your database archive and restore progress</p>
-            </div>
-          </div>
-
-          <div class="notes-backup-grid">
-            
-            <!-- Backup Control Card -->
-            <div class="glass-card backup-card">
-              <div class="card-header">
-                <i data-lucide="database" class="header-icon"></i>
-                <h4>Backup System</h4>
+            <!-- Daily Missions Card -->
+            <div class="glass-card daily-missions-card" id="daily-missions-card">
+              <div class="card-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                <i data-lucide="target" class="header-icon" style="color: var(--accent); width: 18px; height: 18px;"></i>
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700;">Daily Missions</h4>
               </div>
-              <p class="card-description">Export your complete progress and diet logs. You can share this backup directly to Google Drive, WhatsApp, or Email to keep it secure.</p>
-              
-              <div class="backup-actions">
-                <button class="btn btn-primary" onclick="shareBackupData()">
-                  <i data-lucide="share-2"></i> Share Backup Archive
-                </button>
-                <div class="divider">or</div>
-                <button class="btn btn-secondary" onclick="triggerRestoreUpload()">
-                  <i data-lucide="upload"></i> Restore Backup File
-                </button>
-                <input type="file" id="backup-file-upload" style="display: none;" accept=".json" onchange="handleRestoreUpload(event)">
-              </div>
-
-              <!-- Last Backup Date & Status Info -->
-              <div class="backup-status-row" style="margin: 16px 0; padding: 10px 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="info" id="backup-status-icon" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
-                <span id="last-backup-text" style="color: var(--text-sub);">Last Backup: <strong style="color: var(--text-main);">Never</strong></span>
-              </div>
-
-              <div class="backup-instructions">
-                <h5>How to Secure Your Data:</h5>
-                <ol>
-                  <li>Click <strong>Share Backup Archive</strong> to open your device's native share menu.</li>
-                  <li>Save the backup file to Google Drive, WhatsApp, or send it to yourself via Email.</li>
-                  <li>If changing devices or clearing browser cache, locate the file and click <strong>Restore Backup File</strong> to restore all logs.</li>
-                </ol>
+              <div class="missions-list" style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="mission-row" id="mission-workout-row" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                  <div class="mission-status-icon" id="mission-workout-icon" style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted);"><i data-lucide="circle" style="width: 16px; height: 16px;"></i></div>
+                  <div class="mission-text-container" style="flex: 1;">
+                    <span class="mission-title" style="display: block; font-size: 13px; font-weight: 600; color: var(--text-main);">Workout Target</span>
+                    <span class="mission-desc" id="mission-workout-desc" style="display: block; font-size: 11px; color: var(--text-sub);">Complete today's exercises</span>
+                  </div>
+                </div>
+                <div class="mission-row" id="mission-diet-row" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                  <div class="mission-status-icon" id="mission-diet-icon" style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted);"><i data-lucide="circle" style="width: 16px; height: 16px;"></i></div>
+                  <div class="mission-text-container" style="flex: 1;">
+                    <span class="mission-title" style="display: block; font-size: 13px; font-weight: 600; color: var(--text-main);">Kitchen Logs</span>
+                    <span class="mission-desc" style="display: block; font-size: 11px; color: var(--text-sub);">Track foods in at least 3 meal slots today</span>
+                  </div>
+                </div>
+                <div class="mission-row" id="mission-water-row" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                  <div class="mission-status-icon" id="mission-water-icon" style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted);"><i data-lucide="circle" style="width: 16px; height: 16px;"></i></div>
+                  <div class="mission-text-container" style="flex: 1;">
+                    <span class="mission-title" style="display: block; font-size: 13px; font-weight: 600; color: var(--text-main);">Hydration Target</span>
+                    <span class="mission-desc" style="display: block; font-size: 11px; color: var(--text-sub);">Drink 3500ml of water today</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-          </div>
+            <!-- Water Tracker Card -->
+            <div class="glass-card water-tracker-card" id="water-tracker-card">
+              <div class="card-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                <i data-lucide="droplet" class="header-icon" style="color: #00d9ff; width: 18px; height: 18px;"></i>
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700;">Water Intake</h4>
+              </div>
+              <div class="water-progress-box" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px;">
+                <div class="water-progress-text" style="display: flex; flex-direction: column;">
+                  <span id="water-progress-value" style="font-size: 20px; font-weight: 700; color: var(--text-main);">0 / 3500 ml</span>
+                  <span id="water-glasses-count" style="color: var(--text-sub); font-size: 12px;">0 of 14 cups (250ml)</span>
+                </div>
+                <div class="water-buttons" style="display: flex; gap: 8px;">
+                  <button class="btn btn-secondary btn-sm" onclick="adjustWaterIntake(-250)" style="padding: 6px 12px; font-size: 12px;">-250ml</button>
+                  <button class="btn btn-primary btn-sm" onclick="adjustWaterIntake(250)" style="padding: 6px 14px; font-size: 12px; background: linear-gradient(135deg, #00d9ff, #0077ff); border: none;">+250ml</button>
+                </div>
+              </div>
+              <div class="water-cups-visual" id="water-cups-container" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 4px; background: rgba(255,255,255,0.01); border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <!-- Populated dynamically: 14 cup slots -->
+              </div>
+            </div>
+
+            <!-- Trophy Room Card -->
+            <div class="glass-card trophy-room-card" id="trophy-room-card">
+              <div class="card-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                <i data-lucide="trophy" class="header-icon" style="color: #ffb703; width: 18px; height: 18px;"></i>
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700;">Trophy Case</h4>
+              </div>
+              <div class="badges-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; text-align: center;">
+                <div class="badge-item locked" id="badge-consistent-crusader" style="display: flex; flex-direction: column; align-items: center; gap: 6px; transition: var(--transition);" title="Consistent Crusader: Hit a 3-day workout streak">
+                  <div class="badge-icon" style="font-size: 24px; filter: drop-shadow(0 0 4px rgba(255,255,255,0.1));">🔥</div>
+                  <span class="badge-name" style="font-size: 9px; font-weight: 600; color: var(--text-sub); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">Crusader</span>
+                </div>
+                <div class="badge-item locked" id="badge-gym-legend" style="display: flex; flex-direction: column; align-items: center; gap: 6px; transition: var(--transition);" title="Gym Legend: Hit a 7-day workout streak">
+                  <div class="badge-icon" style="font-size: 24px; filter: drop-shadow(0 0 4px rgba(255,255,255,0.1));">👑</div>
+                  <span class="badge-name" style="font-size: 9px; font-weight: 600; color: var(--text-sub); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">Legend</span>
+                </div>
+                <div class="badge-item locked" id="badge-kitchen-master" style="display: flex; flex-direction: column; align-items: center; gap: 6px; transition: var(--transition);" title="Kitchen Master: Log diet for 3 distinct days">
+                  <div class="badge-icon" style="font-size: 24px; filter: drop-shadow(0 0 4px rgba(255,255,255,0.1));">🍳</div>
+                  <span class="badge-name" style="font-size: 9px; font-weight: 600; color: var(--text-sub); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">Kitchen</span>
+                </div>
+                <div class="badge-item locked" id="badge-hydration-champ" style="display: flex; flex-direction: column; align-items: center; gap: 6px; transition: var(--transition);" title="Hydration Champ: Reach daily water target on 3 distinct days">
+                  <div class="badge-icon" style="font-size: 24px; filter: drop-shadow(0 0 4px rgba(255,255,255,0.1));">💧</div>
+                  <span class="badge-name" style="font-size: 9px; font-weight: 600; color: var(--text-sub); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">Hydration</span>
+                </div>
+                <div class="badge-item locked" id="badge-iron-discipline" style="display: flex; flex-direction: column; align-items: center; gap: 6px; transition: var(--transition);" title="Iron Discipline: Complete a Friday workout 100%">
+                  <div class="badge-icon" style="font-size: 24px; filter: drop-shadow(0 0 4px rgba(255,255,255,0.1));">⛓️</div>
+                  <span class="badge-name" style="font-size: 9px; font-weight: 600; color: var(--text-sub); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">Discipline</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coach Corner Card (Moved to bottom) -->
+            <div class="glass-card coach-corner-card" id="coach-corner-card" style="grid-column: 1 / -1;">
+              <div class="coach-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div class="coach-avatar-wrapper" style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--border-color); border-radius: 50%; overflow: hidden;">
+                  <img src="coach_richards.jpg" alt="Coach Richards" style="width: 100%; height: 100%; object-fit: cover;" />
+                  <span class="coach-status-dot" style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #00ff88; border: 2px solid var(--bg-card); border-radius: 50%;"></span>
+                </div>
+                <div class="coach-title-box" style="flex: 1;">
+                  <h4 class="coach-name" style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-main);">Coach Richards</h4>
+                  <p class="coach-role" style="margin: 0; font-size: 11px; color: var(--text-sub);">Strict Gym Instructor</p>
+                </div>
+                <div class="streak-badge-wrapper" id="streak-badge-container" style="display: flex; align-items: center; gap: 6px; background: rgba(255, 183, 3, 0.1); border: 1px solid rgba(255, 183, 3, 0.2); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #ffb703;">
+                  <span class="streak-fire-icon">🔥</span>
+                  <span id="streak-count-value" class="streak-count-text">0 Days</span>
+                </div>
+              </div>
+              <div class="coach-bubble" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 14px; position: relative;">
+                <p id="coach-feedback-text" style="margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-main); font-style: italic;">Retrieving coach report...</p>
+              </div>
+            </div>
+
+            </div>
         </section>
 
         <!-- 6. DIET & CALORIE TRACKER PAGE -->
@@ -241,24 +411,24 @@
 
               <!-- Compact Macro Badges Row -->
               <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-top: 4px;">
-                <div class="macro-badge" style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: var(--radius-sm); padding: 6px; text-align: center;">
-                  <span style="font-size: 9px; color: #fca5a5; display: block; font-weight: 700; text-transform: uppercase;">Protein</span>
-                  <span id="diet-protein-total" style="font-size: 12px; font-weight: 700; color: #fca5a5;">0g</span>
+                <div class="macro-badge protein">
+                  <span class="macro-label">Protein</span>
+                  <span id="diet-protein-total" class="macro-value">0g</span>
                 </div>
-                <div class="macro-badge" style="background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.15); border-radius: var(--radius-sm); padding: 6px; text-align: center;">
-                  <span style="font-size: 9px; color: #fef08a; display: block; font-weight: 700; text-transform: uppercase;">Carbs</span>
-                  <span id="diet-carbs-total" style="font-size: 12px; font-weight: 700; color: #fef08a;">0g</span>
+                <div class="macro-badge carbs">
+                  <span class="macro-label">Carbs</span>
+                  <span id="diet-carbs-total" class="macro-value">0g</span>
                 </div>
-                <div class="macro-badge" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: var(--radius-sm); padding: 6px; text-align: center;">
-                  <span style="font-size: 9px; color: #bfdbfe; display: block; font-weight: 700; text-transform: uppercase;">Fat</span>
-                  <span id="diet-fat-total" style="font-size: 12px; font-weight: 700; color: #bfdbfe;">0g</span>
+                <div class="macro-badge fat">
+                  <span class="macro-label">Fat</span>
+                  <span id="diet-fat-total" class="macro-value">0g</span>
                 </div>
               </div>
             </div>
 
             <!-- Date Navigator & Fast Controls -->
             <div class="date-navigator" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: var(--radius-sm);">
+              <div class="diet-date-navigator-container">
                 <button class="btn-icon" onclick="adjustDietDate(-1)" style="padding: 6px; border: none; background: none; color: var(--text-main);">
                   <i data-lucide="chevron-left" style="width: 18px; height: 18px;"></i>
                 </button>
@@ -372,7 +542,7 @@
                 
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <label for="diet-sched-day-select" style="font-size: 13px; font-weight: 600; color: var(--text-sub);">Select Day:</label>
-                  <select id="diet-sched-day-select" onchange="renderWeeklySchedule()" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 13px; outline: none; cursor: pointer;">
+                  <select id="diet-sched-day-select" class="diet-select-input" onchange="renderWeeklySchedule()">
                     <option value="Monday">Monday</option>
                     <option value="Tuesday">Tuesday</option>
                     <option value="Wednesday">Wednesday</option>
@@ -389,7 +559,7 @@
               <!-- Weekly schedule grid (similar layout to daily log) -->
               <div class="meal-grid" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
                 <!-- Breakfast -->
-                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; background: rgba(0,0,0,0.15);">
+                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; ">
                   <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <i data-lucide="coffee" style="color: var(--accent); width:16px; height:16px;"></i>
@@ -408,7 +578,7 @@
                 </div>
 
                 <!-- Lunch -->
-                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; background: rgba(0,0,0,0.15);">
+                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; ">
                   <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <i data-lucide="sandwich" style="color: var(--accent); width:16px; height:16px;"></i>
@@ -427,7 +597,7 @@
                 </div>
 
                 <!-- Evening Snacks -->
-                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; background: rgba(0,0,0,0.15);">
+                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; ">
                   <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <i data-lucide="cookie" style="color: var(--accent); width:16px; height:16px;"></i>
@@ -446,7 +616,7 @@
                 </div>
 
                 <!-- Dinner -->
-                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; background: rgba(0,0,0,0.15);">
+                <div class="glass-card" style="padding: 16px; display: flex; flex-direction: column; ">
                   <div class="card-header" style="padding: 0 0 10px 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <i data-lucide="soup" style="color: var(--accent); width:16px; height:16px;"></i>
@@ -478,23 +648,23 @@
               <form id="diet-profile-form" onsubmit="saveDietProfile(event)">
                 <div class="form-group" style="margin-bottom: 16px;">
                   <label for="diet-prof-age" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px;">Age (years)</label>
-                  <input type="number" id="diet-prof-age" required min="1" max="120" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+                  <input type="number" id="diet-prof-age" class="diet-form-input" required min="1" max="120" style="width: 100%;">
                 </div>
                 <div class="form-group" style="margin-bottom: 16px;">
                   <label for="diet-prof-height" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px;">Height (cm)</label>
-                  <input type="number" id="diet-prof-height" required min="50" max="250" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+                  <input type="number" id="diet-prof-height" class="diet-form-input" required min="50" max="250" style="width: 100%;">
                 </div>
                 <div class="form-group" style="margin-bottom: 16px;">
                   <label for="diet-prof-weight" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px;">Current Weight (kg) <span style="font-size: 11px; font-weight: normal; color: var(--accent);">(Syncs with Gym weight tracker)</span></label>
-                  <input type="number" step="0.1" id="diet-prof-weight" required min="1" max="500" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+                  <input type="number" step="0.1" id="diet-prof-weight" class="diet-form-input" required min="1" max="500" style="width: 100%;">
                 </div>
                 <div class="form-group" style="margin-bottom: 16px;">
                   <label for="diet-prof-goal" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px;">Goal Weight (kg)</label>
-                  <input type="number" step="0.1" id="diet-prof-goal" required min="1" max="500" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+                  <input type="number" step="0.1" id="diet-prof-goal" class="diet-form-input" required min="1" max="500" style="width: 100%;">
                 </div>
                 <div class="form-group" style="margin-bottom: 24px;">
                   <label for="diet-prof-target" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px;">Target Daily Calories (kcal)</label>
-                  <input type="number" id="diet-prof-target" required min="500" max="10000" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
+                  <input type="number" id="diet-prof-target" class="diet-form-input" required min="500" max="10000" style="width: 100%;">
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">
                   <i data-lucide="save"></i> Save Profile Settings
@@ -553,60 +723,717 @@
             </div>
           </div>
 
-          <!-- Bottom Sheet Modal for Adding Foods -->
-          <div id="diet-food-modal" class="diet-modal-overlay" onclick="if(event.target === this) closeAddFoodModal()">
-            <div class="diet-modal-card">
-              <div class="diet-modal-drag"></div>
-              
-              <div class="diet-modal-header">
-                <h4 id="diet-modal-title-text">
-                  <i data-lucide="search" style="color: var(--accent); width: 18px; height: 18px;"></i>
-                  Add Food
-                </h4>
-                <button class="diet-modal-close-btn" onclick="closeAddFoodModal()" title="Close dialog">
-                  <i data-lucide="x" style="width: 16px; height: 16px;"></i>
-                </button>
-              </div>
+        </section>
 
-              <!-- Search input -->
-              <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-shrink: 0;">
-                <input id="diet-search-input" placeholder="Type food name (e.g. Poha, Egg)..." oninput="onDietSearch()" style="flex: 1; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 14px; outline: none; transition: var(--transition);">
-                
-                <select id="diet-sort-select" onchange="onDietSearch()" style="width: 110px; padding: 10px 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.4); color: var(--text-main); font-size: 12px; outline: none; cursor: pointer;">
-                  <option value="name-asc">A-Z</option>
-                  <option value="cal-asc">Cal Γåæ</option>
-                  <option value="cal-desc">Cal Γåô</option>
-                </select>
-              </div>
+        <!-- 7. EXERCISE DICTIONARY PAGE -->
+        <section id="page-dictionary" class="page-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Exercise Library</h2>
+              <p class="page-subtitle">Search, filter, and master exercise technique with step-by-step forms</p>
+            </div>
+          </div>
 
-              <!-- Horizontal Category Chips -->
-              <div id="diet-cat-chips-container" class="diet-category-chips">
-                <!-- Populated dynamically via JS -->
+          <!-- Dictionary Search and Filter Controls -->
+          <div class="glass-card" style="margin-bottom: 20px; padding: 16px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <div style="position: relative; flex: 1;">
+                <input id="dict-search-input" class="diet-form-input" placeholder="Search exercises (e.g. Squat, Bench)..." oninput="onDictSearch()" style="width: 100%; padding-left: 36px;">
+                <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-sub); pointer-events: none;"></i>
               </div>
+            </div>
+            <!-- Category Chips -->
+            <div id="dict-cat-chips" class="diet-category-chips" style="margin-top: 10px; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px;">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
 
-              <!-- Touch-Friendly Search Results list -->
-              <div id="diet-search-list" class="diet-search-list">
-                <!-- Populated dynamically via JS -->
-              </div>
 
-              <!-- Pagination Navigation -->
-              <div class="pagination" style="display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-color); padding-top: 12px;">
-                <div>
-                  <button id="diet-prev-btn" class="btn btn-secondary btn-sm" onclick="changeDietPage(-1)" style="padding: 6px 12px; font-size: 11px;">ΓåÉ Prev</button>
-                  <span id="diet-page-info" style="margin: 0 8px; font-weight: 600; font-size: 11px;">Page 1 of 1</span>
-                  <button id="diet-next-btn" class="btn btn-secondary btn-sm" onclick="changeDietPage(1)" style="padding: 6px 12px; font-size: 11px;">Next ΓåÆ</button>
+          <!-- Exercise List Container -->
+          <div id="dict-exercise-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding-bottom: 120px;">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </section>
+
+        <!-- 8. ACTIVITY CENTER PAGE -->
+        <section id="page-activity" class="page-section" style="padding-bottom: 120px;">
+          <!-- Page Header -->
+          <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+            <div>
+              <h2 class="page-title">Activity Center</h2>
+              <p class="page-subtitle">Your daily habit, movement, and competition dashboard</p>
+            </div>
+            <!-- Streak & XP Badges Header -->
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <!-- XP Badge -->
+              <div class="glass-card" style="padding: 8px 16px; border-radius: 16px; display: flex; align-items: center; gap: 8px; margin: 0;">
+                <span style="font-size: 16px; font-weight: 800; color: var(--accent);">LVL <span id="act-lvl-val">1</span></span>
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                  <span id="act-xp-text" style="font-size: 9px; color: var(--text-sub); font-weight: 600;">0 / 100 XP</span>
+                  <div style="width: 80px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden;">
+                    <div id="act-xp-bar" style="width: 0%; height: 100%; background: var(--accent-gradient); transition: width 0.3s ease;"></div>
+                  </div>
                 </div>
-                <span id="diet-showing-info" style="font-size: 11px; color: var(--text-muted);">(0 items)</span>
+              </div>
+              <!-- Streak Badge -->
+              <div id="act-streak-badge" class="glass-card" style="padding: 8px 16px; border-radius: 16px; display: flex; align-items: center; gap: 6px; margin: 0;">
+                <span style="font-size: 16px;">🔥</span>
+                <span id="act-streak-val" style="font-size: 14px; font-weight: 700; color: var(--warning);">0 Days</span>
               </div>
             </div>
           </div>
+
+          <!-- Streak Risk Alert Banner -->
+          <div id="act-streak-alert" class="missed-notification-banner" style="display: none; margin-bottom: 20px; border-radius: 16px; align-items: center; gap: 10px;">
+            <i data-lucide="alert-triangle" style="width: 18px; height: 18px; color: #ef4444; flex-shrink: 0;"></i>
+            <span id="act-streak-alert-msg">Streak at risk! Complete today's workout to keep it alive.</span>
+          </div>
+
+          <!-- Hero Section: Rings & Health Score -->
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; margin-bottom: 20px;" class="act-hero-grid">
+            
+            <!-- Concentric SVG Activity Rings Card -->
+            <div class="glass-card" style="display: flex; align-items: center; justify-content: space-around; padding: 20px; gap: 16px; min-height: 220px; position: relative;">
+              <!-- Rings Container -->
+              <div style="position: relative; width: 140px; height: 140px; flex-shrink: 0;">
+                <svg width="100%" height="100%" viewBox="0 0 160 160" style="transform: rotate(-90deg);">
+                  <!-- Outer ring: Steps (Radius 70) -->
+                  <circle cx="80" cy="80" r="70" stroke="rgba(255,255,255,0.03)" stroke-width="10" fill="transparent" />
+                  <circle id="ring-steps" cx="80" cy="80" r="70" stroke="#00ff88" stroke-width="10" stroke-dasharray="439.82" stroke-dashoffset="439.82" stroke-linecap="round" fill="transparent" style="transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);" />
+                  
+                  <!-- Middle ring 1: Active Minutes (Radius 56) -->
+                  <circle cx="80" cy="80" r="56" stroke="rgba(255,255,255,0.03)" stroke-width="10" fill="transparent" />
+                  <circle id="ring-active" cx="80" cy="80" r="56" stroke="#ffb703" stroke-width="10" stroke-dasharray="351.85" stroke-dashoffset="351.85" stroke-linecap="round" fill="transparent" style="transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);" />
+                  
+                  <!-- Middle ring 2: Calories (Radius 42) -->
+                  <circle cx="80" cy="80" r="42" stroke="rgba(255,255,255,0.03)" stroke-width="10" fill="transparent" />
+                  <circle id="ring-calories" cx="80" cy="80" r="42" stroke="#ff2a5f" stroke-width="10" stroke-dasharray="263.89" stroke-dashoffset="263.89" stroke-linecap="round" fill="transparent" style="transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);" />
+                  
+                  <!-- Inner ring: Water (Radius 28) -->
+                  <circle cx="80" cy="80" r="28" stroke="rgba(255,255,255,0.03)" stroke-width="10" fill="transparent" />
+                  <circle id="ring-water" cx="80" cy="80" r="28" stroke="#00d9ff" stroke-width="10" stroke-dasharray="175.92" stroke-dashoffset="175.92" stroke-linecap="round" fill="transparent" style="transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);" />
+                </svg>
+                <!-- Mini Icons in Center -->
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                  <span style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">RINGS</span>
+                  <span style="font-size: 8px; color: var(--text-sub); font-weight: 700; text-transform: uppercase;">Sync</span>
+                </div>
+              </div>
+
+              <!-- Rings Legend -->
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 11px;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #00ff88; flex-shrink: 0;"></span>
+                  <span style="color: var(--text-sub);">Steps: <strong id="legend-steps-val" style="color: var(--text-main);">0%</strong></span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 11px;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #ffb703; flex-shrink: 0;"></span>
+                  <span style="color: var(--text-sub);">Active Min: <strong id="legend-active-val" style="color: var(--text-main);">0%</strong></span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 11px;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #ff2a5f; flex-shrink: 0;"></span>
+                  <span style="color: var(--text-sub);">Calories: <strong id="legend-calories-val" style="color: var(--text-main);">0%</strong></span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 11px;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #00d9ff; flex-shrink: 0;"></span>
+                  <span style="color: var(--text-sub);">Water: <strong id="legend-water-val" style="color: var(--text-main);">0%</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Health Score Card -->
+            <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; min-height: 220px; position: relative;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Live Health Score</span>
+              
+              <!-- Circular Arc / Score Ring -->
+              <div style="position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center;">
+                <svg width="100%" height="100%" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                  <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.03)" stroke-width="8" fill="transparent" />
+                  <circle id="health-score-arc" cx="50" cy="50" r="42" stroke="var(--accent)" stroke-width="8" stroke-dasharray="263.89" stroke-dashoffset="263.89" stroke-linecap="round" fill="transparent" style="transition: stroke-dashoffset 0.8s ease;" />
+                </svg>
+                <div style="position: absolute; display: flex; flex-direction: column; align-items: center;">
+                  <span id="act-health-score" style="font-size: 28px; font-weight: 900; color: var(--text-main); line-height: 1;">0</span>
+                  <span style="font-size: 9px; color: var(--text-sub); font-weight: 600; margin-top: 2px;">/100</span>
+                </div>
+              </div>
+
+              <div id="act-health-status" style="font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 10px;">Pending Log</div>
+              <div id="act-health-desc" style="font-size: 10px; color: var(--text-sub); margin-top: 2px; max-width: 180px; line-height: 1.3;">Log sleep, water, and steps to compute score</div>
+            </div>
+
+          </div>
+
+          <!-- Daily Snapshot Strip (Horizontal scrolling list of simple cards) -->
+          <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Daily Snapshot</h3>
+            <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;" class="act-snapshot-strip">
+              <!-- Steps -->
+              <div class="glass-card" style="flex: 0 0 100px; padding: 12px; text-align: center; margin: 0; border-radius: 14px;">
+                <span style="font-size: 14px;">👣</span>
+                <div id="snap-steps" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-top: 4px;">0</div>
+                <div style="font-size: 9px; color: var(--text-sub);">Steps</div>
+              </div>
+              <!-- Distance -->
+              <div class="glass-card" style="flex: 0 0 100px; padding: 12px; text-align: center; margin: 0; border-radius: 14px;">
+                <span style="font-size: 14px;">📍</span>
+                <div id="snap-distance" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-top: 4px;">0.0 km</div>
+                <div style="font-size: 9px; color: var(--text-sub);">Distance</div>
+              </div>
+              <!-- Calories -->
+              <div class="glass-card" style="flex: 0 0 100px; padding: 12px; text-align: center; margin: 0; border-radius: 14px;">
+                <span style="font-size: 14px;">🔥</span>
+                <div id="snap-calories" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-top: 4px;">0 kcal</div>
+                <div style="font-size: 9px; color: var(--text-sub);">Active Burn</div>
+              </div>
+              <!-- Active Minutes -->
+              <div class="glass-card" style="flex: 0 0 100px; padding: 12px; text-align: center; margin: 0; border-radius: 14px;">
+                <span style="font-size: 14px;">⏱️</span>
+                <div id="snap-active" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-top: 4px;">0 m</div>
+                <div style="font-size: 9px; color: var(--text-sub);">Active Time</div>
+              </div>
+              <!-- Workouts -->
+              <div class="glass-card" style="flex: 0 0 100px; padding: 12px; text-align: center; margin: 0; border-radius: 14px;">
+                <span style="font-size: 14px;">🏋️</span>
+                <div id="snap-workout" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-top: 4px;">0%</div>
+                <div style="font-size: 9px; color: var(--text-sub);">Workout</div>
+              </div>
+              <!-- Water -->
+              <div class="glass-card" style="flex: 0 0 100px; padding: 12px; text-align: center; margin: 0; border-radius: 14px;">
+                <span style="font-size: 14px;">💧</span>
+                <div id="snap-water" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-top: 4px;">0 ml</div>
+                <div style="font-size: 9px; color: var(--text-sub);">Water</div>
+              </div>
+              <!-- Weight -->
+              <div class="glass-card" style="flex: 0 0 100px; padding: 12px; text-align: center; margin: 0; border-radius: 14px;">
+                <span style="font-size: 14px;">⚖️</span>
+                <div id="snap-weight" style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-top: 4px;">-- kg</div>
+                <div style="font-size: 9px; color: var(--text-sub);">Weight</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- main content section tabs inside activity page to split the layout -->
+          <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px;" class="act-sub-tabs">
+            <button id="act-tab-btn-dash" class="filter-pill active" onclick="switchActSubTab('dash')">My Dashboard</button>
+            <button id="act-tab-btn-comp" class="filter-pill" onclick="switchActSubTab('comp')">Brothers Arena</button>
+            <button id="act-tab-btn-awards" class="filter-pill" onclick="switchActSubTab('awards')">Badges & Streaks</button>
+            <button id="act-tab-btn-feed" class="filter-pill" onclick="switchActSubTab('feed')">Activity Log & Feed</button>
+          </div>
+
+          <!-- SUB-PAGE: DASHBOARD -->
+          <div id="act-sub-dash" class="act-sub-panel active">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;" class="act-dash-grid">
+              
+              <!-- HYDRATION CARD -->
+              <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 18px;">💧</span>
+                      <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 0;">Hydration Tracker</h4>
+                    </div>
+                    <span id="act-water-streak" class="badge" style="background: rgba(0, 217, 255, 0.1); color: #00d9ff;">0 Day Streak</span>
+                  </div>
+                  <div style="text-align: center; margin: 15px 0;">
+                    <span id="act-water-progress-text" style="font-size: 22px; font-weight: 800; color: #00d9ff;">0 / 3500 ml</span>
+                    <div style="font-size: 11px; color: var(--text-sub); margin-top: 4px;">Daily target: 3.5 Liters (14 cups)</div>
+                  </div>
+                  <!-- Quick-add Buttons -->
+                  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 15px;">
+                    <button class="filter-pill" onclick="addActWater(250)" style="font-size: 11px; padding: 6px 0; text-align: center; font-weight: 700;">+250ml</button>
+                    <button class="filter-pill" onclick="addActWater(500)" style="font-size: 11px; padding: 6px 0; text-align: center; font-weight: 700;">+500ml</button>
+                    <button class="filter-pill" onclick="addActWater(750)" style="font-size: 11px; padding: 6px 0; text-align: center; font-weight: 700;">+750ml</button>
+                    <button class="filter-pill" onclick="addActWater(1000)" style="font-size: 11px; padding: 6px 0; text-align: center; font-weight: 700;">+1.0L</button>
+                  </div>
+                </div>
+                <!-- Mini Weekly Trend (Canvas / SVG based bar) -->
+                <div>
+                  <span style="font-size: 10px; font-weight: 700; color: var(--text-sub); text-transform: uppercase;">7-Day Water Trend</span>
+                  <div id="water-bar-chart" style="display: flex; justify-content: space-between; align-items: flex-end; height: 50px; margin-top: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 2px;">
+                    <!-- Rendered via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- MOVEMENT CARD (manual logger + steps stats) -->
+              <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 18px;">👣</span>
+                      <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 0;">Daily Movement Log</h4>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span id="act-health-sync-status" class="badge" style="font-size: 9px; padding: 4px 7px;">Manual</span>
+                      <button class="filter-pill" onclick="showLogMovementModal()" style="font-size: 10px; padding: 4px 10px;">Log Activity</button>
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+                    <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); padding: 10px; border-radius: 10px; text-align: center;">
+                      <span style="font-size: 11px; color: var(--text-sub);">Steps Goal</span>
+                      <div id="act-steps-progress" style="font-size: 16px; font-weight: 700; color: #00ff88; margin-top: 4px;">0 / 10000</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); padding: 10px; border-radius: 10px; text-align: center;">
+                      <span style="font-size: 11px; color: var(--text-sub);">Active Min Goal</span>
+                      <div id="act-active-progress" style="font-size: 16px; font-weight: 700; color: #ffb703; margin-top: 4px;">0 / 60m</div>
+                    </div>
+                  </div>
+                  <!-- Presets for fast entry -->
+                  <div style="display: flex; gap: 6px; justify-content: space-between; font-size: 10px; margin-bottom: 15px;">
+                    <button class="filter-pill" onclick="logMovementPreset('morning')" style="flex: 1; padding: 6px 0; font-size: 10px;">🌅 Morning Walk (3k)</button>
+                    <button class="filter-pill" onclick="logMovementPreset('evening')" style="flex: 1; padding: 6px 0; font-size: 10px;">🌇 Evening Walk (5k)</button>
+                  </div>
+                </div>
+
+                <div>
+                  <span style="font-size: 10px; font-weight: 700; color: var(--text-sub); text-transform: uppercase;">7-Day Steps Trend</span>
+                  <div id="steps-bar-chart" style="display: flex; justify-content: space-between; align-items: flex-end; height: 50px; margin-top: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 2px;">
+                    <!-- Rendered via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- SLEEP & RECOVERY CARD -->
+              <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 18px;">🛌</span>
+                      <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 0;">Sleep & Recovery</h4>
+                    </div>
+                    <button class="filter-pill" onclick="showSleepLogModal()" style="font-size: 10px; padding: 4px 10px;">Log Sleep</button>
+                  </div>
+
+                  <div style="text-align: center; margin: 15px 0;">
+                    <div id="act-sleep-duration-text" style="font-size: 22px; font-weight: 800; color: var(--text-main);">0h 0m logged</div>
+                    <div id="act-sleep-quality-stars" style="font-size: 14px; color: #ffb703; margin-top: 4px;">☆☆☆☆☆</div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; text-align: center;">
+                      <span style="font-size: 9px; color: var(--text-sub); text-transform: uppercase;">Sleep Score</span>
+                      <div id="act-sleep-score-val" style="font-size: 16px; font-weight: 700; color: #00d9ff; margin-top: 2px;">0</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; text-align: center;">
+                      <span style="font-size: 9px; color: var(--text-sub); text-transform: uppercase;">Recovery Score</span>
+                      <div id="act-recovery-score-val" style="font-size: 16px; font-weight: 700; color: var(--accent); margin-top: 2px;">--</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <span style="font-size: 10px; font-weight: 700; color: var(--text-sub); text-transform: uppercase;">Sleep History</span>
+                  <div id="sleep-bar-chart" style="display: flex; justify-content: space-between; align-items: flex-end; height: 50px; margin-top: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 2px;">
+                    <!-- Rendered via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- WEIGHT & BODY STATS CARD -->
+              <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 18px;">⚖️</span>
+                      <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 0;">Weight & Body Stats</h4>
+                    </div>
+                    <button class="filter-pill" onclick="showWeightLogModal()" style="font-size: 10px; padding: 4px 10px;">Log Weight</button>
+                  </div>
+
+                  <div style="text-align: center; margin: 10px 0;">
+                    <span id="act-current-weight" style="font-size: 24px; font-weight: 800; color: var(--accent);">-- kg</span>
+                    <div style="font-size: 11px; color: var(--text-sub); margin-top: 4px;">Goal: <span id="act-goal-weight">--</span> kg</div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; text-align: center;">
+                      <span style="font-size: 9px; color: var(--text-sub); text-transform: uppercase;">Body Fat %</span>
+                      <div id="act-bodyfat-val" style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-top: 2px;">-- %</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; text-align: center;">
+                      <span style="font-size: 9px; color: var(--text-sub); text-transform: uppercase;">Waist Size</span>
+                      <div id="act-waist-val" style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-top: 2px;">-- in</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <span style="font-size: 10px; font-weight: 700; color: var(--text-sub); text-transform: uppercase;">Goal Progress</span>
+                  <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin: 8px 0 4px 0;">
+                    <div id="weight-progress-fill" style="width: 0%; height: 100%; background: var(--accent-gradient); transition: width 0.4s ease;"></div>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--text-sub);">
+                    <span>Start: <span id="act-start-weight">--</span> kg</span>
+                    <span id="act-weight-delta-msg" style="font-weight: 600; color: var(--accent);">--</span>
+                    <span>Goal: <span id="act-goal-weight-2">--</span> kg</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- SUB-PAGE: BROTHERS ARENA (COMPETITION & RACE) -->
+          <div id="act-sub-comp" class="act-sub-panel">
+            <!-- Head-to-Head Card -->
+            <div class="glass-card" style="margin-bottom: 20px;">
+              <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                <span>👑</span> <span id="comp-arena-title">Brother Arena</span>
+              </h4>
+              <div id="rival-setup-row" style="display: none; gap: 8px; margin-bottom: 14px;">
+                <input id="rival-username-input" class="diet-form-input" placeholder="Enter rival username" style="flex: 1; font-size: 12px;" autocapitalize="none" spellcheck="false">
+                <button class="filter-pill active" onclick="saveRivalUsername()" style="padding: 8px 14px; border: none; cursor: pointer;">Set Rival</button>
+              </div>
+
+              <div class="act-versus-grid" style="display: grid; grid-template-columns: 1fr 120px 1fr; gap: 10px; align-items: center; text-align: center;">
+                <!-- Aman Column -->
+                <div style="background: rgba(0, 255, 136, 0.02); border: 1px solid rgba(0, 255, 136, 0.08); padding: 15px; border-radius: 12px;">
+                  <span id="comp-name-aman" style="font-size: 18px; font-weight: 800; color: #00ff88;">You</span>
+                  <div style="font-size: 24px; font-weight: 800; margin-top: 10px;" id="comp-aman-score">0</div>
+                  <span style="font-size: 10px; color: var(--text-sub);">Arena XP</span>
+                </div>
+                <!-- VERSUS / LEADERBOARD -->
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-sub); font-style: italic;">
+                  VS
+                  <div style="margin-top: 8px; font-size: 10px; background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 20px; font-style: normal;" id="comp-leader-badge">Draw</div>
+                </div>
+                <!-- Rishit Column -->
+                <div style="background: rgba(157, 78, 221, 0.02); border: 1px solid rgba(157, 78, 221, 0.08); padding: 15px; border-radius: 12px;">
+                  <span id="comp-name-rishit" style="font-size: 18px; font-weight: 800; color: #9d4edd;">Rival</span>
+                  <div style="font-size: 24px; font-weight: 800; margin-top: 10px;" id="comp-rishit-score">0</div>
+                  <span style="font-size: 10px; color: var(--text-sub);">Arena XP</span>
+                </div>
+              </div>
+
+              <!-- Metric Comparison Rows -->
+              <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+                <h5 style="font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-bottom: 5px;">Metric Breakdown (Today)</h5>
+                
+                <!-- Steps Comparison -->
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span id="comp-steps-aman" style="font-weight: 700; color: #00ff88;">0 steps</span>
+                    <span style="color: var(--text-sub); font-weight: 600;">Steps Walked</span>
+                    <span id="comp-steps-rishit" style="font-weight: 700; color: #9d4edd;">0 steps</span>
+                  </div>
+                  <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; display: flex; overflow: hidden;">
+                    <div id="comp-bar-steps-aman" style="width: 50%; height: 100%; background: #00ff88; transition: width 0.4s ease;"></div>
+                    <div id="comp-bar-steps-rishit" style="width: 50%; height: 100%; background: #9d4edd; transition: width 0.4s ease;"></div>
+                  </div>
+                </div>
+
+                <!-- Sleep Score Comparison -->
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span id="comp-sleep-aman" style="font-weight: 700; color: #00ff88;">0</span>
+                    <span style="color: var(--text-sub); font-weight: 600;">Sleep Score</span>
+                    <span id="comp-sleep-rishit" style="font-weight: 700; color: #9d4edd;">0</span>
+                  </div>
+                  <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; display: flex; overflow: hidden;">
+                    <div id="comp-bar-sleep-aman" style="width: 50%; height: 100%; background: #00ff88; transition: width 0.4s ease;"></div>
+                    <div id="comp-bar-sleep-rishit" style="width: 50%; height: 100%; background: #9d4edd; transition: width 0.4s ease;"></div>
+                  </div>
+                </div>
+
+                <!-- Water Comparison -->
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span id="comp-water-aman" style="font-weight: 700; color: #00ff88;">0 ml</span>
+                    <span style="color: var(--text-sub); font-weight: 600;">Water Logged</span>
+                    <span id="comp-water-rishit" style="font-weight: 700; color: #9d4edd;">0 ml</span>
+                  </div>
+                  <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; display: flex; overflow: hidden;">
+                    <div id="comp-bar-water-aman" style="width: 50%; height: 100%; background: #00ff88; transition: width 0.4s ease;"></div>
+                    <div id="comp-bar-water-rishit" style="width: 50%; height: 100%; background: #9d4edd; transition: width 0.4s ease;"></div>
+                  </div>
+                </div>
+
+                <!-- Workout Comparison -->
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span id="comp-workout-aman" style="font-weight: 700; color: #00ff88;">0%</span>
+                    <span style="color: var(--text-sub); font-weight: 600;">Workout Completion</span>
+                    <span id="comp-workout-rishit" style="font-weight: 700; color: #9d4edd;">0%</span>
+                  </div>
+                  <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; display: flex; overflow: hidden;">
+                    <div id="comp-bar-workout-aman" style="width: 50%; height: 100%; background: #00ff88; transition: width 0.4s ease;"></div>
+                    <div id="comp-bar-workout-rishit" style="width: 50%; height: 100%; background: #9d4edd; transition: width 0.4s ease;"></div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Race Mode Card -->
+            <div class="glass-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>🏁</span> Active Steps Race
+                </h4>
+                <!-- Target Selector -->
+                <div style="display: flex; gap: 4px;">
+                  <button id="race-target-btn-5k" class="filter-pill active" onclick="setRaceTarget(5000)" style="font-size: 9px; padding: 4px 8px;">5K</button>
+                  <button id="race-target-btn-10k" class="filter-pill" onclick="setRaceTarget(10000)" style="font-size: 9px; padding: 4px 8px;">10K</button>
+                  <button id="race-target-btn-15k" class="filter-pill" onclick="setRaceTarget(15000)" style="font-size: 9px; padding: 4px 8px;">15K</button>
+                </div>
+              </div>
+
+              <!-- Race Tracks -->
+              <div style="display: flex; flex-direction: column; gap: 20px; margin: 20px 0; position: relative;">
+                <!-- Target Line Marker -->
+                <div style="position: absolute; right: 20px; top: 0; bottom: 0; border-left: 2px dashed rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; z-index: 1;">
+                  <span style="font-size: 9px; color: var(--text-sub); transform: rotate(90deg); white-space: nowrap; margin-left: 4px;">FINISH</span>
+                </div>
+
+                <!-- Aman Runner -->
+                <div style="display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 2;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span id="race-name-aman" style="font-weight: 700; color: #00ff88;">You🏃</span>
+                    <span id="race-steps-aman" style="font-weight: 700;">0 / 5,000 steps</span>
+                  </div>
+                  <div style="height: 14px; background: rgba(255,255,255,0.03); border-radius: 99px; overflow: hidden; padding: 2px;">
+                    <div id="race-bar-aman" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00ff88, #00d9ff); border-radius: 99px; transition: width 0.4s ease;"></div>
+                  </div>
+                </div>
+
+                <!-- Rishit Runner -->
+                <div style="display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 2;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span id="race-name-rishit" style="font-weight: 700; color: #9d4edd;">Rival🏃</span>
+                    <span id="race-steps-rishit" style="font-weight: 700;">0 / 5,000 steps</span>
+                  </div>
+                  <div style="height: 14px; background: rgba(255,255,255,0.03); border-radius: 99px; overflow: hidden; padding: 2px;">
+                    <div id="race-bar-rishit" style="width: 0%; height: 100%; background: linear-gradient(90deg, #9d4edd, #ff007f); border-radius: 99px; transition: width 0.4s ease;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Race Status Banner -->
+              <div id="race-status-banner" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; text-align: center; font-size: 12px; color: var(--text-sub); font-weight: 600;">
+                Race is on! First to hit the target wins a 200 XP bonus.
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-PAGE: BADGES & STREAKS -->
+          <div id="act-sub-awards" class="act-sub-panel">
+            <!-- Streaks Showcase -->
+            <div class="glass-card" style="margin-bottom: 20px;">
+              <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 15px;">🔥 Active Habit Streaks</h4>
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;" class="act-streaks-grid">
+                
+                <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); padding: 12px 6px; border-radius: 12px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                  <span class="flame-emoji" style="font-size: 24px;">🏋️</span>
+                  <span id="streak-show-workout" style="font-size: 16px; font-weight: 800; color: var(--accent); margin-top: 4px;">0 Days</span>
+                  <span style="font-size: 9px; color: var(--text-sub); margin-top: 2px;">Workouts</span>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); padding: 12px 6px; border-radius: 12px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                  <span class="flame-emoji" style="font-size: 24px;">👣</span>
+                  <span id="streak-show-steps" style="font-size: 16px; font-weight: 800; color: #00ff88; margin-top: 4px;">0 Days</span>
+                  <span style="font-size: 9px; color: var(--text-sub); margin-top: 2px;">Steps (8K)</span>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); padding: 12px 6px; border-radius: 12px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                  <span class="flame-emoji" style="font-size: 24px;">💧</span>
+                  <span id="streak-show-water" style="font-size: 16px; font-weight: 800; color: #00d9ff; margin-top: 4px;">0 Days</span>
+                  <span style="font-size: 9px; color: var(--text-sub); margin-top: 2px;">Water (3.5L)</span>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); padding: 12px 6px; border-radius: 12px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                  <span class="flame-emoji" style="font-size: 24px;">🛌</span>
+                  <span id="streak-show-sleep" style="font-size: 16px; font-weight: 800; color: #ffb703; margin-top: 4px;">0 Days</span>
+                  <span style="font-size: 9px; color: var(--text-sub); margin-top: 2px;">Sleep (7h+)</span>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Achievement Showcase Grid -->
+            <div class="glass-card">
+              <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 15px;">🏆 Dynamic Badge Showcase</h4>
+              <div id="act-badge-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px;">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-PAGE: LOG & FEED -->
+          <div id="act-sub-feed" class="act-sub-panel">
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px;" class="act-feed-grid">
+              
+              <!-- Social Feed -->
+              <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+                <div>
+                  <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">📣 Brotherhood Feed</h4>
+                  <div id="act-social-feed-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px;">
+                    <!-- Populated dynamically via JS -->
+                  </div>
+                </div>
+                <!-- Manual custom post -->
+                <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px; display: flex; gap: 8px;">
+                  <input id="act-feed-msg-input" class="diet-form-input" placeholder="Brag to your brother..." style="flex: 1; font-size: 12px;">
+                  <button class="filter-pill" onclick="postToFeed()" style="padding: 6px 14px; font-weight: 700; font-size: 11px;">Post</button>
+                </div>
+              </div>
+
+              <!-- Challenges & AI Insights -->
+              <div style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- Challenges Card -->
+                <div class="glass-card" style="padding: 18px;">
+                  <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                    🎯 Quests & Challenges
+                  </h4>
+                  <div style="display: flex; flex-direction: column; gap: 10px;" id="act-challenges-list">
+                    <!-- Populated dynamically via JS -->
+                  </div>
+                </div>
+
+                <!-- Insights Card -->
+                <div class="glass-card" style="padding: 18px;">
+                  <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                    💡 Coach Richards' Insights
+                  </h4>
+                  <div style="display: flex; flex-direction: column; gap: 10px;" id="act-insights-list">
+                    <!-- Populated dynamically via JS -->
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </section>
+
 
       </main>
     </div>
   </div>
 
   <!-- Floating Stopwatch & Timer removed -->
+
+  <!-- Bottom Sheet Modal for Adding Foods -->
+  <div id="diet-food-modal" class="diet-modal-overlay" onclick="if(event.target === this) closeAddFoodModal()">
+    <div class="diet-modal-card">
+      <div class="diet-modal-drag"></div>
+      
+      <div class="diet-modal-header">
+        <h4 id="diet-modal-title-text">
+          <i data-lucide="search" style="color: var(--accent); width: 18px; height: 18px;"></i>
+          Add Food
+        </h4>
+        <button class="diet-modal-close-btn" onclick="closeAddFoodModal()" title="Close dialog">
+          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+
+      <!-- Search input -->
+      <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-shrink: 0;">
+        <input id="diet-search-input" class="diet-form-input" placeholder="Type food name (e.g. Poha, Egg)..." oninput="onDietSearch()" style="flex: 1;">
+        
+        <select id="diet-sort-select" class="diet-select-input" onchange="onDietSearch()" style="width: 110px; padding: 10px 10px; font-size: 12px;">
+          <option value="name-asc">A-Z</option>
+          <option value="cal-asc">Cal ↑</option>
+          <option value="cal-desc">Cal ↓</option>
+        </select>
+      </div>
+
+      <!-- Horizontal Category Chips -->
+      <div id="diet-cat-chips-container" class="diet-category-chips">
+        <!-- Populated dynamically via JS -->
+      </div>
+
+      <!-- Touch-Friendly Search Results list -->
+      <div id="diet-search-list" class="diet-search-list">
+        <!-- Populated dynamically via JS -->
+      </div>
+
+      <!-- Pagination Navigation -->
+      <div class="pagination" style="display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-color); padding-top: 12px;">
+        <div>
+          <button id="diet-prev-btn" class="btn btn-secondary btn-sm" onclick="changeDietPage(-1)" style="padding: 6px 12px; font-size: 11px;">← Prev</button>
+          <span id="diet-page-info" style="margin: 0 8px; font-weight: 600; font-size: 11px;">Page 1 of 1</span>
+          <button id="diet-next-btn" class="btn btn-secondary btn-sm" onclick="changeDietPage(1)" style="padding: 6px 12px; font-size: 11px;">Next →</button>
+        </div>
+        <span id="diet-showing-info" style="font-size: 11px; color: var(--text-muted);">(0 items)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Portion Details & Log Modal Drawer -->
+  <div id="diet-portion-modal" class="diet-modal-overlay" onclick="if(event.target === this) closePortionModal()" role="dialog" aria-hidden="true" aria-labelledby="portion-modal-title">
+    <div class="diet-modal-card" style="max-height: 85vh;">
+      <div class="diet-modal-drag"></div>
+      <div class="diet-modal-header">
+        <h4 id="portion-modal-title" style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px;">
+          <i data-lucide="scale" style="color: var(--accent); width: 18px; height: 18px;"></i>
+          Adjust Serving & Portion
+        </h4>
+        <button class="diet-modal-close-btn" onclick="closePortionModal()" title="Close dialog" aria-label="Close details dialog">
+          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+      
+      <div style="overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 16px;">
+        <!-- Food details -->
+        <div>
+          <span id="portion-food-category" style="font-size: 11px; text-transform: uppercase; background: rgba(0,255,136,0.1); color: var(--accent); padding: 2px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px;">Beverages</span>
+          <h3 id="portion-food-name" style="font-size: 20px; font-weight: 800; color: var(--text-main); margin: 6px 0 2px 0;">Masala Chai</h3>
+          <p style="font-size: 12px; color: var(--text-sub); margin: 0;">Recommended Serving: <span id="portion-recommended-size" style="font-weight: 600; color: var(--text-main);">1 cup (150ml)</span></p>
+        </div>
+
+        <!-- Scale Dynamic Stats (Calories, Macros) -->
+        <div class="portion-stats-grid">
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Calories</span>
+            <span id="portion-display-cal" style="font-size: 14px; font-weight: 700; color: var(--accent); margin-top: 4px;">0 kcal</span>
+          </div>
+          <div style="display: flex; flex-direction: column; border-left: 1px solid var(--border-color);">
+            <span style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Protein</span>
+            <span id="portion-display-protein" style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 4px;">0g</span>
+          </div>
+          <div style="display: flex; flex-direction: column; border-left: 1px solid var(--border-color);">
+            <span style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Carbs</span>
+            <span id="portion-display-carbs" style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 4px;">0g</span>
+          </div>
+          <div style="display: flex; flex-direction: column; border-left: 1px solid var(--border-color);">
+            <span style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Fats</span>
+            <span id="portion-display-fat" style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 4px;">0g</span>
+          </div>
+        </div>
+
+        <!-- Custom Weight Input and Steppers -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label for="portion-weight-input" style="font-size: 12px; font-weight: 600; color: var(--text-sub);">Custom Weight / Volume (g or ml)</label>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-secondary" onclick="stepPortionWeight(-25)" style="padding: 10px 14px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); cursor: pointer;">-25</button>
+            <input type="number" id="portion-weight-input" class="diet-form-input" oninput="onPortionWeightChange()" style="flex: 1; min-width: 0; text-align: center; font-size: 18px; font-weight: 700; height: 44px; padding: 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(0,0,0,0.4); color: var(--text-main);" />
+            <button class="btn btn-secondary" onclick="stepPortionWeight(25)" style="padding: 10px 14px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); cursor: pointer;">+25</button>
+          </div>
+        </div>
+
+        <!-- Multipliers -->
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Quick Multipliers</span>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="setPortionMultiplier(0.5)" style="padding: 8px; font-size: 12px; font-weight: 600;">0.5x</button>
+            <button class="btn btn-secondary btn-sm" onclick="setPortionMultiplier(1.0)" style="padding: 8px; font-size: 12px; font-weight: 600;">1.0x (Std)</button>
+            <button class="btn btn-secondary btn-sm" onclick="setPortionMultiplier(1.5)" style="padding: 8px; font-size: 12px; font-weight: 600;">1.5x</button>
+            <button class="btn btn-secondary btn-sm" onclick="setPortionMultiplier(2.0)" style="padding: 8px; font-size: 12px; font-weight: 600;">2.0x</button>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div style="display: flex; gap: 10px; margin-top: 8px;">
+          <button class="btn btn-secondary" onclick="closePortionModal()" style="flex: 1; padding: 12px; font-size: 14px; font-weight: 600;">Cancel</button>
+          <button class="btn btn-primary" onclick="confirmAddPortion()" style="flex: 2; padding: 12px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Log Food
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Exercise Info Modal Drawer -->
   <div id="exercise-info-modal" class="diet-modal-overlay" onclick="if(event.target === this) closeExerciseInfoModal()" role="dialog" aria-hidden="true" aria-labelledby="ex-modal-title">
@@ -623,6 +1450,11 @@
       </div>
       <div style="overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 14px;">
         <h3 id="ex-modal-name" style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">Push-ups</h3>
+        
+        <!-- Video Container -->
+        <div id="ex-modal-video-container" style="display: none; margin-bottom: 4px;">
+          <!-- Will be populated dynamically by script.js -->
+        </div>
         
         <div>
           <h5 style="font-size: 11px; text-transform: uppercase; color: var(--accent); font-weight: 700; letter-spacing: 0.5px; margin: 0 0 6px 0;">How to Perform</h5>
@@ -641,11 +1473,173 @@
     </div>
   </div>
 
+  <!-- Premium Rest & Sets Timer Modal -->
+  <div id="exercise-timer-modal" class="diet-modal-overlay" onclick="if(event.target === this) closeTimerModal()" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="diet-modal-card" style="max-height: 85vh; backdrop-filter: blur(20px);">
+      <div class="diet-modal-drag"></div>
+      <div class="diet-modal-header">
+        <h4 style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px; font-weight: 700; color: var(--accent);">
+          <i data-lucide="timer" style="width: 18px; height: 18px;"></i>
+          Rest & Set Timer
+        </h4>
+        <button class="diet-modal-close-btn" onclick="closeTimerModal()" title="Close timer">
+          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+        </button>
+      </div>
+
+      <div style="overflow-y: auto; flex: 1; min-height: 0; padding-right: 4px; display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%; box-sizing: border-box;">
+        <!-- Alarm Banner (shown when rest timer finishes) -->
+        <div id="timer-alarm-banner" class="timer-alarm-banner" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="bell-ring" class="alarm-icon-active" style="color: #ffb703; width: 18px; height: 18px;"></i>
+            <span class="timer-alarm-text">Rest Complete! Next set.</span>
+          </div>
+          <button class="btn btn-secondary btn-sm timer-alarm-stop-btn" onclick="stopAlarmSound(); document.getElementById('timer-alarm-banner').style.display = 'none';">Stop</button>
+        </div>
+
+        <!-- Exercise Header -->
+        <div style="text-align: center; width: 100%;">
+          <h3 id="timer-modal-ex-name" style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">Incline Dumbbell Press</h3>
+          <p id="timer-modal-ex-details" style="font-size: 11px; color: var(--text-sub); margin: 2px 0 0 0;">Target: 3 Sets x 10 Reps</p>
+        </div>
+
+        <!-- Visual Ring Timer -->
+        <div class="timer-circle-wrapper" style="position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; margin: 4px 0; flex-shrink: 0;">
+          <svg style="position: absolute; top: 0; left: 0; transform: rotate(-90deg); width: 150px; height: 150px;">
+            <circle class="timer-circle-bg" cx="75" cy="75" r="66" stroke-width="6" fill="transparent" />
+            <circle id="timer-circle-progress" cx="75" cy="75" r="66" stroke="var(--accent)" stroke-width="6" fill="transparent" stroke-dasharray="414.7" stroke-dashoffset="0" stroke-linecap="round" style="transition: stroke-dashoffset 0.1s linear;" />
+          </svg>
+          <div style="display: flex; flex-direction: column; align-items: center; z-index: 1;">
+            <span id="timer-modal-countdown" style="font-size: 32px; font-weight: 800; font-family: monospace; color: var(--text-main); line-height: 1;">01:30</span>
+            <span id="timer-modal-state" style="font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--accent); letter-spacing: 1px; margin-top: 4px;">RESTING</span>
+          </div>
+        </div>
+
+        <!-- Quick Adjusters -->
+        <div style="display: flex; gap: 8px; justify-content: center; width: 100%;">
+          <button class="btn btn-secondary btn-sm" onclick="adjustTimerDuration(-15)" style="padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: var(--radius-sm); cursor: pointer;">-15s</button>
+          <button class="btn btn-secondary btn-sm" onclick="adjustTimerDuration(15)" style="padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: var(--radius-sm); cursor: pointer;">+15s</button>
+          <button class="btn btn-secondary btn-sm" onclick="resetTimerDuration()" style="padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: var(--radius-sm); cursor: pointer;">Reset</button>
+        </div>
+
+        <!-- Premium Sets Tracker Dashboard -->
+        <div class="timer-sets-dashboard" style="display: flex; flex-direction: column; gap: 6px; border-radius: var(--radius-sm); padding: 10px 12px; box-sizing: border-box;">
+          <h5 style="font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 700; letter-spacing: 0.5px; margin: 0 0 2px 0; display: flex; align-items: center; justify-content: space-between;">
+            <span>Sets Tracker</span>
+            <span id="timer-modal-set-ratio" style="font-size: 10px; color: var(--text-sub); font-family: monospace;">Done: 0/3</span>
+          </h5>
+          <div id="timer-modal-sets-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; width: 100%;">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div style="display: flex; gap: 10px; width: 100%; margin-top: 4px;">
+          <button id="timer-modal-control-btn" class="btn btn-secondary" onclick="toggleTimerModalState()" style="flex: 1; padding: 12px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--radius-sm); cursor: pointer;">
+            <i data-lucide="play" style="width: 16px; height: 16px;"></i> Start
+          </button>
+          <button class="btn btn-primary" onclick="completeExerciseFromTimer()" style="flex: 1.5; padding: 12px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--radius-sm); border: none; cursor: pointer;">
+            <i data-lucide="check" style="width: 16px; height: 16px;"></i> Log Exercise
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOG MOVEMENT MODAL -->
+  <div id="act-movement-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px);">
+    <div class="glass-card modal-content" style="max-width: 400px; width: 90%; padding: 24px; position: relative; margin: auto;">
+      <button class="modal-close-btn" onclick="closeActModal('act-movement-modal')" style="position: absolute; right: 16px; top: 16px; background: none; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer;">&times;</button>
+      <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">👣 Log Activity</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; text-align: left;">
+        <div>
+          <label style="font-size: 11px; color: var(--text-sub); font-weight: 600; display: block; margin-bottom: 4px;">Steps Walked</label>
+          <input id="input-act-steps" type="number" class="diet-form-input" placeholder="e.g. 8000" style="width: 100%;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-sub); font-weight: 600; display: block; margin-bottom: 4px;">Distance (km)</label>
+          <input id="input-act-distance" type="number" step="0.1" class="diet-form-input" placeholder="e.g. 5.6" style="width: 100%;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-sub); font-weight: 600; display: block; margin-bottom: 4px;">Active Minutes</label>
+          <input id="input-act-active" type="number" class="diet-form-input" placeholder="e.g. 45" style="width: 100%;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-sub); font-weight: 600; display: block; margin-bottom: 4px;">Floors Climbed</label>
+          <input id="input-act-floors" type="number" class="diet-form-input" placeholder="e.g. 8" style="width: 100%;">
+        </div>
+      </div>
+      <button class="filter-pill active" onclick="saveActMovement()" style="width: 100%; padding: 12px; font-weight: 700; text-align: center; border-radius: 12px; border: none; cursor: pointer;">Save Activity</button>
+    </div>
+  </div>
+
+  <!-- LOG SLEEP MODAL -->
+  <div id="act-sleep-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px);">
+    <div class="glass-card modal-content" style="max-width: 400px; width: 90%; padding: 24px; position: relative; margin: auto;">
+      <button class="modal-close-btn" onclick="closeActModal('act-sleep-modal')" style="position: absolute; right: 16px; top: 16px; background: none; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer;">&times;</button>
+      <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">🛌 Log Sleep</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; text-align: left;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label style="font-size: 11px; color: var(--text-sub); font-weight: 600; display: block; margin-bottom: 4px;">Bedtime</label>
+            <input id="input-act-sleep-bed" type="time" class="diet-form-input" style="width: 100%;">
+          </div>
+          <div>
+            <label style="font-size: 11px; color: var(--text-sub); font-weight: 600; display: block; margin-bottom: 4px;">Wake Time</label>
+            <input id="input-act-sleep-wake" type="time" class="diet-form-input" style="width: 100%;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-sub); font-weight: 600; display: block; margin-bottom: 4px;">Sleep Quality (1-5 Stars)</label>
+          <input id="input-act-sleep-quality" type="range" min="1" max="5" class="diet-form-input" style="width: 100%; padding: 0;" oninput="document.getElementById('sleep-quality-lbl').textContent = this.value + ' / 5'">
+          <div style="text-align: right; font-size: 11px; font-weight: 700; color: var(--accent); margin-top: 4px;" id="sleep-quality-lbl">3 / 5</div>
+        </div>
+      </div>
+      <button class="filter-pill active" onclick="saveActSleep()" style="width: 100%; padding: 12px; font-weight: 700; text-align: center; border-radius: 12px; border: none; cursor: pointer;">Save Sleep Record</button>
+    </div>
+  </div>
+
+  <!-- LOG WEIGHT MODAL -->
+  <div id="act-weight-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px);">
+    <div class="glass-card modal-content" style="max-width: 400px; width: 90%; padding: 24px; position: relative; margin: auto;">
+      <button class="modal-close-btn" onclick="closeActModal('act-weight-modal')" style="position: absolute; right: 16px; top: 16px; background: none; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer;">&times;</button>
+      <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">⚖️ Log Weight & Body Stats</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; text-align: left;">
+        <div>
+          <label style="font-size: 11px; color: var(--text-sub); font-weight: 600; display: block; margin-bottom: 4px;">Weight (kg)</label>
+          <input id="input-act-weight" type="number" step="0.05" class="diet-form-input" placeholder="e.g. 94.6" style="width: 100%;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-sub); font-weight: 600; display: block; margin-bottom: 4px;">Body Fat %</label>
+          <input id="input-act-bodyfat" type="number" step="0.1" class="diet-form-input" placeholder="e.g. 22.5" style="width: 100%;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-sub); font-weight: 600; display: block; margin-bottom: 4px;">Waist Size (inches)</label>
+          <input id="input-act-waist" type="number" step="0.25" class="diet-form-input" placeholder="e.g. 34.0" style="width: 100%;">
+        </div>
+      </div>
+      <button class="filter-pill active" onclick="saveActWeight()" style="width: 100%; padding: 12px; font-weight: 700; text-align: center; border-radius: 12px; border: none; cursor: pointer;">Save Body Stats</button>
+    </div>
+  </div>
+
+  <!-- Supabase client JS CDN library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Main script file -->
   <script src="script.js"></script>
   <script>
-    // Initialize icons
-    lucide.createIcons();
+    // Initialize icons safely
+    if (typeof safeCreateIcons !== 'undefined') {
+      safeCreateIcons();
+    } else if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      try {
+        lucide.createIcons();
+      } catch (e) {
+        console.warn("Lucide initialization failed", e);
+      }
+    }
   </script>
 </body>
 </html>

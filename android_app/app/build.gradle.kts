@@ -9,7 +9,7 @@ android {
     compileSdk = 36
     defaultConfig {
         applicationId = "com.example.duogym"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -81,4 +81,10 @@ dependencies {
   implementation(libs.androidx.navigation3.ui)
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+  // WebView extensions for secure local origin loading and performance
+  implementation("androidx.webkit:webkit:1.12.0")
+
+  // Health Connect is the single on-device source of truth for activity metrics.
+  implementation("androidx.health.connect:connect-client:1.1.0")
 }
