@@ -1,277 +1,14 @@
 /* ============================================================
-   DuoGym — Authentication & Cloud Sync Module
-   ============================================================
-   Handles login, logout, remember-me, and Firebase Firestore sync.
+   DuoGym / FitRivals — Core Configuration & UI Utilities
    ============================================================ */
 
-// --- AUTH CREDENTIALS (SHA-256 hashed passwords) ---
-const AUTH_CREDENTIALS = {
-  // Legacy local credentials removed. Supabase Auth is now the identity source.
-};
-
 const AUTH_STORAGE_KEY = 'duogym_auth_session';
-const AUTH_EXPIRY_DAYS = 30;
-
-// --- SHA-256 Hashing ---
-async function sha256(message) {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 // --- Auth State Management ---
 let isAuthenticated = false;
 let authenticatedUser = null;
 
-function getAuthSession() {
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) return null;
-    const session = JSON.parse(raw);
-    // Check expiry
-    if (session.expiry && Date.now() > session.expiry) {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-      return null;
-    }
-    return session;
-  } catch (e) {
-    console.warn('Failed to read auth session', e);
-    return null;
-  }
-}
-
-function setAuthSession(username, rememberMe) {
-  const session = {
-    username: username,
-    timestamp: Date.now(),
-    expiry: rememberMe ? Date.now() + (AUTH_EXPIRY_DAYS * 24 * 60 * 60 * 1000) : null,
-    rememberMe: rememberMe
-  };
-  try {
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-  } catch (e) {
-    console.warn('Failed to save auth session', e);
-  }
-}
-
-function clearAuthSession() {
-  try {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-  } catch (e) {
-    console.warn('Failed to clear auth session', e);
-  }
-}
-
-// --- Login Handler ---
-async function handleLogin() {
-  const loginBtn = document.getElementById('login-btn');
-  const errorEl = document.getElementById('login-error');
-  const passwordInput = document.getElementById('login-password');
-  
-  if (!loginBtn || !passwordInput) return;
-  
-  // Get selected user
-  const selectedUser = document.querySelector('.login-user-btn.active');
-  const username = selectedUser ? selectedUser.dataset.user : 'aman';
-  const password = passwordInput.value;
-  
-  if (!password) {
-    showLoginError('Enter your password, warrior.');
-    return;
-  }
-  
-  // Show loading state
-  loginBtn.classList.add('loading');
-  errorEl.classList.remove('visible');
-  
-  try {
-    // Hash the entered password
-    const hash = await sha256(password);
-    const cred = AUTH_CREDENTIALS[username];
-    
-    if (!cred || hash !== cred.passwordHash) {
-      await new Promise(r => setTimeout(r, 600)); // Simulate delay
-      showLoginError('Wrong password. Coach Richards is watching.');
-      loginBtn.classList.remove('loading');
-      passwordInput.value = '';
-      passwordInput.focus();
-      return;
-    }
-    
-    // Success!
-    const rememberMe = document.getElementById('login-remember-toggle');
-    const shouldRemember = rememberMe ? rememberMe.classList.contains('active') : false;
-    
-    setAuthSession(username, shouldRemember);
-    isAuthenticated = true;
-    authenticatedUser = username;
-    
-    // Small delay for smooth animation
-    await new Promise(r => setTimeout(r, 400));
-    
-    // Transition to app
-    completeLogin(username);
-    
-  } catch (e) {
-    console.error('Login error:', e);
-    showLoginError('Something went wrong. Try again.');
-    loginBtn.classList.remove('loading');
-  }
-}
-
-function showLoginError(message) {
-  const errorEl = document.getElementById('login-error');
-  if (errorEl) {
-    errorEl.textContent = message;
-    errorEl.classList.remove('visible');
-    void errorEl.offsetWidth; // Trigger reflow for re-animation
-    errorEl.classList.add('visible');
-  }
-}
-
-function completeLogin(username) {
-  // Hide login overlay
-  const loginOverlay = document.getElementById('login-overlay');
-  if (loginOverlay) {
-    loginOverlay.classList.add('hidden');
-  }
-  
-  // Set the current user
-  currentUser = username;
-  
-  // Show the main app layout
-  const appLayout = document.getElementById('app-layout');
-  if (appLayout) {
-    appLayout.style.display = '';
-  }
-  
-  // Update header to show logged-in user name
-  updateLoggedInHeader(username);
-  
-  // Load data and render
-  if (typeof loadData === 'function') loadData();
-  
-  // Set selected date
-  if (typeof dateToYYYYMMDD === 'function') {
-    const todayStr = dateToYYYYMMDD(new Date());
-    if (typeof isWithinSubscription === 'function' && isWithinSubscription(todayStr)) {
-      selectedDate = todayStr;
-    } else if (typeof START_DATE_STR !== 'undefined') {
-      selectedDate = START_DATE_STR;
-    }
-  }
-  
-  if (typeof switchUser === 'function') switchUser(username);
-  if (typeof switchPage === 'function') switchPage('today');
-  if (typeof initDietData === 'function') initDietData();
-  
-  // Initialize Supabase sync if available
-  if (typeof initSupabaseSync === 'function') {
-    initSupabaseSync(username);
-  }
-}
-
-function updateLoggedInHeader(username) {
-  const cred = AUTH_CREDENTIALS[username];
-  const displayName = cred ? cred.displayName : username;
-  
-  // Hide the user tab switcher — each user has their own login now
-  const userTabs = document.querySelector('.user-tabs');
-  if (userTabs) {
-    userTabs.style.display = 'none';
-  }
-  
-  // Update header logged in user badge
-  const headerUser = document.getElementById('header-logged-user');
-  if (headerUser) {
-    headerUser.textContent = displayName;
-    headerUser.style.display = 'inline-block';
-    if (username === 'rishit') {
-      headerUser.style.color = '#9d4edd';
-      headerUser.style.background = 'rgba(157, 78, 221, 0.1)';
-    } else {
-      headerUser.style.color = '#00ff88';
-      headerUser.style.background = 'rgba(0, 255, 136, 0.1)';
-    }
-  }
-  
-  // Show logout button
-  const logoutBtn = document.getElementById('header-logout-btn');
-  if (logoutBtn) {
-    logoutBtn.style.display = 'flex';
-  }
-}
-
-// --- Logout Handler ---
-function handleLogout() {
-  if (!confirm('Log out of DuoGym?')) return;
-  
-  clearAuthSession();
-  isAuthenticated = false;
-  authenticatedUser = null;
-  
-  // Hide user badge
-  const headerUser = document.getElementById('header-logged-user');
-  if (headerUser) {
-    headerUser.style.display = 'none';
-  }
-  
-  // Show login overlay
-  const loginOverlay = document.getElementById('login-overlay');
-  if (loginOverlay) {
-    loginOverlay.classList.remove('hidden');
-  }
-  
-  // Hide main app
-  const appLayout = document.getElementById('app-layout');
-  if (appLayout) {
-    appLayout.style.display = 'none';
-  }
-  
-  // Clear password field
-  const passwordInput = document.getElementById('login-password');
-  if (passwordInput) passwordInput.value = '';
-  
-  // Reset login button
-  const loginBtn = document.getElementById('login-btn');
-  if (loginBtn) loginBtn.classList.remove('loading');
-  
-  // Hide error
-  const errorEl = document.getElementById('login-error');
-  if (errorEl) errorEl.classList.remove('visible');
-}
-
 // --- Login UI Helpers ---
-function selectLoginUser(username) {
-  // Update button active states
-  document.querySelectorAll('.login-user-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.user === username);
-  });
-  
-  // Move slider
-  const slider = document.querySelector('.login-user-slider');
-  if (slider) {
-    slider.classList.toggle('right', username === 'rishit');
-  }
-  
-  // Update accent color preview
-  const loginCard = document.querySelector('.login-card');
-  if (loginCard) {
-    if (username === 'rishit') {
-      loginCard.style.setProperty('--accent', '#9d4edd');
-      loginCard.style.setProperty('--accent-gradient', 'linear-gradient(135deg, #9d4edd 0%, #7b2cbf 100%)');
-    } else {
-      loginCard.style.setProperty('--accent', '#00ff88');
-      loginCard.style.setProperty('--accent-gradient', 'linear-gradient(135deg, #00ff88 0%, #00cc6a 100%)');
-    }
-  }
-  
-  // Focus password
-  const passwordInput = document.getElementById('login-password');
-  if (passwordInput) passwordInput.focus();
-}
-
 function toggleLoginPassword() {
   const input = document.getElementById('login-password');
   const btn = document.querySelector('.login-eye-btn');
@@ -282,33 +19,12 @@ function toggleLoginPassword() {
   }
 }
 
+// Remember me is visually handled by UI layout toggles.
 function toggleLoginRemember() {
   const toggle = document.getElementById('login-remember-toggle');
   if (toggle) {
     toggle.classList.toggle('active');
   }
-}
-
-// --- Auth Check on Page Load ---
-function checkAuthOnLoad() {
-  const session = getAuthSession();
-  
-  if (session && session.username && AUTH_CREDENTIALS[session.username]) {
-    // Valid session — skip login
-    isAuthenticated = true;
-    authenticatedUser = session.username;
-    completeLogin(session.username);
-    return true;
-  }
-  
-  // No valid session — show login page, hide app
-  const loginOverlay = document.getElementById('login-overlay');
-  const appLayout = document.getElementById('app-layout');
-  
-  if (loginOverlay) loginOverlay.classList.remove('hidden');
-  if (appLayout) appLayout.style.display = 'none';
-  
-  return false;
 }
 
 // Handle Enter key on password field
@@ -3388,6 +3104,552 @@ function calculateWorkoutStats(user) {
 // Calculate weight changes month-over-month
 function calculateMonthlyWeightChanges(user) {
   const startWeight = getStartingWeight(user);
+  const weights = fitnessData[user].weights || {};
+  
+  const start = new Date(START_DATE_STR);
+  const end = new Date(END_DATE_STR);
+  const realToday = new Date();
+  const todayBound = realToday > end ? end : realToday;
+  
+  const loggedDates = Object.keys(weights).sort();
+  const months = [];
+  
+  let currentDate = new Date(start.getFullYear(), start.getMonth(), 1);
+  const endMonth = new Date(todayBound.getFullYear(), todayBound.getMonth(), 1);
+  
+  while (currentDate <= endMonth) {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const lastDay = new Date(year, month + 1, 0);
+    const lastDayStr = dateToYYYYMMDD(lastDay > todayBound ? todayBound : lastDay);
+    
+    let activeWeight = startWeight;
+    for (const dStr of loggedDates) {
+      if (dStr <= lastDayStr) {
+        activeWeight = weights[dStr];
+      } else {
+        break;
+      }
+    }
+    
+    months.push({
+      label: currentDate.toLocaleDateString("en-US", { month: "long" }),
+      year,
+      month,
+      weight: activeWeight
+    });
+    
+    currentDate.setMonth(currentDate.getMonth() + 1);
+  }
+  
+  const summary = [];
+  if (months.length > 0) {
+    const juneWeight = months[0].weight;
+    const juneChange = juneWeight - startWeight;
+    summary.push({ label: months[0].label, change: juneChange });
+  }
+  for (let i = 1; i < months.length; i++) {
+    const prevWeight = months[i - 1].weight;
+    const currWeight = months[i].weight;
+    const change = currWeight - prevWeight;
+    summary.push({ label: months[i].label, change });
+  }
+  return summary;
+}
+
+
+
+// Prompt Goal Weight configuration
+function promptGoalWeight() {
+  const currentGoal = fitnessData[currentUser].goalWeight || 80.0;
+  const newGoalStr = prompt(`Enter new goal weight (kg) for ${currentUser.charAt(0).toUpperCase() + currentUser.slice(1)}:`, currentGoal);
+  if (newGoalStr === null) return;
+  const newGoal = parseFloat(newGoalStr);
+  if (isNaN(newGoal) || newGoal <= 0 || newGoal > 300) {
+    alert("Please enter a valid positive weight value.");
+    return;
+  }
+  fitnessData[currentUser].goalWeight = newGoal;
+  saveData();
+}
+
+// Toggle active exercise library muscle filter pills
+let activeLibraryFilter = "all";
+function setLibraryFilter(muscle) {
+  activeLibraryFilter = muscle;
+  const pills = document.querySelectorAll(".filter-pill");
+  pills.forEach(p => {
+    p.classList.toggle("active", p.textContent.trim().toLowerCase() === muscle.toLowerCase() || (muscle === "all" && p.textContent.trim() === "All"));
+  });
+  filterLibrary();
+}
+
+/* ============================================================
+   10.8. DEVELOPER & FUTURE MAINTAINABILITY GUIDE
+   ============================================================
+   Welcome! Follow these simple guidelines to update this app.
+   All modifications should be made directly in this script.js file.
+
+   1. HOW TO CHANGE WORKOUT TYPES OR NAMES:
+      Locate `weeklySchedule` configuration array around line 604. 
+      Update the `type` or `focus` values of any weekday item.
+      E.g., Change Monday's focus: `focus: "Chest, Back & Shoulders"`
+
+   2. HOW TO ADD OR EDIT EXERCISES IN DATABASE:
+      Locate `exerciseLibrary` configuration array around line 47.
+      Add or edit an object with the following structure:
+      {
+        id: "unique-exercise-id",
+        name: "Exercise Display Name",
+        muscles: ["Chest", "Triceps"],
+        description: "A short guide on what the exercise is...",
+        steps: ["Step 1 description...", "Step 2 description..."],
+        mistakes: ["Common mistake..."],
+        breathing: "Breathing directions...",
+        tips: ["Safety tip..."],
+        restTime: "60-90 seconds",
+        image: "https://unsplash.com/..."
+      }
+
+   3. HOW TO UPDATE WEEKLY SCHEDULE / ASSIGNED EXERCISES:
+      Locate `weeklySchedule` configuration array around line 604.
+      Under each day, update the `exercises` array by adding/removing
+      exercise references matching the IDs inside the `exerciseLibrary`.
+      E.g., `exercises: [ { exerciseId: "bench-press", reps: "8-12 reps", sets: 3 } ]`
+
+   4. HOW TO EXTEND SUBSCRIPTION DATES:
+      Locate `START_DATE_STR` and `END_DATE_STR` constants around line 695.
+      Change the date string values in "YYYY-MM-DD" format.
+      E.g., Extend end date: `const END_DATE_STR = "2028-12-31";`
+
+   5. HOW TO ADD ANOTHER USER:
+      Step A: Locate `STARTING_WEIGHTS` around line 698. Add a new key and weight:
+              `const STARTING_WEIGHTS = { aman: 94.6, rishit: 92.7, newuser: 85.0 };`
+      Step B: Locate `initData()` around line 789. Copy & append a new user block:
+              `newuser: { workouts: {}, weights: { "2026-06-15": 85.0 }, notes: { general: "" }, measurements: {}, photos: {}, goalWeight: 75.0 }`
+      Step C: In `index.html` (Header Section), copy the tab button markup:
+              `<button id="tab-user-newuser" class="user-tab-btn" onclick="switchUser('newuser')">New User</button>`
+   ============================================================ */
+
+/* ============================================================
+   12. DIET & CALORIE TRACKER MODULE LOGIC
+   ============================================================ */
+
+// Food database containing Indian, Bengali, and common daily foods with explicit portion weights and macros
+const dietFoods = [
+  // Beverages
+  {n:"Chai (Tea) with Milk & Sugar",c:"Beverages",s:"1 cup (150ml)",w:150,k:120,p:2,carb:20,f:4},
+  {n:"Chai (Tea) Black/No Sugar",c:"Beverages",s:"1 cup (150ml)",w:150,k:5,p:0.2,carb:1,f:0},
+  {n:"Filter Coffee with Milk & Sugar",c:"Beverages",s:"1 cup (150ml)",w:150,k:110,p:2,carb:18,f:3.5},
+  {n:"Coffee Black/No Sugar",c:"Beverages",s:"1 cup (150ml)",w:150,k:2,p:0.1,carb:0.4,f:0},
+  {n:"Green Tea",c:"Beverages",s:"1 cup (150ml)",w:150,k:2,p:0,carb:0.5,f:0},
+  {n:"Sweet Lassi",c:"Beverages",s:"1 glass (250ml)",w:250,k:200,p:5,carb:32,f:5},
+  {n:"Salted Lassi",c:"Beverages",s:"1 glass (250ml)",w:250,k:120,p:4.5,carb:12,f:5},
+  {n:"Masala Chaas (Buttermilk)",c:"Beverages",s:"1 glass (250ml)",w:250,k:45,p:2,carb:4,f:2},
+  {n:"Coconut Water",c:"Beverages",s:"1 cup (200ml)",w:200,k:40,p:1,carb:9,f:0.2},
+  {n:"Sugarcane Juice",c:"Beverages",s:"1 glass (250ml)",w:250,k:180,p:0.5,carb:45,f:0.1},
+  {n:"Soft Drink (Cola/Soda)",c:"Beverages",s:"1 can (330ml)",w:330,k:140,p:0,carb:35,f:0},
+
+  // Breakfast Items
+  {n:"Poha",c:"Breakfast",s:"1 plate (150g)",w:150,k:260,p:4,carb:45,f:7},
+  {n:"Suji Upma",c:"Breakfast",s:"1 plate (150g)",w:150,k:220,p:4,carb:34,f:7},
+  {n:"Idli",c:"Breakfast",s:"2 medium pieces (80g)",w:80,k:150,p:4,carb:32,f:0.5},
+  {n:"Plain Dosa",c:"Breakfast",s:"1 large (80g)",w:80,k:165,p:3,carb:29,f:4},
+  {n:"Masala Dosa",c:"Breakfast",s:"1 large (150g)",w:150,k:290,p:6,carb:48,f:8},
+  {n:"Medu Vada",c:"Breakfast",s:"2 pieces (80g)",w:80,k:190,p:5,carb:18,f:11},
+  {n:"Sambar",c:"Breakfast",s:"1 bowl (150g)",w:150,k:85,p:3,carb:14,f:2},
+  {n:"Coconut Chutney",c:"Breakfast",s:"2 tbsp (30g)",w:30,k:90,p:1,carb:4,f:8},
+  {n:"Aloo Paratha",c:"Breakfast",s:"1 medium (100g)",w:100,k:290,p:6,carb:42,f:11},
+  {n:"Paneer Paratha",c:"Breakfast",s:"1 medium (100g)",w:100,k:330,p:12,carb:38,f:14},
+  {n:"Gobhi Paratha",c:"Breakfast",s:"1 medium (100g)",w:100,k:240,p:5,carb:36,f:8},
+  {n:"Puri Bhaji",c:"Breakfast",s:"2 puri + bhaji (180g)",w:180,k:380,p:7,carb:48,f:18},
+  {n:"Chole Bhature",c:"Breakfast",s:"1 plate (220g)",w:220,k:550,p:12,carb:70,f:24},
+  {n:"Dhokla",c:"Breakfast",s:"2 pieces (80g)",w:80,k:130,p:6,carb:18,f:4},
+  {n:"Khandvi",c:"Breakfast",s:"4 pieces (100g)",w:100,k:140,p:4,carb:16,f:6},
+  {n:"Moong Dal Cheela",c:"Breakfast",s:"2 medium (100g)",w:100,k:190,p:12,carb:28,f:3},
+  {n:"Besan Cheela",c:"Breakfast",s:"2 medium (100g)",w:100,k:210,p:10,carb:30,f:5},
+  {n:"Oatmeal with Milk",c:"Breakfast",s:"1 bowl (200g)",w:200,k:260,p:10,carb:42,f:5},
+  {n:"Boiled Egg",c:"Breakfast",s:"1 large (50g)",w:50,k:78,p:6,carb:0.6,f:5},
+  {n:"Omelette (2 Eggs, Plain)",c:"Breakfast",s:"1 plate (100g)",w:100,k:180,p:12,carb:1,f:14},
+  {n:"Egg Bhurji (2 Eggs)",c:"Breakfast",s:"1 plate (120g)",w:120,k:220,p:14,carb:3,f:17},
+  {n:"Whey Protein",c:"Breakfast",s:"1 scoop (33g)",w:33,k:120,p:24,carb:3,f:1.5},
+
+  // Rice & Pulao
+  {n:"Plain White Rice (Cooked)",c:"Rice",s:"1 bowl (150g)",w:150,k:195,p:4,carb:43,f:0.5},
+  {n:"Brown Rice (Cooked)",c:"Rice",s:"1 bowl (150g)",w:150,k:170,p:4,carb:35,f:1.5},
+  {n:"Jeera Rice",c:"Rice",s:"1 bowl (150g)",w:150,k:210,p:4.2,carb:42,f:2.5},
+  {n:"Khichdi (Moong Dal & Rice)",c:"Rice",s:"1 bowl (150g)",w:150,k:215,p:7,carb:38,f:3},
+  {n:"Veg Biryani",c:"Rice",s:"1 plate (250g)",w:250,k:350,p:8,carb:62,f:8},
+  {n:"Chicken Biryani",c:"Rice",s:"1 plate (250g)",w:250,k:480,p:28,carb:58,f:15},
+  {n:"Curd Rice",c:"Rice",s:"1 bowl (200g)",w:200,k:220,p:5,carb:35,f:6},
+
+  // Breads
+  {n:"Roti (Whole Wheat, Plain)",c:"Bread",s:"1 medium (40g)",w:40,k:100,p:3,carb:20,f:0.5},
+  {n:"Butter Roti",c:"Bread",s:"1 medium (45g)",w:45,k:130,p:3,carb:20,f:4},
+  {n:"Tandoori Roti (Plain)",c:"Bread",s:"1 piece (60g)",w:60,k:150,p:4.5,carb:31,f:0.6},
+  {n:"Plain Naan",c:"Bread",s:"1 piece (90g)",w:90,k:260,p:6.5,carb:52,f:3},
+  {n:"Butter Naan",c:"Bread",s:"1 piece (95g)",w:95,k:310,p:6.5,carb:52,f:8.5},
+  {n:"Garlic Naan",c:"Bread",s:"1 piece (95g)",w:95,k:320,p:7,carb:53,f:9},
+  {n:"Missi Roti",c:"Bread",s:"1 piece (60g)",w:60,k:145,p:6,carb:24,f:3},
+  {n:"Bajra Roti",c:"Bread",s:"1 piece (50g)",w:50,k:120,p:3.5,carb:25,f:1},
+  {n:"White Bread",c:"Bread",s:"1 slice (25g)",w:25,k:65,p:2,carb:13,f:0.5},
+  {n:"Brown Bread",c:"Bread",s:"1 slice (28g)",w:28,k:70,p:3,carb:13,f:0.8},
+
+  // Dals & Soups
+  {n:"Dal Tadka (Yellow Dal)",c:"Dal",s:"1 bowl (150g)",w:150,k:150,p:7,carb:20,f:4},
+  {n:"Dal Makhani",c:"Dal",s:"1 bowl (150g)",w:150,k:240,p:8,carb:22,f:13},
+  {n:"Chana Masala (Chickpeas)",c:"Dal",s:"1 bowl (150g)",w:150,k:180,p:8,carb:28,f:4},
+  {n:"Rajma Masala (Kidney Beans)",c:"Dal",s:"1 bowl (150g)",w:150,k:190,p:9,carb:30,f:4},
+  {n:"Shorba / Lentil Soup",c:"Dal",s:"1 bowl (200ml)",w:200,k:110,p:6,carb:18,f:2},
+  {n:"Tomato Soup",c:"Dal",s:"1 bowl (200ml)",w:200,k:80,p:1.5,carb:12,f:3},
+
+  // Vegetables & Paneer
+  {n:"Mixed Veg Sabzi",c:"Veg Dishes",s:"1 bowl (150g)",w:150,k:110,p:3,carb:15,f:5},
+  {n:"Bhindi Masala (Okra)",c:"Veg Dishes",s:"1 bowl (150g)",w:150,k:130,p:3,carb:12,f:8},
+  {n:"Aloo Gobhi",c:"Veg Dishes",s:"1 bowl (150g)",w:150,k:150,p:3,carb:18,f:8},
+  {n:"Baingan Bharta",c:"Veg Dishes",s:"1 bowl (150g)",w:150,k:120,p:2,carb:14,f:6},
+  {n:"Paneer Butter Masala",c:"Paneer",s:"1 bowl (150g)",w:150,k:320,p:12,carb:10,f:26},
+  {n:"Palak Paneer",c:"Paneer",s:"1 bowl (150g)",w:150,k:210,p:10,carb:8,f:15},
+  {n:"Kadai Paneer",c:"Paneer",s:"1 bowl (150g)",w:150,k:260,p:11,carb:9,f:20},
+  {n:"Paneer Bhurji",c:"Paneer",s:"1 serving (150g)",w:150,k:270,p:14,carb:6,f:21},
+  {n:"Paneer Tikka (Grilled)",c:"Paneer",s:"6 pieces (150g)",w:150,k:270,p:18,carb:6,f:20},
+  {n:"Raw Paneer",c:"Paneer",s:"50g portion",w:50,k:165,p:10,carb:1,f:13},
+
+  // Non-Veg Curries
+  {n:"Chicken Curry (Indian style)",c:"Non-Veg",s:"1 bowl (150g)",w:150,k:240,p:22,carb:6,f:14},
+  {n:"Butter Chicken",c:"Non-Veg",s:"1 bowl (150g)",w:150,k:380,p:24,carb:12,f:26},
+  {n:"Chicken Tikka",c:"Non-Veg",s:"6 pieces (150g)",w:150,k:220,p:30,carb:4,f:8},
+  {n:"Fish Curry (Indian style)",c:"Non-Veg",s:"1 bowl (180g)",w:180,k:210,p:20,carb:5,f:12},
+  {n:"Egg Curry (2 Eggs)",c:"Non-Veg",s:"1 bowl (180g)",w:180,k:260,p:14,carb:8,f:19},
+  {n:"Mutton Curry",c:"Non-Veg",s:"1 bowl (180g)",w:180,k:340,p:26,carb:8,f:22},
+
+  // Dairy & Sides
+  {n:"Dahi / Curd (Whole Milk)",c:"Dairy",s:"1 bowl (150g)",w:150,k:100,p:5,carb:6,f:6},
+  {n:"Dahi / Curd (Double Toned)",c:"Dairy",s:"1 bowl (150g)",w:150,k:60,p:6,carb:7,f:0.2},
+  {n:"Cow Milk (Toned)",c:"Dairy",s:"1 glass (250ml)",w:250,k:120,p:8,carb:12,f:4.5},
+  {n:"Cow Milk (Full Cream)",c:"Dairy",s:"1 glass (250ml)",w:250,k:160,p:8.2,carb:12.5,f:8.5},
+  {n:"Amul Butter",c:"Dairy",s:"1 pat (10g)",w:10,k:72,p:0.1,carb:0,f:8},
+  {n:"Ghee (Clarified Butter)",c:"Dairy",s:"1 tsp (5ml)",w:5,k:45,p:0,carb:0,f:5},
+
+  // Snacks & Street Foods
+  {n:"Samosa",c:"Snacks",s:"1 medium (70g)",w:70,k:250,p:4,carb:25,f:15},
+  {n:"Pakora (Veg Mix)",c:"Snacks",s:"4 pieces (80g)",w:80,k:280,p:5,carb:25,f:18},
+  {n:"Panipuri / Golgappa",c:"Snacks",s:"6 pieces (100g)",w:100,k:150,p:3,carb:26,f:4},
+  {n:"Pav Bhaji",c:"Snacks",s:"1 plate (200g)",w:200,k:400,p:9,carb:58,f:14},
+  {n:"Vada Pav",c:"Snacks",s:"1 piece (120g)",w:120,k:300,p:6,carb:40,f:12},
+  {n:"Bhelpuri",c:"Snacks",s:"1 plate (100g)",w:100,k:180,p:4,carb:32,f:4},
+  {n:"Sev Puri",c:"Snacks",s:"6 pieces (120g)",w:120,k:310,p:6,carb:42,f:13},
+  {n:"Papdi Chaat",c:"Snacks",s:"1 plate (150g)",w:150,k:340,p:7,carb:42,f:16},
+  {n:"Veg Momos (Steamed)",c:"Snacks",s:"6 pieces (120g)",w:120,k:220,p:6,carb:42,f:3},
+  {n:"Veg Roll",c:"Snacks",s:"1 roll (150g)",w:150,k:320,p:8,carb:48,f:11},
+  {n:"Paneer Roll",c:"Snacks",s:"1 roll (160g)",w:160,k:390,p:15,carb:50,f:15},
+  {n:"Maggie Noodles",c:"Snacks",s:"1 bowl (150g cooked)",w:150,k:310,p:7,carb:44,f:12},
+  {n:"Roasted Makhana (Foxnuts)",c:"Snacks",s:"1 bowl (20g)",w:20,k:75,p:2,carb:15,f:0.1},
+  {n:"Roasted Chana (Gram)",c:"Snacks",s:"1 handful (30g)",w:30,k:110,p:6,carb:18,f:1.5},
+  {n:"Almonds",c:"Snacks",s:"10 pieces (10g)",w:10,k:60,p:2.2,carb:2.2,f:5},
+  {n:"Peanut Butter",c:"Snacks",s:"1 tbsp (16g)",w:16,k:95,p:4,carb:3,f:8},
+
+  // Sweets & Desserts
+  {n:"Gulab Jamun",c:"Sweets",s:"2 pieces (80g)",w:80,k:300,p:4,carb:50,f:10},
+  {n:"Jalebi",c:"Sweets",s:"2 pieces (60g)",w:60,k:220,p:1,carb:38,f:7},
+  {n:"Rasgulla",c:"Sweets",s:"2 pieces (80g)",w:80,k:200,p:4,carb:38,f:3},
+  {n:"Kaju Katli",c:"Sweets",s:"2 pieces (30g)",w:30,k:120,p:2,carb:16,f:6},
+  {n:"Besan Ladoo",c:"Sweets",s:"1 piece (40g)",w:40,k:200,p:3,carb:24,f:10},
+  {n:"Motichoor Ladoo",c:"Sweets",s:"1 piece (40g)",w:40,k:185,p:2,carb:26,f:8},
+  {n:"Rasmalai",c:"Sweets",s:"1 piece (80g)",w:80,k:160,p:5,carb:22,f:6},
+  {n:"Kheer (Rice Pudding)",c:"Sweets",s:"1 bowl (150g)",w:150,k:240,p:6,carb:38,f:7},
+  {n:"Gajar Halwa",c:"Sweets",s:"1 bowl (150g)",w:150,k:380,p:6,carb:52,f:16},
+
+  // Fruits
+  {n:"Banana",c:"Fruits",s:"1 medium (110g)",w:110,k:95,p:1.2,carb:25,f:0.3},
+  {n:"Apple",c:"Fruits",s:"1 medium (150g)",w:150,k:80,p:0.3,carb:20,f:0.2},
+  {n:"Papaya",c:"Fruits",s:"1 cup diced (145g)",w:145,k:60,p:0.6,carb:15,f:0.1},
+  {n:"Mango",c:"Fruits",s:"1 medium (200g)",w:200,k:130,p:1.6,carb:34,f:0.6},
+  {n:"Watermelon",c:"Fruits",s:"1 cup diced (150g)",w:150,k:46,p:0.9,carb:11,f:0.2}
+];
+
+// Default preset diet plan mapping (Fat-loss base plan)
+const defaultPresetDiet = {
+  Breakfast: [
+    { n: "Poha", c: "Breakfast", s: "150g portion (1 plate)", k: 260, p: 4, carb: 45, f: 7 },
+    { n: "Banana", c: "Fruits", s: "110g portion (1 medium)", k: 95, p: 1.2, carb: 25, f: 0.3 },
+    { n: "Chai (Tea) with Milk & Sugar", c: "Beverages", s: "150ml portion (1 cup)", k: 120, p: 2, carb: 20, f: 4 }
+  ],
+  Lunch: [
+    { n: "Plain White Rice (Cooked)", c: "Rice", s: "150g portion (1 bowl)", k: 195, p: 4, carb: 43, f: 0.5 },
+    { n: "Dal Tadka (Yellow Dal)", c: "Dal", s: "150g portion (1 bowl)", k: 150, p: 7, carb: 20, f: 4 },
+    { n: "Mixed Veg Sabzi", c: "Veg Dishes", s: "150g portion (1 bowl)", k: 110, p: 3, carb: 15, f: 5 }
+  ],
+  EveningSnacks: [
+    { n: "Roasted Chana (Gram)", c: "Snacks", s: "30g portion (1 handful)", k: 110, p: 6, carb: 18, f: 1.5 }
+  ],
+  Dinner: [
+    { n: "Roti (Whole Wheat, Plain)", c: "Bread", s: "120g portion (3 medium)", k: 300, p: 9, carb: 60, f: 1.5 },
+    { n: "Paneer Bhurji", c: "Paneer", s: "150g portion (1 plate)", k: 270, p: 14, carb: 6, f: 21 },
+    { n: "Cow Milk (Toned)", c: "Dairy", s: "250ml portion (1 glass)", k: 120, p: 8, carb: 12, f: 4.5 }
+  ]
+};
+
+// Default 7-day weekly schedule for Aman
+const defaultWeeklyScheduleAman = {
+  Monday: JSON.parse(JSON.stringify(defaultPresetDiet)),
+  Tuesday: JSON.parse(JSON.stringify(defaultPresetDiet)),
+  Wednesday: JSON.parse(JSON.stringify(defaultPresetDiet)),
+  Thursday: JSON.parse(JSON.stringify(defaultPresetDiet)),
+  Friday: JSON.parse(JSON.stringify(defaultPresetDiet)),
+  Saturday: JSON.parse(JSON.stringify(defaultPresetDiet)),
+  Sunday: JSON.parse(JSON.stringify(defaultPresetDiet))
+};
+
+// Default 7-day weekly schedule for Rishit (Aman's + portion adjustment)
+const defaultWeeklyScheduleRishit = JSON.parse(JSON.stringify(defaultWeeklyScheduleAman));
+Object.keys(defaultWeeklyScheduleRishit).forEach(day => {
+  const dayPlan = defaultWeeklyScheduleRishit[day];
+  dayPlan.Breakfast = [
+    { n: "Poha", c: "Breakfast", s: "200g portion (1.3 plates)", k: 346, p: 5.3, carb: 60, f: 9.3 },
+    { n: "Banana", c: "Fruits", s: "110g portion (1 medium)", k: 95, p: 1.2, carb: 25, f: 0.3 },
+    { n: "Filter Coffee with Milk & Sugar", c: "Beverages", s: "150ml portion (1 cup)", k: 110, p: 2, carb: 18, f: 3.5 }
+  ];
+  dayPlan.Lunch = [
+    { n: "Plain White Rice (Cooked)", c: "Rice", s: "200g portion (1.3 bowls)", k: 260, p: 5.3, carb: 57, f: 0.7 },
+    { n: "Dal Tadka (Yellow Dal)", c: "Dal", s: "150g portion (1 bowl)", k: 150, p: 7, carb: 20, f: 4 },
+    { n: "Mixed Veg Sabzi", c: "Veg Dishes", s: "150g portion (1 bowl)", k: 110, p: 3, carb: 15, f: 5 }
+  ];
+  dayPlan.EveningSnacks = [
+    { n: "Roasted Chana (Gram)", c: "Snacks", s: "40g portion (1.3 handfuls)", k: 150, p: 8, carb: 24, f: 2 }
+  ];
+  dayPlan.Dinner = [
+    { n: "Roti (Whole Wheat, Plain)", c: "Bread", s: "160g portion (4 medium)", k: 400, p: 12, carb: 80, f: 2 },
+    { n: "Paneer Bhurji", c: "Paneer", s: "200g portion (1.3 plates)", k: 360, p: 18.7, carb: 8, f: 28 },
+    { n: "Cow Milk (Toned)", c: "Dairy", s: "250ml portion (1 glass)", k: 120, p: 8, carb: 12, f: 4.5 }
+  ];
+});
+
+// State variables for Diet Tracker
+let amanDietData = null;
+let rishitDietData = null;
+let selectedDietDate = "";
+let activeDietTab = "log"; // log, schedule, profile, reports
+let dietSearchPage = 1;
+const dietSearchPageSize = 8;
+let activeLoggingMeal = "";
+let selectedDietCategory = "";
+
+// Macro Calculation Helper: estimates P/C/F based on food categories and calories
+function getFoodMacros(food) {
+  // Check if exact macros are defined on the food object
+  const hasExact = (food.p !== undefined || food.protein !== undefined) && 
+                    (food.carb !== undefined || food.carbs !== undefined) && 
+                    (food.f !== undefined || food.fat !== undefined);
+  if (hasExact) {
+    return {
+      protein: Math.round(food.p !== undefined ? food.p : (food.protein || 0)),
+      carbs: Math.round(food.carb !== undefined ? food.carb : (food.carbs || 0)),
+      fat: Math.round(food.f !== undefined ? food.f : (food.fat || 0))
+    };
+  }
+  
+  let p = 0, c = 0, f = 0;
+  const kcal = food.k || food.calories || 0;
+  const cat = food.c || food.category || "";
+  
+  switch(cat) {
+    case "Breakfast":
+      p = Math.round((kcal * 0.15) / 4);
+      c = Math.round((kcal * 0.60) / 4);
+      f = Math.round((kcal * 0.25) / 9);
+      break;
+    case "Rice":
+    case "Bread":
+      p = Math.round((kcal * 0.08) / 4);
+      c = Math.round((kcal * 0.85) / 4);
+      f = Math.round((kcal * 0.07) / 9);
+      break;
+    case "Dal":
+    case "Legumes":
+      p = Math.round((kcal * 0.25) / 4);
+      c = Math.round((kcal * 0.65) / 4);
+      f = Math.round((kcal * 0.10) / 9);
+      break;
+    case "Paneer":
+      p = Math.round((kcal * 0.25) / 4);
+      c = Math.round((kcal * 0.15) / 4);
+      f = Math.round((kcal * 0.60) / 9);
+      break;
+    case "Soybean":
+      p = Math.round((kcal * 0.40) / 4);
+      c = Math.round((kcal * 0.35) / 4);
+      f = Math.round((kcal * 0.25) / 9);
+      break;
+    case "Bengali Sabji":
+    case "Dry Veg":
+    case "Veg Dishes":
+    case "Salads":
+    case "Soups":
+      p = Math.round((kcal * 0.10) / 4);
+      c = Math.round((kcal * 0.70) / 4);
+      f = Math.round((kcal * 0.20) / 9);
+      break;
+    case "Fruits":
+      p = Math.round((kcal * 0.03) / 4);
+      c = Math.round((kcal * 0.95) / 4);
+      f = Math.round((kcal * 0.02) / 9);
+      break;
+    case "Snacks":
+    case "Street Food":
+      p = Math.round((kcal * 0.08) / 4);
+      c = Math.round((kcal * 0.52) / 4);
+      f = Math.round((kcal * 0.40) / 9);
+      break;
+    case "Bengali Sweets":
+    case "Desserts":
+    case "Sweets":
+      p = Math.round((kcal * 0.05) / 4);
+      c = Math.round((kcal * 0.75) / 4);
+      f = Math.round((kcal * 0.20) / 9);
+      break;
+    default:
+      p = Math.round((kcal * 0.15) / 4);
+      c = Math.round((kcal * 0.55) / 4);
+      f = Math.round((kcal * 0.30) / 9);
+  }
+  
+  // Minimal carbohydrate assignment if calorie value exists but formula estimates zero
+  if (kcal > 0 && p === 0 && c === 0 && f === 0) {
+    c = Math.round(kcal / 4);
+  }
+  return { protein: p, carbs: c, fat: f };
+}
+
+// Automatic migration utility to update legacy schedules to dietician plan
+function migrateDietDataIfNecessary(data, user) {
+  let migrated = false;
+  const isAman = (user === "aman");
+  
+  if (!data.profile) {
+    data.profile = {
+      age: isAman ? 24 : 18,
+      height: 170,
+      weight: isAman ? 94.6 : 92.7,
+      goalWeight: 80,
+      targetCalories: isAman ? 2200 : 2300
+    };
+    migrated = true;
+  } else {
+    // Ensure all critical profile properties exist defensively
+    if (data.profile.age === undefined) { data.profile.age = isAman ? 24 : 18; migrated = true; }
+    if (data.profile.height === undefined) { data.profile.height = 170; migrated = true; }
+    if (data.profile.weight === undefined) { data.profile.weight = isAman ? 94.6 : 92.7; migrated = true; }
+    if (data.profile.goalWeight === undefined) { data.profile.goalWeight = 80; migrated = true; }
+    if (data.profile.targetCalories === undefined) { data.profile.targetCalories = isAman ? 2200 : 2300; migrated = true; }
+  }
+  
+  if (!data.schedule) {
+    data.schedule = JSON.parse(JSON.stringify(isAman ? defaultWeeklyScheduleAman : defaultWeeklyScheduleRishit));
+    migrated = true;
+  }
+
+  if (!data.meals) {
+    data.meals = {};
+    migrated = true;
+  }
+  
+  return migrated;
+}
+
+// Initial default structures generator
+function initDietData(user) {
+  const isAman = (user === "aman");
+  return {
+    profile: {
+      age: isAman ? 24 : 18,
+      height: 170,
+      weight: isAman ? 94.6 : 92.7,
+      goalWeight: 80,
+      targetCalories: isAman ? 2200 : 2300
+    },
+    meals: {}, // date -> { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] }
+    schedule: JSON.parse(JSON.stringify(isAman ? defaultWeeklyScheduleAman : defaultWeeklyScheduleRishit))
+  };
+}
+
+// Load separate databases from localStorage
+function loadDietData() {
+  const storedAman = safeStorage.getItem("amanDietData");
+  if (storedAman) {
+    try { 
+      amanDietData = JSON.parse(storedAman);
+      if (migrateDietDataIfNecessary(amanDietData, "aman")) {
+        safeStorage.setItem("amanDietData", JSON.stringify(amanDietData));
+      }
+    }
+    catch(e) { amanDietData = initDietData("aman"); }
+  } else {
+    amanDietData = initDietData("aman");
+  }
+
+  const storedRishit = safeStorage.getItem("rishitDietData");
+  if (storedRishit) {
+    try { 
+      rishitDietData = JSON.parse(storedRishit);
+      if (migrateDietDataIfNecessary(rishitDietData, "rishit")) {
+        safeStorage.setItem("rishitDietData", JSON.stringify(rishitDietData));
+      }
+    }
+    catch(e) { rishitDietData = initDietData("rishit"); }
+  } else {
+    rishitDietData = initDietData("rishit");
+  }
+
+  // Set version flag so migration doesn't run again next time
+  safeStorage.setItem("duogym_diet_version_dietician_v2", "true");
+}
+
+// Save back to respective separate keys
+let customDietData = {}; // Cache for custom users' diet data
+
+function getActiveDietData() {
+  if (currentUser === "aman") return amanDietData;
+  if (currentUser === "rishit") return rishitDietData;
+  if (!customDietData[currentUser]) {
+    const stored = safeStorage.getItem(`${currentUser}_diet_data`);
+    if (stored) {
+      try {
+        customDietData[currentUser] = JSON.parse(stored);
+        migrateDietDataIfNecessary(customDietData[currentUser], currentUser);
+      } catch (e) {
+        customDietData[currentUser] = initDietData(currentUser);
+      }
+    } else {
+      customDietData[currentUser] = initDietData(currentUser);
+    }
+  }
+  return customDietData[currentUser];
+}
+
+function saveDietData() {
+  if (currentUser === "aman") {
+    safeStorage.setItem("amanDietData", JSON.stringify(amanDietData));
+  } else if (currentUser === "rishit") {
+    safeStorage.setItem("rishitDietData", JSON.stringify(rishitDietData));
+  } else {
+    const data = getActiveDietData();
+    safeStorage.setItem(`${currentUser}_diet_data`, JSON.stringify(data));
+  }
+  if (typeof debouncedSync === 'function') debouncedSync();
+}
+
+function saveDietDataDirect(username, data) {
+  if (username === "aman") {
+    amanDietData = data;
+    safeStorage.setItem("amanDietData", JSON.stringify(amanDietData));
+  } else if (username === "rishit") {
+    rishitDietData = data;
+    safeStorage.setItem("rishitDietData", JSON.stringify(rishitDietData));
+  } else {
+    customDietData[username] = data;
+    safeStorage.setItem(`${username}_diet_data`, JSON.stringify(data));
+  }
 }
 
 // Ensure meal arrays exist for a selected date
