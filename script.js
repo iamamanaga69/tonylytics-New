@@ -460,9 +460,10 @@ async function syncToSupabase(username) {
       };
     });
     if (workoutRows.length > 0) {
-      const { error } = await supabaseClient.from('duogym_workouts').upsert(workoutRows);
+      const { error } = await supabaseClient.from('duogym_workouts').upsert(workoutRows, { onConflict: 'username,workout_date' });
       if (error) throw error;
     }
+    console.log('DuoGym: Step 1 (workouts) synced');
     
     // 2. Sync weights
     const weights = fitnessData[username]?.weights || {};
@@ -472,21 +473,26 @@ async function syncToSupabase(username) {
       weight: Number(weights[dateStr])
     }));
     if (weightRows.length > 0) {
-      const { error } = await supabaseClient.from('duogym_weights').upsert(weightRows);
+      const { error } = await supabaseClient.from('duogym_weights').upsert(weightRows, { onConflict: 'username,log_date' });
       if (error) throw error;
     }
+    console.log('DuoGym: Step 2 (weights) synced');
     
     // 3. Sync notes
     const notes = fitnessData[username]?.notes || {};
-    const noteRows = Object.keys(notes).map(dateStr => ({
-      username,
-      log_date: dateStr,
-      note: notes[dateStr]
-    }));
+    const noteRows = Object.keys(notes).map(dateStr => {
+      const dbDate = dateStr === "general" ? "1970-01-01" : dateStr;
+      return {
+        username,
+        log_date: dbDate,
+        note: notes[dateStr]
+      };
+    });
     if (noteRows.length > 0) {
-      const { error } = await supabaseClient.from('duogym_notes').upsert(noteRows);
+      const { error } = await supabaseClient.from('duogym_notes').upsert(noteRows, { onConflict: 'username,log_date' });
       if (error) throw error;
     }
+    console.log('DuoGym: Step 3 (notes) synced');
     
     // 4. Sync badges
     const badges = fitnessData[username]?.badges || [];
@@ -495,9 +501,10 @@ async function syncToSupabase(username) {
       badge_id: badgeId
     }));
     if (badgeRows.length > 0) {
-      const { error } = await supabaseClient.from('duogym_badges').upsert(badgeRows);
+      const { error } = await supabaseClient.from('duogym_badges').upsert(badgeRows, { onConflict: 'username,badge_id' });
       if (error) throw error;
     }
+    console.log('DuoGym: Step 4 (badges) synced');
     
     // 5. Sync activity movement
     const movement = fitnessData[username]?.activityData?.movement || {};
@@ -514,9 +521,10 @@ async function syncToSupabase(username) {
       };
     });
     if (movementRows.length > 0) {
-      const { error } = await supabaseClient.from('duogym_activity_movement').upsert(movementRows);
+      const { error } = await supabaseClient.from('duogym_activity_movement').upsert(movementRows, { onConflict: 'username,log_date' });
       if (error) throw error;
     }
+    console.log('DuoGym: Step 5 (movement) synced');
     
     // 6. Sync activity sleep
     const sleep = fitnessData[username]?.activityData?.sleep || {};
@@ -533,9 +541,10 @@ async function syncToSupabase(username) {
       };
     });
     if (sleepRows.length > 0) {
-      const { error } = await supabaseClient.from('duogym_activity_sleep').upsert(sleepRows);
+      const { error } = await supabaseClient.from('duogym_activity_sleep').upsert(sleepRows, { onConflict: 'username,log_date' });
       if (error) throw error;
     }
+    console.log('DuoGym: Step 6 (sleep) synced');
     
     // 7. Sync XP
     const xp = fitnessData[username]?.activityData?.xp || { total: 0, level: 1 };
@@ -545,8 +554,9 @@ async function syncToSupabase(username) {
       xp_level: xp.level || 1,
       updated_at: new Date().toISOString()
     };
-    const { error: xpError } = await supabaseClient.from('duogym_xp').upsert(xpRow);
+    const { error: xpError } = await supabaseClient.from('duogym_xp').upsert(xpRow, { onConflict: 'username' });
     if (xpError) throw xpError;
+    console.log('DuoGym: Step 7 (XP) synced');
     
     // 8. Sync diet profile
     const diet = getActiveDietData();
@@ -564,9 +574,10 @@ async function syncToSupabase(username) {
         target_fat: p.targetFat || null,
         updated_at: new Date().toISOString()
       };
-      const { error: profileError } = await supabaseClient.from('duogym_diet_profile').upsert(profileRow);
+      const { error: profileError } = await supabaseClient.from('duogym_diet_profile').upsert(profileRow, { onConflict: 'username' });
       if (profileError) throw profileError;
     }
+    console.log('DuoGym: Step 8 (diet profile) synced');
     
     // 9. Sync diet meals
     const mealRows = [];
@@ -597,6 +608,7 @@ async function syncToSupabase(username) {
       const { error: mealError } = await supabaseClient.from('duogym_diet_meals').insert(mealRows);
       if (mealError) throw mealError;
     }
+    console.log('DuoGym: Step 9 (diet meals) synced');
     
     // 10. Sync diet schedule template
     const schedRows = [];
@@ -627,6 +639,7 @@ async function syncToSupabase(username) {
       const { error: schedError } = await supabaseClient.from('duogym_diet_schedule').insert(schedRows);
       if (schedError) throw schedError;
     }
+    console.log('DuoGym: Step 10 (diet schedule) synced');
     
     // 11. Sync custom foods
     const customFoodRows = [];
@@ -650,12 +663,14 @@ async function syncToSupabase(username) {
       const { error: customError } = await supabaseClient.from('duogym_custom_foods').insert(customFoodRows);
       if (customError) throw customError;
     }
+    console.log('DuoGym: Step 11 (custom foods) synced');
     
     updateSyncBadge('synced');
     console.log('DuoGym: Relational sync to cloud completed successfully for', username);
     
   } catch (e) {
-    console.warn('DuoGym: Supabase relational sync failed', e);
+    const errorMsg = e?.message || e?.details || (typeof e === 'object' ? JSON.stringify(e) : String(e));
+    console.warn('DuoGym: Supabase relational sync failed:', errorMsg);
     updateSyncBadge('offline');
   }
 }
@@ -721,7 +736,8 @@ async function syncFromSupabase(username) {
     // 3. Reconstruct Notes
     if (notes) {
       notes.forEach(n => {
-        fitnessData[username].notes[n.log_date] = n.note;
+        const localDate = n.log_date === "1970-01-01" ? "general" : n.log_date;
+        fitnessData[username].notes[localDate] = n.note;
       });
     }
     
@@ -856,7 +872,7 @@ async function registerDeviceToken(username, token) {
       username,
       device_token: token,
       updated_at: new Date().toISOString()
-    });
+    }, { onConflict: 'username' });
     console.log('DuoGym: Device token registered successfully in cloud.');
   } catch (e) {
     console.warn('DuoGym: Failed to register device token', e);
@@ -869,12 +885,18 @@ function askAICoachRichards() {
   if (!modal || !input) return;
   input.value = "";
   modal.style.display = "flex";
+  modal.classList.add("active");
   setTimeout(() => input.focus(), 100);
 }
 
 function closeAICoachModal() {
   const modal = DOM.get("ai-coach-modal");
-  if (modal) modal.style.display = "none";
+  if (modal) {
+    modal.classList.remove("active");
+    setTimeout(() => {
+      modal.style.display = "none";
+    }, 300);
+  }
 }
 
 async function submitAICoachQuery() {
@@ -886,6 +908,7 @@ async function submitAICoachQuery() {
   if (!modal || !input || !btn || !textEl || !supabaseInitialized || !supabaseClient) return;
   
   const userMsg = input.value.trim();
+  modal.classList.remove("active");
   modal.style.display = "none";
   
   const originalBtnText = btn.innerHTML;
@@ -895,17 +918,61 @@ async function submitAICoachQuery() {
   ensureDateRecord(currentUser, selectedDate);
   const record = fitnessData[currentUser].workouts[selectedDate];
   const workout = getWorkoutForDate(selectedDate);
-  const dietData = getActiveDietData();
+  const diet = getActiveDietData();
+  const userWeights = fitnessData[currentUser]?.weights || {};
+  const userNotes = fitnessData[currentUser]?.notes || {};
+  const userBadges = fitnessData[currentUser]?.badges || [];
+  const userXP = fitnessData[currentUser]?.activityData?.xp || { total: 0, level: 1 };
   
+  // Get recent weights (sorted by date)
+  const recentWeights = Object.keys(userWeights)
+    .sort()
+    .slice(-7)
+    .map(d => ({ date: d, weight: userWeights[d] }));
+
+  // Get recent workouts
+  const recentWorkouts = [];
+  const workouts = fitnessData[currentUser]?.workouts || {};
+  Object.keys(workouts)
+    .sort()
+    .slice(-7)
+    .forEach(d => {
+      recentWorkouts.push({
+        date: d,
+        focus: getWorkoutForDate(d)?.focus || "Rest",
+        exercisesCompleted: workouts[d]?.completedExercises?.length || 0,
+        waterIntake: workouts[d]?.waterIntake || 0
+      });
+    });
+
   const statsContext = {
     username: currentUser,
     date: selectedDate,
-    workoutFocus: workout.focus,
-    workoutType: workout.type,
-    exercisesCompleted: record.completedExercises.length,
-    totalExercises: workout.exercises.length,
+    currentWorkout: {
+      focus: workout.focus,
+      type: workout.type,
+      exercises: workout.exercises.map(e => e.name),
+      completed: record.completedExercises || []
+    },
+    recentWorkouts,
     waterIntake: record.waterIntake,
-    diet: getDietDateAggregates ? getDietDateAggregates(dietData, currentUser, selectedDate) : {}
+    xp: userXP,
+    badges: userBadges,
+    notes: {
+      today: userNotes[selectedDate] || "",
+      general: userNotes.general || ""
+    },
+    diet: {
+      profile: diet?.profile || {},
+      todayMeals: diet?.meals?.[selectedDate] || {},
+      scheduleTemplate: diet?.schedule || {},
+      customFoodsList: diet?.customFoods || []
+    },
+    weightProgress: {
+      current: diet?.profile?.weight || recentWeights[recentWeights.length - 1]?.weight || 70,
+      goal: diet?.profile?.goalWeight || 70,
+      recentLogs: recentWeights
+    }
   };
   
   try {

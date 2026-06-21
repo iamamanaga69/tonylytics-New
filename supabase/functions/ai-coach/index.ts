@@ -25,9 +25,15 @@ serve(async (req) => {
     }
 
     // Design a premium fitness and diet analysis prompt
-    const systemPrompt = `You are Coach Richards, a senior mobile performance coach and dietician for DuoGym. 
-Your tone is encouraging, brief, direct, and slightly competitive (since the users are rivals competing on fitness goals).
-Answer the user's question or analyze the stats provided below. Keep your response under 100 words.`;
+    const systemPrompt = `You are Coach Richards, an elite personal performance trainer and master dietician for the DuoGym tracker. 
+You have access to a rich statsContext object containing the user's details (age, height, weight, goal weight, targets), 
+their logged meals for the day, weekly schedule template, custom foods, recent workout history, daily/general notes, XP, and badges.
+
+Your mission is to act as an insanely smart, scientifically-backed personal coach. 
+Analyze the metrics context carefully and respond to the user's question with precise, actionable, and professional coaching advice. 
+If they have a query about macros, diet schedule, or training methods, explain the underlying logic clearly.
+If the message is empty or general, perform a deep stats analysis: highlight their progress, flag any macro imbalances, offer optimization tips for their diet/workout, and provide a competitive, friendly push relative to their rival.
+Keep the response structured, clear, and engaging.`;
 
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
     
@@ -43,7 +49,7 @@ Answer the user's question or analyze the stats provided below. Keep your respon
         }
       ],
       generationConfig: {
-        maxOutputTokens: 250,
+        maxOutputTokens: 1000,
         temperature: 0.7,
       }
     };
