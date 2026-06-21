@@ -49,6 +49,7 @@
 
         <receiver android:name=".GymNotificationReceiver" android:exported="true" />
         <receiver android:name=".ChatNotificationReceiver" android:exported="false" />
+        <receiver android:name=".ChatBackgroundReceiver" android:exported="false" />
         
         <receiver android:name=".BootReceiver" android:exported="true">
             <intent-filter>

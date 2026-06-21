@@ -9,6 +9,7 @@ class BootReceiver : BroadcastReceiver() {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             android.util.Log.d("DuoGymNotification", "Device rebooted, rescheduling daily reminder")
             NotificationHelper.scheduleDailyReminder(context)
+            ChatBackgroundPoller.startPolling(context)
         }
     }
 }

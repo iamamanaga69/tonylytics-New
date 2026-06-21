@@ -345,4 +345,25 @@ class GymAppInterface(
             android.util.Log.e("GymAppInterface", "Failed to clear notifications", e)
         }
     }
+
+    @JavascriptInterface
+    fun setCurrentUser(username: String) {
+        try {
+            val prefs = context.getSharedPreferences("duogym_prefs", Context.MODE_PRIVATE)
+            prefs.edit().putString("current_username", username).apply()
+            ChatBackgroundPoller.startPolling(context)
+        } catch (e: Exception) {
+            android.util.Log.e("GymAppInterface", "Failed to set current user", e)
+        }
+    }
+
+    @JavascriptInterface
+    fun updateLastReadTime(timestamp: String) {
+        try {
+            val prefs = context.getSharedPreferences("duogym_prefs", Context.MODE_PRIVATE)
+            prefs.edit().putString("last_checked_message_time", timestamp).apply()
+        } catch (e: Exception) {
+            android.util.Log.e("GymAppInterface", "Failed to update last read time", e)
+        }
+    }
 }

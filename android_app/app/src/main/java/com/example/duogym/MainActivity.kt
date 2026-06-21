@@ -44,6 +44,9 @@ class MainActivity : ComponentActivity() {
     // Request notification permission for Android 13+
     checkNotificationPermission()
 
+    // Start background chat polling
+    ChatBackgroundPoller.startPolling(this)
+
     enableEdgeToEdge()
     setContent {
       DuoGymTheme(dynamicColor = false) {

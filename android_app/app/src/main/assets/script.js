@@ -2180,6 +2180,13 @@ function switchUser(user) {
   // Save selected user to localStorage
   safeStorage.setItem("duogym_selected_user", user);
   
+  // Update Android native background receiver context
+  if (typeof AndroidApp !== "undefined" && AndroidApp.setCurrentUser) {
+    try {
+      AndroidApp.setCurrentUser(user);
+    } catch (_) {}
+  }
+  
   // Update body css class for accent colors without wiping out other classes (like light-mode)
   document.body.classList.remove("user-aman", "user-rishit");
   document.body.classList.add(`user-${user}`);
@@ -7666,6 +7673,16 @@ async function fetchChatMessages() {
       loadedMessages = data;
       renderChatMessages();
       
+      // Update Android last checked timestamp to prevent notification spam
+      if (data.length > 0) {
+        const latestMsg = data[data.length - 1];
+        if (typeof AndroidApp !== "undefined" && AndroidApp.updateLastReadTime) {
+          try {
+            AndroidApp.updateLastReadTime(latestMsg.created_at);
+          } catch (_) {}
+        }
+      }
+      
       // Only notify about genuinely new messages (skip initial load)
       if (chatInitialLoadComplete) {
         incomingMessages.forEach(msg => {
@@ -7932,6 +7949,14 @@ function initChatRealtime() {
         if (!exists) {
           loadedMessages.push(msg);
           renderChatMessages();
+          
+          // Update Android last checked timestamp to prevent notification spam
+          if (typeof AndroidApp !== "undefined" && AndroidApp.updateLastReadTime) {
+            try {
+              AndroidApp.updateLastReadTime(msg.created_at);
+            } catch (_) {}
+          }
+          
           if (msg.sender !== currentUser) {
             triggerIncomingMessageNotification(msg);
           }
