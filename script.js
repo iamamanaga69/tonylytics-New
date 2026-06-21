@@ -445,33 +445,217 @@ async function syncToSupabase(username) {
   updateSyncBadge('syncing');
   
   try {
-    const userData = {
-      username: username,
-      fitness_data: fitnessData[username] || {},
-      diet_data: getActiveDietData ? getActiveDietData() : {},
-      last_synced: new Date().toISOString()
-    };
-
-    // Free-plan friendly: skip identical payloads and write only after user/device changes settle.
-    const payloadFingerprint = JSON.stringify([userData.fitness_data, userData.diet_data]);
-    if (payloadFingerprint === lastSyncedPayload) {
-      updateSyncBadge('synced');
-      return;
+    console.log('DuoGym: Initiating relational sync to cloud for', username);
+    
+    // 1. Sync workouts
+    const workouts = fitnessData[username]?.workouts || {};
+    const workoutRows = Object.keys(workouts).map(dateStr => {
+      const w = workouts[dateStr];
+      return {
+        username,
+        workout_date: dateStr,
+        completed_exercises: w.completedExercises || [],
+        water_intake: w.waterIntake || 0,
+        updated_at: new Date().toISOString()
+      };
+    });
+    if (workoutRows.length > 0) {
+      const { error } = await supabaseClient.from('duogym_workouts').upsert(workoutRows);
+      if (error) throw error;
     }
     
-    const { error } = await supabaseClient
-      .from('duogym_users_data')
-      .upsert(userData, { onConflict: 'username' });
-      
-    if (error) throw error;
-
-    lastSyncedPayload = payloadFingerprint;
+    // 2. Sync weights
+    const weights = fitnessData[username]?.weights || {};
+    const weightRows = Object.keys(weights).map(dateStr => ({
+      username,
+      log_date: dateStr,
+      weight: Number(weights[dateStr])
+    }));
+    if (weightRows.length > 0) {
+      const { error } = await supabaseClient.from('duogym_weights').upsert(weightRows);
+      if (error) throw error;
+    }
+    
+    // 3. Sync notes
+    const notes = fitnessData[username]?.notes || {};
+    const noteRows = Object.keys(notes).map(dateStr => ({
+      username,
+      log_date: dateStr,
+      note: notes[dateStr]
+    }));
+    if (noteRows.length > 0) {
+      const { error } = await supabaseClient.from('duogym_notes').upsert(noteRows);
+      if (error) throw error;
+    }
+    
+    // 4. Sync badges
+    const badges = fitnessData[username]?.badges || [];
+    const badgeRows = badges.map(badgeId => ({
+      username,
+      badge_id: badgeId
+    }));
+    if (badgeRows.length > 0) {
+      const { error } = await supabaseClient.from('duogym_badges').upsert(badgeRows);
+      if (error) throw error;
+    }
+    
+    // 5. Sync activity movement
+    const movement = fitnessData[username]?.activityData?.movement || {};
+    const movementRows = Object.keys(movement).map(dateStr => {
+      const m = movement[dateStr];
+      return {
+        username,
+        log_date: dateStr,
+        steps: m.steps || 0,
+        distance: Number(m.distance) || 0,
+        active_minutes: m.activeMinutes || 0,
+        floors: m.floors || 0,
+        active_calories: m.activeCalories || 0
+      };
+    });
+    if (movementRows.length > 0) {
+      const { error } = await supabaseClient.from('duogym_activity_movement').upsert(movementRows);
+      if (error) throw error;
+    }
+    
+    // 6. Sync activity sleep
+    const sleep = fitnessData[username]?.activityData?.sleep || {};
+    const sleepRows = Object.keys(sleep).map(dateStr => {
+      const s = sleep[dateStr];
+      return {
+        username,
+        log_date: dateStr,
+        bedtime: s.bedtime || '',
+        wake_time: s.wakeTime || '',
+        quality: s.quality || 0,
+        duration: Number(s.duration) || 0,
+        score: s.score || 0
+      };
+    });
+    if (sleepRows.length > 0) {
+      const { error } = await supabaseClient.from('duogym_activity_sleep').upsert(sleepRows);
+      if (error) throw error;
+    }
+    
+    // 7. Sync XP
+    const xp = fitnessData[username]?.activityData?.xp || { total: 0, level: 1 };
+    const xpRow = {
+      username,
+      total_xp: xp.total || 0,
+      xp_level: xp.level || 1,
+      updated_at: new Date().toISOString()
+    };
+    const { error: xpError } = await supabaseClient.from('duogym_xp').upsert(xpRow);
+    if (xpError) throw xpError;
+    
+    // 8. Sync diet profile
+    const diet = getActiveDietData();
+    if (diet && diet.profile) {
+      const p = diet.profile;
+      const profileRow = {
+        username,
+        age: p.age || 18,
+        height: p.height || 170,
+        weight: p.weight || 70,
+        goal_weight: p.goalWeight || 70,
+        target_calories: p.targetCalories || 2000,
+        target_protein: p.targetProtein || null,
+        target_carbs: p.targetCarbs || null,
+        target_fat: p.targetFat || null,
+        updated_at: new Date().toISOString()
+      };
+      const { error: profileError } = await supabaseClient.from('duogym_diet_profile').upsert(profileRow);
+      if (profileError) throw profileError;
+    }
+    
+    // 9. Sync diet meals
+    const mealRows = [];
+    if (diet && diet.meals) {
+      Object.keys(diet.meals).forEach(dateStr => {
+        const dayMeals = diet.meals[dateStr];
+        ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(type => {
+          const items = dayMeals[type] || [];
+          items.forEach(food => {
+            const macros = getFoodMacros(food);
+            mealRows.push({
+              username,
+              log_date: dateStr,
+              meal_type: type,
+              food_name: food.n || food.name,
+              serving: food.s || '1 serving',
+              calories: food.k || 0,
+              protein: macros.protein || 0.0,
+              carbs: macros.carbs || 0.0,
+              fat: macros.fat || 0.0
+            });
+          });
+        });
+      });
+    }
+    await supabaseClient.from('duogym_diet_meals').delete().eq('username', username);
+    if (mealRows.length > 0) {
+      const { error: mealError } = await supabaseClient.from('duogym_diet_meals').insert(mealRows);
+      if (mealError) throw mealError;
+    }
+    
+    // 10. Sync diet schedule template
+    const schedRows = [];
+    if (diet && diet.schedule) {
+      Object.keys(diet.schedule).forEach(day => {
+        const dayMeals = diet.schedule[day];
+        ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(type => {
+          const items = dayMeals[type] || [];
+          items.forEach(food => {
+            const macros = getFoodMacros(food);
+            schedRows.push({
+              username,
+              weekday: day,
+              meal_type: type,
+              food_name: food.n || food.name,
+              serving: food.s || '1 serving',
+              calories: food.k || 0,
+              protein: macros.protein || 0.0,
+              carbs: macros.carbs || 0.0,
+              fat: macros.fat || 0.0
+            });
+          });
+        });
+      });
+    }
+    await supabaseClient.from('duogym_diet_schedule').delete().eq('username', username);
+    if (schedRows.length > 0) {
+      const { error: schedError } = await supabaseClient.from('duogym_diet_schedule').insert(schedRows);
+      if (schedError) throw schedError;
+    }
+    
+    // 11. Sync custom foods
+    const customFoodRows = [];
+    if (diet && diet.customFoods) {
+      const foods = Array.isArray(diet.customFoods) ? diet.customFoods : Object.values(diet.customFoods || {});
+      foods.forEach(food => {
+        const macros = getFoodMacros(food);
+        customFoodRows.push({
+          username,
+          food_name: food.n || food.name,
+          serving: food.s || '100g',
+          calories: food.k || 0,
+          protein: macros.protein || 0.0,
+          carbs: macros.carbs || 0.0,
+          fat: macros.fat || 0.0
+        });
+      });
+    }
+    await supabaseClient.from('duogym_custom_foods').delete().eq('username', username);
+    if (customFoodRows.length > 0) {
+      const { error: customError } = await supabaseClient.from('duogym_custom_foods').insert(customFoodRows);
+      if (customError) throw customError;
+    }
     
     updateSyncBadge('synced');
-    console.log('DuoGym: Synced to Supabase for', username);
+    console.log('DuoGym: Relational sync to cloud completed successfully for', username);
     
   } catch (e) {
-    console.warn('DuoGym: Supabase sync to cloud failed', e ? (e.message || JSON.stringify(e)) : 'Unknown error');
+    console.warn('DuoGym: Supabase relational sync failed', e);
     updateSyncBadge('offline');
   }
 }
@@ -482,39 +666,246 @@ async function syncFromSupabase(username) {
   updateSyncBadge('syncing');
   
   try {
-    const { data, error } = await supabaseClient
-      .from('duogym_users_data')
-      .select('fitness_data, diet_data')
-      .eq('username', username)
-      .maybeSingle();
-      
-    if (error) throw error;
+    console.log('DuoGym: Pulling relational data from cloud for', username);
     
-    if (data) {
-      // Merge cloud fitness data with local
-      if (data.fitness_data && fitnessData[username]) {
-        fitnessData[username] = mergeUserData(fitnessData[username], data.fitness_data);
-        saveData(false);
-      }
-      
-      // Merge diet data
-      if (data.diet_data) {
-        const localDiet = getActiveDietData ? getActiveDietData() : {};
-        const mergedDiet = mergeUserData(localDiet, data.diet_data);
-        if (typeof saveDietDataDirect === 'function') {
-          saveDietDataDirect(username, mergedDiet);
-        }
-      }
-      
-      console.log('DuoGym: Pulled data from Supabase for', username);
-      updatePageContent();
+    // Fetch all tables in parallel
+    const [
+      { data: workouts },
+      { data: weights },
+      { data: notes },
+      { data: badges },
+      { data: movement },
+      { data: sleep },
+      { data: xp },
+      { data: dietProfile },
+      { data: dietMeals },
+      { data: dietSchedule },
+      { data: customFoods }
+    ] = await Promise.all([
+      supabaseClient.from('duogym_workouts').select('*').eq('username', username),
+      supabaseClient.from('duogym_weights').select('*').eq('username', username),
+      supabaseClient.from('duogym_notes').select('*').eq('username', username),
+      supabaseClient.from('duogym_badges').select('*').eq('username', username),
+      supabaseClient.from('duogym_activity_movement').select('*').eq('username', username),
+      supabaseClient.from('duogym_activity_sleep').select('*').eq('username', username),
+      supabaseClient.from('duogym_xp').select('*').eq('username', username).maybeSingle(),
+      supabaseClient.from('duogym_diet_profile').select('*').eq('username', username).maybeSingle(),
+      supabaseClient.from('duogym_diet_meals').select('*').eq('username', username),
+      supabaseClient.from('duogym_diet_schedule').select('*').eq('username', username),
+      supabaseClient.from('duogym_custom_foods').select('*').eq('username', username)
+    ]);
+    
+    // Initialize user structures
+    if (!fitnessData[username]) {
+      fitnessData[username] = createEmptyUserData(username);
     }
     
+    // 1. Reconstruct Workouts
+    if (workouts) {
+      workouts.forEach(w => {
+        const dateStr = w.workout_date;
+        fitnessData[username].workouts[dateStr] = {
+          completedExercises: w.completed_exercises || [],
+          waterIntake: w.water_intake || 0
+        };
+      });
+    }
+    
+    // 2. Reconstruct Weights
+    if (weights) {
+      weights.forEach(w => {
+        fitnessData[username].weights[w.log_date] = Number(w.weight);
+      });
+    }
+    
+    // 3. Reconstruct Notes
+    if (notes) {
+      notes.forEach(n => {
+        fitnessData[username].notes[n.log_date] = n.note;
+      });
+    }
+    
+    // 4. Reconstruct Badges
+    if (badges) {
+      fitnessData[username].badges = badges.map(b => b.badge_id);
+    }
+    
+    // 5. Reconstruct Activity Movement
+    if (movement) {
+      movement.forEach(m => {
+        fitnessData[username].activityData.movement[m.log_date] = {
+          steps: m.steps,
+          distance: Number(m.distance),
+          activeMinutes: m.active_minutes,
+          floors: m.floors,
+          activeCalories: m.active_calories
+        };
+      });
+    }
+    
+    // 6. Reconstruct Activity Sleep
+    if (sleep) {
+      sleep.forEach(s => {
+        fitnessData[username].activityData.sleep[s.log_date] = {
+          bedtime: s.bedtime,
+          wakeTime: s.wake_time,
+          quality: s.quality,
+          duration: Number(s.duration),
+          score: s.score
+        };
+      });
+    }
+    
+    // 7. Reconstruct XP
+    if (xp) {
+      fitnessData[username].activityData.xp.total = xp.total_xp;
+      fitnessData[username].activityData.xp.level = xp.xp_level;
+    }
+    
+    // 8. Reconstruct Diet Data
+    const diet = {
+      profile: dietProfile ? {
+        age: dietProfile.age,
+        height: Number(dietProfile.height),
+        weight: Number(dietProfile.weight),
+        goalWeight: Number(dietProfile.goal_weight),
+        targetCalories: dietProfile.target_calories,
+        targetProtein: dietProfile.target_protein,
+        targetCarbs: dietProfile.target_carbs,
+        targetFat: dietProfile.target_fat
+      } : { age: 24, height: 170, weight: 94.6, goalWeight: 80, targetCalories: 2200 },
+      meals: {},
+      schedule: {
+        Monday: { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] },
+        Tuesday: { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] },
+        Wednesday: { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] },
+        Thursday: { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] },
+        Friday: { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] },
+        Saturday: { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] },
+        Sunday: { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] }
+      },
+      customFoods: []
+    };
+    
+    // 9. Reconstruct Diet Meals
+    if (dietMeals) {
+      dietMeals.forEach(m => {
+        const dateStr = m.log_date;
+        if (!diet.meals[dateStr]) {
+          diet.meals[dateStr] = { Breakfast: [], Lunch: [], EveningSnacks: [], Dinner: [] };
+        }
+        diet.meals[dateStr][m.meal_type].push({
+          n: m.food_name,
+          s: m.serving,
+          k: m.calories,
+          p: m.protein,
+          c: m.carbs,
+          f: m.fat
+        });
+      });
+    }
+    
+    // 10. Reconstruct Diet Schedule Template
+    if (dietSchedule) {
+      dietSchedule.forEach(s => {
+        diet.schedule[s.weekday][s.meal_type].push({
+          n: s.food_name,
+          s: s.serving,
+          k: s.calories,
+          p: s.protein,
+          c: s.carbs,
+          f: s.fat
+        });
+      });
+    }
+    
+    // 11. Reconstruct Custom Foods
+    if (customFoods) {
+      customFoods.forEach(cf => {
+        diet.customFoods.push({
+          n: cf.food_name,
+          s: cf.serving,
+          k: cf.calories,
+          p: cf.protein,
+          c: cf.carbs,
+          f: cf.fat
+        });
+      });
+    }
+    
+    // Commit back to local storage
+    saveData(false);
+    if (typeof saveDietDataDirect === 'function') {
+      saveDietDataDirect(username, diet);
+    }
+    
+    console.log('DuoGym: Relational pull completed and synced locally for', username);
+    updatePageContent();
     updateSyncBadge('synced');
     
   } catch (e) {
-    console.warn('DuoGym: Pull from Supabase failed', e ? (e.message || JSON.stringify(e)) : 'Unknown error');
+    console.warn('DuoGym: Pull relational from Supabase failed', e);
     updateSyncBadge('offline');
+  }
+}
+
+async function registerDeviceToken(username, token) {
+  if (!supabaseInitialized || !supabaseClient || !username || !token) return;
+  try {
+    await supabaseClient.from('duogym_device_tokens').upsert({
+      username,
+      device_token: token,
+      updated_at: new Date().toISOString()
+    });
+    console.log('DuoGym: Device token registered successfully in cloud.');
+  } catch (e) {
+    console.warn('DuoGym: Failed to register device token', e);
+  }
+}
+
+async function askAICoachRichards() {
+  const btn = DOM.get("ask-ai-coach-btn");
+  const textEl = DOM.get("coach-feedback-text");
+  if (!btn || !textEl || !supabaseInitialized || !supabaseClient) return;
+  
+  const userMsg = prompt("Ask Coach Richards anything, or leave blank for a daily stats analysis:");
+  if (userMsg === null) return;
+  
+  const originalBtnText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerText = "Analyzing...";
+  
+  ensureDateRecord(currentUser, selectedDate);
+  const record = fitnessData[currentUser].workouts[selectedDate];
+  const workout = getWorkoutForDate(selectedDate);
+  const dietData = getActiveDietData();
+  
+  const statsContext = {
+    username: currentUser,
+    date: selectedDate,
+    workoutFocus: workout.focus,
+    workoutType: workout.type,
+    exercisesCompleted: record.completedExercises.length,
+    totalExercises: workout.exercises.length,
+    waterIntake: record.waterIntake,
+    diet: getDietDateAggregates ? getDietDateAggregates(dietData, currentUser, selectedDate) : {}
+  };
+  
+  try {
+    const { data, error } = await supabaseClient.functions.invoke('ai-coach', {
+      body: { message: userMsg || "Please analyze my stats for today and give me feedback.", statsContext }
+    });
+    
+    if (error) throw error;
+    if (data && data.reply) {
+      textEl.innerHTML = `<div style="border-left: 2px solid var(--accent); padding-left: 8px; margin-bottom: 8px; font-weight: 600; color: var(--accent);">AI Coach Richards:</div>${data.reply}`;
+    }
+  } catch (e) {
+    console.warn("AI Coach failed:", e);
+    alert("Could not reach Coach Richards. Keep pushing!");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalBtnText;
   }
 }
 
