@@ -48,8 +48,8 @@
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.7);
   --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.4);
-  --transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-  --transition-slow: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition: background-color 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), color 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-slow: background-color 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), color 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 /* AMAN PROFILE THEME VARIABLES: Hyper Neon Hustle Green */
@@ -2083,6 +2083,7 @@ body.user-rishit .filter-pill.active {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
+  will-change: opacity;
   display: flex;
   align-items: flex-end; /* Slide up from bottom */
   justify-content: center;
@@ -2109,6 +2110,7 @@ body.user-rishit .filter-pill.active {
   box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
   transform: translateY(100%);
   transition: transform 0.3s cubic-bezier(0.32, 0.94, 0.6, 1);
+  will-change: transform;
 }
 
 .diet-modal-overlay.active .diet-modal-card {
@@ -4223,6 +4225,7 @@ button {
   z-index: 1999;
   opacity: 0;
   transition: opacity 0.3s ease;
+  will-change: opacity;
   -webkit-tap-highlight-color: transparent;
 }
 .chat-backdrop.active {
@@ -4260,6 +4263,7 @@ button {
   overflow: hidden;
   transform-origin: top right;
   animation: chatSlideIn 0.35s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, opacity;
 }
 .chat-window-card.slide-out {
   animation: chatSlideOut 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
@@ -4598,6 +4602,7 @@ body.user-rishit .chat-send-btn {
   cursor: pointer;
   animation: iosNotifSlideDown 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   transition: opacity 0.3s, transform 0.3s;
+  will-change: transform, opacity;
 }
 
 .chat-popup-banner.fade-out {

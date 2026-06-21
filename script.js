@@ -4,13 +4,49 @@
 
 const AUTH_STORAGE_KEY = 'duogym_auth_session';
 
+// --- High-Performance DOM Cache Utility ---
+const DOM = {
+  cache: {},
+  get(id) {
+    if (!this.cache[id]) {
+      this.cache[id] = document.getElementById(id);
+    }
+    return this.cache[id];
+  },
+  clear() {
+    this.cache = {};
+  }
+};
+
+// --- High-Performance Calculation Memoization Caches ---
+const dietAggregatesCache = {};
+const streaksCache = {};
+const activityStreaksCache = {};
+
+function invalidateDietCache(username) {
+  const prefix = `${username}_`;
+  for (const key in dietAggregatesCache) {
+    if (key.startsWith(prefix)) {
+      delete dietAggregatesCache[key];
+    }
+  }
+}
+
+function invalidateStreaksCache(username) {
+  delete streaksCache[username];
+}
+
+function invalidateActivityStreaksCache(username) {
+  delete activityStreaksCache[username];
+}
+
 // --- Auth State Management ---
 let isAuthenticated = false;
 let authenticatedUser = null;
 
 // --- Login UI Helpers ---
 function toggleLoginPassword() {
-  const input = document.getElementById('login-password');
+  const input = DOM.get('login-password');
   const btn = document.querySelector('.login-eye-btn');
   if (input) {
     const isPassword = input.type === 'password';
@@ -21,7 +57,7 @@ function toggleLoginPassword() {
 
 // Remember me is visually handled by UI layout toggles.
 function toggleLoginRemember() {
-  const toggle = document.getElementById('login-remember-toggle');
+  const toggle = DOM.get('login-remember-toggle');
   if (toggle) {
     toggle.classList.toggle('active');
   }
@@ -117,10 +153,10 @@ function clearAuthSession() {
 function setAuthMode(mode) {
   authMode = mode === "signup" ? "signup" : "signin";
   document.querySelector(".login-card")?.classList.toggle("auth-signup", authMode === "signup");
-  document.getElementById("auth-tab-signin")?.classList.toggle("active", authMode === "signin");
-  document.getElementById("auth-tab-signup")?.classList.toggle("active", authMode === "signup");
-  const identityLabel = document.getElementById("auth-identity-label");
-  const identityInput = document.getElementById("auth-identity");
+  DOM.get("auth-tab-signin")?.classList.toggle("active", authMode === "signin");
+  DOM.get("auth-tab-signup")?.classList.toggle("active", authMode === "signup");
+  const identityLabel = DOM.get("auth-identity-label");
+  const identityInput = DOM.get("auth-identity");
   const buttonText = document.querySelector("#login-btn .login-btn-text");
   if (identityLabel) identityLabel.textContent = authMode === "signup" ? "Username" : "Username or email";
   if (identityInput) identityInput.placeholder = authMode === "signup" ? "Choose a unique username" : "Username or email";
@@ -129,11 +165,11 @@ function setAuthMode(mode) {
 }
 
 function hideLoginError() {
-  document.getElementById("login-error")?.classList.remove("visible");
+  DOM.get("login-error")?.classList.remove("visible");
 }
 
 function showLoginError(message) {
-  const errorEl = document.getElementById("login-error");
+  const errorEl = DOM.get("login-error");
   if (!errorEl) return;
   errorEl.textContent = message;
   errorEl.classList.add("visible");
@@ -188,13 +224,13 @@ async function loadOrCreateAuthProfile(user, preferredUsername = "", displayName
 }
 
 async function handleLogin() {
-  const button = document.getElementById("login-btn");
+  const button = DOM.get("login-btn");
   if (!button) return;
   hideLoginError();
-  const identity = document.getElementById("auth-identity")?.value.trim() || "";
-  const email = document.getElementById("auth-email")?.value.trim().toLowerCase() || "";
-  const displayName = document.getElementById("auth-display-name")?.value.trim() || "";
-  const password = document.getElementById("login-password")?.value || "";
+  const identity = DOM.get("auth-identity")?.value.trim() || "";
+  const email = DOM.get("auth-email")?.value.trim().toLowerCase() || "";
+  const displayName = DOM.get("auth-display-name")?.value.trim() || "";
+  const password = DOM.get("login-password")?.value || "";
   if (password.length < 8) {
     showLoginError("Password must be at least 8 characters.");
     return;
@@ -301,8 +337,8 @@ function loginAsBypass(username) {
 }
 
 function completeLogin(username) {
-  document.getElementById("login-overlay")?.classList.add("hidden");
-  const appLayout = document.getElementById("app-layout");
+  DOM.get("login-overlay")?.classList.add("hidden");
+  const appLayout = DOM.get("app-layout");
   if (appLayout) appLayout.style.display = "";
   currentUser = username;
   loadData();
@@ -318,14 +354,14 @@ function completeLogin(username) {
 }
 
 function updateLoggedInHeader(username) {
-  const badge = document.getElementById("header-logged-user");
+  const badge = DOM.get("header-logged-user");
   if (badge) {
     badge.textContent = authenticatedProfile?.display_name || username;
     badge.style.display = "inline-block";
     badge.style.color = "#00ff88";
     badge.style.background = "rgba(0,255,136,.1)";
   }
-  const logout = document.getElementById("header-logout-btn");
+  const logout = DOM.get("header-logout-btn");
   if (logout) logout.style.display = "flex";
 }
 
@@ -341,11 +377,11 @@ async function handleLogout() {
   isAuthenticated = false;
   authenticatedUser = null;
   authenticatedProfile = null;
-  document.getElementById("header-logged-user")?.style.setProperty("display", "none");
-  document.getElementById("login-overlay")?.classList.remove("hidden");
-  const appLayout = document.getElementById("app-layout");
+  DOM.get("header-logged-user")?.style.setProperty("display", "none");
+  DOM.get("login-overlay")?.classList.remove("hidden");
+  const appLayout = DOM.get("app-layout");
   if (appLayout) appLayout.style.display = "none";
-  const password = document.getElementById("login-password");
+  const password = DOM.get("login-password");
   if (password) password.value = "";
   setAuthMode("signin");
 }
@@ -718,8 +754,8 @@ function debouncedSync() {
 
 function updateSyncBadge(status) {
   syncStatus = status;
-  const badge = document.getElementById('sync-badge');
-  const text = document.getElementById('sync-text');
+  const badge = DOM.get('sync-badge');
+  const text = DOM.get('sync-text');
   if (!badge) return;
   
   badge.className = 'sync-badge ' + status;
@@ -750,6 +786,10 @@ if (typeof window !== 'undefined') {
       if (document.visibilityState === 'hidden' && authenticatedUser && supabaseInitialized) {
         clearTimeout(syncDebounceTimer);
         syncToSupabase(authenticatedUser);
+      } else if (document.visibilityState === 'visible') {
+        if (typeof fetchChatMessages === 'function') {
+          fetchChatMessages();
+        }
       }
     });
   }
@@ -1734,7 +1774,7 @@ function showCrashScreen(error) {
       return;
     }
     // Prevent duplicate crash screens
-    if (document.getElementById("duogym-crash-overlay")) return;
+    if (DOM.get("duogym-crash-overlay")) return;
 
     const crashDiv = document.createElement("div");
     crashDiv.id = "duogym-crash-overlay";
@@ -1802,13 +1842,18 @@ const safeStorage = {
   }
 };
 
+let lucideTimeout = null;
 function safeCreateIcons() {
   if (typeof lucide !== "undefined" && lucide.createIcons) {
-    try {
-      lucide.createIcons();
-    } catch (e) {
-      console.warn("Lucide icon creation failed", e);
-    }
+    if (lucideTimeout) cancelAnimationFrame(lucideTimeout);
+    lucideTimeout = requestAnimationFrame(() => {
+      try {
+        lucide.createIcons();
+      } catch (e) {
+        console.warn("Lucide icon creation failed", e);
+      }
+      lucideTimeout = null;
+    });
   }
 }
 
@@ -1897,14 +1942,14 @@ function adjustDate(offset) {
   const newDateStr = dateToYYYYMMDD(date);
   if (isWithinSubscription(newDateStr)) {
     selectedDate = newDateStr;
-    document.getElementById("checkin-date-picker").value = selectedDate;
+    DOM.get("checkin-date-picker").value = selectedDate;
     updatePageContent();
   }
 }
 
 // Trigger date picker overlay click
 function triggerDatePicker() {
-  document.getElementById("checkin-date-picker").showPicker();
+  DOM.get("checkin-date-picker").showPicker();
 }
 
 // Sets the selected date directly from date picker input
@@ -1914,7 +1959,7 @@ function setDateFromPicker(value) {
     updatePageContent();
   } else {
     alert(`Please select a date within the subscription period: ${formatDateLong(START_DATE_STR)} to ${formatDateLong(END_DATE_STR)}`);
-    document.getElementById("checkin-date-picker").value = selectedDate;
+    DOM.get("checkin-date-picker").value = selectedDate;
   }
 }
 
@@ -1931,7 +1976,7 @@ function jumpToToday() {
   } else {
     selectedDate = START_DATE_STR;
   }
-  document.getElementById("checkin-date-picker").value = selectedDate;
+  DOM.get("checkin-date-picker").value = selectedDate;
   updatePageContent();
 }
 
@@ -2079,6 +2124,8 @@ function migrateDataIfNecessary() {
 
 // Save data to localStorage and trigger cloud sync
 function saveData(syncToCloud = true) {
+  invalidateStreaksCache(currentUser);
+  invalidateActivityStreaksCache(currentUser);
   safeStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(fitnessData));
   if (syncToCloud && typeof debouncedSync === 'function') debouncedSync();
 }
@@ -2156,7 +2203,7 @@ function ensureDateRecord(user, dateStr) {
 // Theme Toggle Handler
 function toggleTheme() {
   const isLight = document.body.classList.toggle("light-mode");
-  const themeIcon = document.getElementById("theme-icon");
+  const themeIcon = DOM.get("theme-icon");
   
   if (isLight) {
     safeStorage.setItem("duogym_theme", "light");
@@ -2192,8 +2239,8 @@ function switchUser(user) {
   document.body.classList.add(`user-${user}`);
 
   // Update tabs DOM classes
-  const tabAman = document.getElementById("tab-user-aman");
-  const tabRishit = document.getElementById("tab-user-rishit");
+  const tabAman = DOM.get("tab-user-aman");
+  const tabRishit = DOM.get("tab-user-rishit");
   if (tabAman) tabAman.classList.toggle("active", user === "aman");
   if (tabRishit) tabRishit.classList.toggle("active", user === "rishit");
 
@@ -2226,13 +2273,13 @@ function switchPage(pageId) {
   // Toggle active styling on navigation buttons
   const navIds = ["today", "diet", "dictionary", "activity"];
   navIds.forEach(id => {
-    const btn = document.getElementById(`nav-btn-${id}`);
+    const btn = DOM.get(`nav-btn-${id}`);
     if (btn) btn.classList.toggle("active", id === pageId);
   });
 
   // Toggle active styling on section elements
   navIds.forEach(id => {
-    const sec = document.getElementById(`page-${id}`);
+    const sec = DOM.get(`page-${id}`);
     if (sec) sec.classList.toggle("active", id === pageId);
   });
 
@@ -2288,7 +2335,7 @@ function getRivalUsername() {
 }
 
 async function saveRivalUsername() {
-  const input = document.getElementById("rival-username-input");
+  const input = DOM.get("rival-username-input");
   const rival = normalizeUsername(input?.value);
   if (!isValidUsername(rival) || rival === authenticatedUser) {
     alert("Enter another valid FitRivals username.");
@@ -2364,25 +2411,25 @@ function renderCheckIn() {
   }
   const quoteIndex = charSum % quotes.length;
   const quoteText = `"${quotes[quoteIndex]}"`;
-  const quoteEl = document.getElementById("header-motivation-quote");
+  const quoteEl = DOM.get("header-motivation-quote");
   if (quoteEl) {
     quoteEl.textContent = quoteText;
   }
 
   // Set date text in navigator
-  document.getElementById("checkin-date-text").textContent = formatDateNav(selectedDate);
-  document.getElementById("checkin-date-picker").value = selectedDate;
+  DOM.get("checkin-date-text").textContent = formatDateNav(selectedDate);
+  DOM.get("checkin-date-picker").value = selectedDate;
 
   // Set workout header details
-  document.getElementById("workout-day-badge").textContent = `${getWeekdayName(selectedDate)} Workout`;
-  document.getElementById("workout-name-text").textContent = workout.type;
-  document.getElementById("workout-focus-text").textContent = workout.focus;
+  DOM.get("workout-day-badge").textContent = `${getWeekdayName(selectedDate)} Workout`;
+  DOM.get("workout-name-text").textContent = workout.type;
+  DOM.get("workout-focus-text").textContent = workout.focus;
 
   // Missed yesterday's workout check (subtle notification)
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = dateToYYYYMMDD(yesterday);
-  const banner = document.getElementById("yesterday-missed-banner");
+  const banner = DOM.get("yesterday-missed-banner");
   
   if (yesterdayStr >= START_DATE_STR && yesterdayStr <= END_DATE_STR && getWeekdayName(yesterdayStr) !== "Sunday") {
     ensureDateRecord(currentUser, yesterdayStr);
@@ -2398,11 +2445,11 @@ function renderCheckIn() {
   }
 
   // Render Coach Bubble & Streak
-  const coachFeedbackEl = document.getElementById("coach-feedback-text");
+  const coachFeedbackEl = DOM.get("coach-feedback-text");
   if (coachFeedbackEl) {
     coachFeedbackEl.innerHTML = getCoachFeedback();
   }
-  const streakCountEl = document.getElementById("streak-count-value");
+  const streakCountEl = DOM.get("streak-count-value");
   if (streakCountEl) {
     const streak = calculateStreaks(currentUser).currentStreak;
     streakCountEl.textContent = `${streak} Day${streak === 1 ? "" : "s"}`;
@@ -2411,8 +2458,8 @@ function renderCheckIn() {
   // Render Daily Missions status
   const missions = record.missions || { workout: false, diet: false, water: false };
   
-  const wIcon = document.getElementById("mission-workout-icon");
-  const wRow = document.getElementById("mission-workout-row");
+  const wIcon = DOM.get("mission-workout-icon");
+  const wRow = DOM.get("mission-workout-row");
   if (wIcon && wRow) {
     if (missions.workout) {
       wIcon.innerHTML = `<i data-lucide="check-circle-2" style="width: 16px; height: 16px; color: var(--success);"></i>`;
@@ -2423,8 +2470,8 @@ function renderCheckIn() {
     }
   }
 
-  const dIcon = document.getElementById("mission-diet-icon");
-  const dRow = document.getElementById("mission-diet-row");
+  const dIcon = DOM.get("mission-diet-icon");
+  const dRow = DOM.get("mission-diet-row");
   if (dIcon && dRow) {
     if (missions.diet) {
       dIcon.innerHTML = `<i data-lucide="check-circle-2" style="width: 16px; height: 16px; color: var(--success);"></i>`;
@@ -2435,8 +2482,8 @@ function renderCheckIn() {
     }
   }
 
-  const hIcon = document.getElementById("mission-water-icon");
-  const hRow = document.getElementById("mission-water-row");
+  const hIcon = DOM.get("mission-water-icon");
+  const hRow = DOM.get("mission-water-row");
   if (hIcon && hRow) {
     if (missions.water) {
       hIcon.innerHTML = `<i data-lucide="check-circle-2" style="width: 16px; height: 16px; color: var(--success);"></i>`;
@@ -2448,17 +2495,17 @@ function renderCheckIn() {
   }
 
   // Render Water Tracker Card
-  const waterProgressEl = document.getElementById("water-progress-value");
+  const waterProgressEl = DOM.get("water-progress-value");
   if (waterProgressEl) {
     waterProgressEl.textContent = `${record.waterIntake || 0} / 3500 ml`;
   }
-  const waterGlassesEl = document.getElementById("water-glasses-count");
+  const waterGlassesEl = DOM.get("water-glasses-count");
   if (waterGlassesEl) {
     const cups = Math.round((record.waterIntake || 0) / 250);
     waterGlassesEl.textContent = `${cups} of 14 cups (250ml)`;
   }
   
-  const cupsContainer = document.getElementById("water-cups-container");
+  const cupsContainer = DOM.get("water-cups-container");
   if (cupsContainer) {
     cupsContainer.innerHTML = "";
     const waterVal = record.waterIntake || 0;
@@ -2482,7 +2529,7 @@ function renderCheckIn() {
   const userBadges = fitnessData[currentUser].badges || [];
   const allBadgesList = ["consistent-crusader", "gym-legend", "kitchen-master", "hydration-champ", "iron-discipline"];
   allBadgesList.forEach(badgeId => {
-    const el = document.getElementById(`badge-${badgeId}`);
+    const el = DOM.get(`badge-${badgeId}`);
     if (el) {
       if (userBadges.includes(badgeId)) {
         el.classList.remove("locked");
@@ -2495,7 +2542,7 @@ function renderCheckIn() {
   });
 
   // Render checklist items
-  const checklistContainer = document.getElementById("checklist-container");
+  const checklistContainer = DOM.get("checklist-container");
   checklistContainer.innerHTML = "";
 
   // If selectedDate is in the future, checklist rows should look disabled/read-only
@@ -2752,21 +2799,21 @@ function updateProgressBar() {
   const completed = record ? record.completedExercises.length : 0;
   const percent = record ? record.completionPercentage : 0;
 
-  const percentEl = document.getElementById("workout-progress-percent");
+  const percentEl = DOM.get("workout-progress-percent");
   if (percentEl) percentEl.textContent = `${percent}%`;
   
-  const fillEl = document.getElementById("workout-progress-fill");
+  const fillEl = DOM.get("workout-progress-fill");
   if (fillEl) fillEl.style.width = `${percent}%`;
   
-  const countEl = document.getElementById("workout-count-text");
+  const countEl = DOM.get("workout-count-text");
   if (countEl) countEl.textContent = `Completed: ${completed} of ${total} exercises`;
 }
 
 /* ── RENDER BACKUP MANAGER ────────────────────────────────── */
 function renderNotes() {
   // Render last backup status info
-  const backupText = document.getElementById("last-backup-text");
-  const backupIcon = document.getElementById("backup-status-icon");
+  const backupText = DOM.get("last-backup-text");
+  const backupIcon = DOM.get("backup-status-icon");
   if (backupText && backupIcon) {
     const lastBackup = fitnessData.lastBackup;
     if (lastBackup) {
@@ -2783,8 +2830,8 @@ function renderNotes() {
   // Populate Supabase credentials inputs
   const storedUrl = safeStorage.getItem("duogym_supabase_url") || "";
   const storedKey = safeStorage.getItem("duogym_supabase_key") || "";
-  const urlInput = document.getElementById("sb-url-input");
-  const keyInput = document.getElementById("sb-key-input");
+  const urlInput = DOM.get("sb-url-input");
+  const keyInput = DOM.get("sb-key-input");
   if (urlInput) urlInput.value = storedUrl;
   if (keyInput) keyInput.value = storedKey;
 
@@ -2795,8 +2842,8 @@ function renderNotes() {
 }
 
 function saveAndConnectSupabase() {
-  const url = document.getElementById('sb-url-input').value.trim();
-  const key = document.getElementById('sb-key-input').value.trim();
+  const url = DOM.get('sb-url-input').value.trim();
+  const key = DOM.get('sb-key-input').value.trim();
   
   if (!url || !key) {
     alert("Please enter both the Supabase URL and Anon Key.");
@@ -2813,7 +2860,7 @@ function saveAndConnectSupabase() {
 }
 
 function copySupabaseSQL() {
-  const code = document.getElementById('sb-sql-code').textContent;
+  const code = DOM.get('sb-sql-code').textContent;
   navigator.clipboard.writeText(code).then(() => {
     alert("SQL script copied to clipboard! Run this in your Supabase SQL Editor.");
   }).catch(e => {
@@ -2822,18 +2869,18 @@ function copySupabaseSQL() {
 }
 
 function calculateOneRepMax() {
-  const wInput = document.getElementById("calc-weight");
-  const rInput = document.getElementById("calc-reps");
+  const wInput = DOM.get("calc-weight");
+  const rInput = DOM.get("calc-reps");
   
   if (!wInput || !rInput) return;
   
   const w = parseFloat(wInput.value) || 0;
   const r = parseInt(rInput.value, 10) || 0;
   
-  const el1rm = document.getElementById("calc-1rm-val");
-  const elPower = document.getElementById("calc-power-val");
-  const elHyper = document.getElementById("calc-hyper-val");
-  const elEndur = document.getElementById("calc-endur-val");
+  const el1rm = DOM.get("calc-1rm-val");
+  const elPower = DOM.get("calc-power-val");
+  const elHyper = DOM.get("calc-hyper-val");
+  const elEndur = DOM.get("calc-endur-val");
   
   if (w <= 0 || r <= 0) {
     if (el1rm) el1rm.textContent = "0.0 kg";
@@ -2934,7 +2981,7 @@ async function shareBackupData() {
 
 // Click hidden file input
 function triggerRestoreUpload() {
-  document.getElementById("backup-file-upload").click();
+  DOM.get("backup-file-upload").click();
 }
 
 // Handle selected file parse and restore confirmation
@@ -2994,7 +3041,7 @@ window.addEventListener("beforeinstallprompt", (e) => {
   // Stash the event so it can be triggered later.
   deferredPrompt = e;
   // Update UI to notify the user they can install the PWA
-  const installBtn = document.getElementById("install-app-btn");
+  const installBtn = DOM.get("install-app-btn");
   if (installBtn) {
     installBtn.style.display = "flex";
   }
@@ -3012,7 +3059,7 @@ function installApp() {
       console.log("User dismissed the install prompt");
     }
     deferredPrompt = null;
-    const installBtn = document.getElementById("install-app-btn");
+    const installBtn = DOM.get("install-app-btn");
     if (installBtn) {
       installBtn.style.display = "none";
     }
@@ -3021,7 +3068,7 @@ function installApp() {
 
 window.addEventListener("appinstalled", (evt) => {
   console.log("App was successfully installed");
-  const installBtn = document.getElementById("install-app-btn");
+  const installBtn = DOM.get("install-app-btn");
   if (installBtn) {
     installBtn.style.display = "none";
   }
@@ -3592,6 +3639,52 @@ function getFoodMacros(food) {
   return { protein: p, carbs: c, fat: f };
 }
 
+function getDietDateAggregates(data, username, dateStr) {
+  const cacheKey = `${username}_${dateStr}`;
+  if (dietAggregatesCache[cacheKey]) {
+    return dietAggregatesCache[cacheKey];
+  }
+  
+  ensureDietDateRecord(data, dateStr);
+  const meals = data.meals[dateStr];
+  let calories = 0;
+  let protein = 0;
+  let carbs = 0;
+  let fat = 0;
+  
+  ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(type => {
+    (meals[type] || []).forEach(f => {
+      calories += f.k;
+      const mac = getFoodMacros(f);
+      protein += mac.protein;
+      carbs += mac.carbs;
+      fat += mac.fat;
+    });
+  });
+  
+  const result = { calories, protein, carbs, fat };
+  dietAggregatesCache[cacheKey] = result;
+  return result;
+}
+
+function getCachedStreaks(username) {
+  if (streaksCache[username]) {
+    return streaksCache[username];
+  }
+  const result = calculateStreaks(username);
+  streaksCache[username] = result;
+  return result;
+}
+
+function getCachedActivityStreaks(username) {
+  if (activityStreaksCache[username]) {
+    return activityStreaksCache[username];
+  }
+  const result = calculateActivityStreaks(username);
+  activityStreaksCache[username] = result;
+  return result;
+}
+
 // Automatic migration utility to update legacy schedules to dietician plan
 function migrateDietDataIfNecessary(data, user) {
   let migrated = false;
@@ -3699,6 +3792,7 @@ function getActiveDietData() {
 }
 
 function saveDietData() {
+  invalidateDietCache(currentUser);
   if (currentUser === "aman") {
     safeStorage.setItem("amanDietData", JSON.stringify(amanDietData));
   } else if (currentUser === "rishit") {
@@ -3711,6 +3805,7 @@ function saveDietData() {
 }
 
 function saveDietDataDirect(username, data) {
+  invalidateDietCache(username);
   if (username === "aman") {
     amanDietData = data;
     safeStorage.setItem("amanDietData", JSON.stringify(amanDietData));
@@ -3745,10 +3840,10 @@ function renderDietTracker() {
   // Switch Sub-tabs content show/hide
   const panels = ["log", "schedule", "profile", "reports"];
   panels.forEach(p => {
-    const el = document.getElementById(`diet-panel-${p}`);
+    const el = DOM.get(`diet-panel-${p}`);
     if (el) el.style.display = (p === activeDietTab) ? "block" : "none";
     
-    const btn = document.getElementById(`diet-tab-btn-${p}`);
+    const btn = DOM.get(`diet-tab-btn-${p}`);
     if (btn) btn.classList.toggle("active", p === activeDietTab);
   });
 
@@ -3776,24 +3871,25 @@ function renderDietLog() {
   ensureDietDateRecord(data, selectedDietDate);
   
   // Date values
-  document.getElementById("diet-date-text").textContent = formatDateNav(selectedDietDate);
-  document.getElementById("diet-date-picker").value = selectedDietDate;
+  DOM.get("diet-date-text").textContent = formatDateNav(selectedDietDate);
+  DOM.get("diet-date-picker").value = selectedDietDate;
   
   const targetCals = data.profile.targetCalories || 2000;
-  document.getElementById("diet-val-target").textContent = targetCals;
+  DOM.get("diet-val-target").textContent = targetCals;
   
   // Compute logged items
   const meals = data.meals[selectedDietDate];
-  let consumedCals = 0;
-  let totalProtein = 0;
-  let totalCarbs = 0;
-  let totalFat = 0;
+  const aggregates = getDietDateAggregates(data, currentUser, selectedDietDate);
+  const consumedCals = aggregates.calories;
+  const totalProtein = aggregates.protein;
+  const totalCarbs = aggregates.carbs;
+  const totalFat = aggregates.fat;
 
   const mealTypes = ["Breakfast", "Lunch", "EveningSnacks", "Dinner"];
   
   mealTypes.forEach(type => {
-    const listContainer = document.getElementById(type === "EveningSnacks" ? "meal-list-snacks" : `meal-list-${type.toLowerCase()}`);
-    const calLabel = document.getElementById(type === "EveningSnacks" ? "meal-cal-snacks" : `meal-cal-${type.toLowerCase()}`);
+    const listContainer = DOM.get(type === "EveningSnacks" ? "meal-list-snacks" : `meal-list-${type.toLowerCase()}`);
+    const calLabel = DOM.get(type === "EveningSnacks" ? "meal-cal-snacks" : `meal-cal-${type.toLowerCase()}`);
     
     if (!listContainer) return;
     listContainer.innerHTML = "";
@@ -3806,13 +3902,9 @@ function renderDietLog() {
     } else {
       items.forEach((food, idx) => {
         mealCals += food.k;
-        consumedCals += food.k;
         
         // Accumulate macros
         const macros = getFoodMacros(food);
-        totalProtein += macros.protein;
-        totalCarbs += macros.carbs;
-        totalFat += macros.fat;
         
         const row = document.createElement("div");
         row.className = "meal-food-item";
@@ -3836,11 +3928,11 @@ function renderDietLog() {
   });
 
   // Update summary totals
-  document.getElementById("diet-val-consumed").textContent = consumedCals;
+  DOM.get("diet-val-consumed").textContent = consumedCals;
   
   const remainingCals = targetCals - consumedCals;
-  const remainingLabel = document.getElementById("diet-val-remaining");
-  const remainingStatus = document.getElementById("diet-status-remaining");
+  const remainingLabel = DOM.get("diet-val-remaining");
+  const remainingStatus = DOM.get("diet-status-remaining");
   
   if (remainingCals >= 0) {
     remainingLabel.textContent = `${remainingCals} kcal`;
@@ -3857,7 +3949,7 @@ function renderDietLog() {
   const pct = Math.min(100, Math.round((consumedCals / targetCals) * 100));
   
   // Progress fill width
-  const progressFill = document.getElementById("diet-progress-fill");
+  const progressFill = DOM.get("diet-progress-fill");
   if (progressFill) {
     progressFill.style.width = `${pct}%`;
     progressFill.style.background = (consumedCals > targetCals) ? "var(--danger)" : "var(--accent)";
@@ -3868,9 +3960,9 @@ function renderDietLog() {
   const targetCarbs = Math.round((targetCals * 0.50) / 4);
   const targetFat = Math.round((targetCals * 0.25) / 9);
 
-  document.getElementById("diet-protein-total").textContent = `${Math.round(totalProtein)} / ${targetProtein}g`;
-  document.getElementById("diet-carbs-total").textContent = `${Math.round(totalCarbs)} / ${targetCarbs}g`;
-  document.getElementById("diet-fat-total").textContent = `${Math.round(totalFat)} / ${targetFat}g`;
+  DOM.get("diet-protein-total").textContent = `${Math.round(totalProtein)} / ${targetProtein}g`;
+  DOM.get("diet-carbs-total").textContent = `${Math.round(totalCarbs)} / ${targetCarbs}g`;
+  DOM.get("diet-fat-total").textContent = `${Math.round(totalFat)} / ${targetFat}g`;
 
   // Refresh lucide icons inside logs
   safeCreateIcons();
@@ -3884,7 +3976,7 @@ function deleteFoodItem(type, index) {
   if (activeDietTab === "log") {
     data.meals[selectedDietDate][type].splice(index, 1);
   } else if (activeDietTab === "schedule") {
-    const day = document.getElementById("diet-sched-day-select").value;
+    const day = DOM.get("diet-sched-day-select").value;
     data.schedule[day][type].splice(index, 1);
   }
   
@@ -3909,21 +4001,21 @@ function onDietDateChanged(newVal) {
     renderDietTracker();
   } else {
     alert("Date selected is outside subscription period!");
-    document.getElementById("diet-date-picker").value = selectedDietDate;
+    DOM.get("diet-date-picker").value = selectedDietDate;
   }
 }
 
 // ── RENDER SUB-TAB 2: WEEKLY SCHEDULE ──
 function renderWeeklySchedule() {
   const data = getActiveDietData();
-  const day = document.getElementById("diet-sched-day-select").value;
+  const day = DOM.get("diet-sched-day-select").value;
   
   const schedule = data.schedule[day];
   const mealTypes = ["Breakfast", "Lunch", "EveningSnacks", "Dinner"];
   
   mealTypes.forEach(type => {
-    const listContainer = document.getElementById(type === "EveningSnacks" ? "sched-list-snacks" : `sched-list-${type.toLowerCase()}`);
-    const calLabel = document.getElementById(type === "EveningSnacks" ? "sched-cal-snacks" : `sched-cal-${type.toLowerCase()}`);
+    const listContainer = DOM.get(type === "EveningSnacks" ? "sched-list-snacks" : `sched-list-${type.toLowerCase()}`);
+    const calLabel = DOM.get(type === "EveningSnacks" ? "sched-cal-snacks" : `sched-cal-${type.toLowerCase()}`);
     
     if (!listContainer) return;
     listContainer.innerHTML = "";
@@ -3970,11 +4062,11 @@ function renderDietProfile() {
   const dates = Object.keys(weights).sort();
   const latestWeight = dates.length ? weights[dates[dates.length - 1]] : data.profile.weight;
   
-  document.getElementById("diet-prof-age").value = data.profile.age;
-  document.getElementById("diet-prof-height").value = data.profile.height;
-  document.getElementById("diet-prof-weight").value = latestWeight;
-  document.getElementById("diet-prof-goal").value = data.profile.goalWeight;
-  document.getElementById("diet-prof-target").value = data.profile.targetCalories;
+  DOM.get("diet-prof-age").value = data.profile.age;
+  DOM.get("diet-prof-height").value = data.profile.height;
+  DOM.get("diet-prof-weight").value = latestWeight;
+  DOM.get("diet-prof-goal").value = data.profile.goalWeight;
+  DOM.get("diet-prof-target").value = data.profile.targetCalories;
 }
 
 // Profile Save handler
@@ -3982,11 +4074,11 @@ function saveDietProfile(event) {
   event.preventDefault();
   const data = getActiveDietData();
   
-  const age = parseInt(document.getElementById("diet-prof-age").value);
-  const height = parseInt(document.getElementById("diet-prof-height").value);
-  const weight = parseFloat(document.getElementById("diet-prof-weight").value);
-  const goal = parseFloat(document.getElementById("diet-prof-goal").value);
-  const target = parseInt(document.getElementById("diet-prof-target").value);
+  const age = parseInt(DOM.get("diet-prof-age").value);
+  const height = parseInt(DOM.get("diet-prof-height").value);
+  const weight = parseFloat(DOM.get("diet-prof-weight").value);
+  const goal = parseFloat(DOM.get("diet-prof-goal").value);
+  const target = parseInt(DOM.get("diet-prof-target").value);
   
   if (age <= 0 || height <= 0 || weight <= 0 || goal <= 0 || target <= 0) {
     alert("Please enter positive numeric bounds!");
@@ -4018,50 +4110,37 @@ function renderDietReports() {
   const data = getActiveDietData();
   
   // Calculate today's calories
-  ensureDietDateRecord(data, selectedDietDate);
-  const todayMeals = data.meals[selectedDietDate];
-  let todayCals = 0;
-  ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(type => {
-    (todayMeals[type] || []).forEach(f => todayCals += f.k);
-  });
+  const todayStr = selectedDietDate;
+  const todayAgg = getDietDateAggregates(data, currentUser, todayStr);
+  const todayCals = todayAgg.calories;
   
-  document.getElementById("diet-report-today").textContent = `${todayCals} kcal`;
+  DOM.get("diet-report-today").textContent = `${todayCals} kcal`;
   
   // Gather active logs history
   const activeDates = Object.keys(data.meals).filter(d => {
-    let dayTotal = 0;
-    ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(t => {
-      (data.meals[d][t] || []).forEach(f => dayTotal += f.k);
-    });
-    return dayTotal > 0;
+    return getDietDateAggregates(data, currentUser, d).calories > 0;
   }).sort();
   
   // Calculate Weekly Average (past 7 active days)
   let weeklySum = 0;
   const weeklyDates = activeDates.slice(-7);
   weeklyDates.forEach(d => {
-    ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(t => {
-      (data.meals[d][t] || []).forEach(f => weeklySum += f.k);
-    });
+    weeklySum += getDietDateAggregates(data, currentUser, d).calories;
   });
   const weeklyAvg = weeklyDates.length ? Math.round(weeklySum / weeklyDates.length) : 0;
-  document.getElementById("diet-report-weekly-avg").textContent = `${weeklyAvg} kcal`;
+  DOM.get("diet-report-weekly-avg").textContent = `${weeklyAvg} kcal`;
   
   // Calculate Monthly Average (past 30 active days)
   let monthlySum = 0;
   const monthlyDates = activeDates.slice(-30);
   monthlyDates.forEach(d => {
-    ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(t => {
-      (data.meals[d][t] || []).forEach(f => monthlySum += f.k);
-    });
+    monthlySum += getDietDateAggregates(data, currentUser, d).calories;
   });
   const monthlyAvg = monthlyDates.length ? Math.round(monthlySum / monthlyDates.length) : 0;
-  document.getElementById("diet-report-monthly-avg").textContent = `${monthlyAvg} kcal`;
-  
-
+  DOM.get("diet-report-monthly-avg").textContent = `${monthlyAvg} kcal`;
   
   // History table population
-  const tbody = document.getElementById("diet-history-tbody");
+  const tbody = DOM.get("diet-history-tbody");
   tbody.innerHTML = "";
   
   if (activeDates.length === 0) {
@@ -4070,18 +4149,7 @@ function renderDietReports() {
     // Reverse chronological order
     const reverseDates = [...activeDates].reverse();
     reverseDates.forEach(d => {
-      let dayTotal = 0;
-      let pTotal = 0, cTotal = 0, fTotal = 0;
-      
-      ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(t => {
-        (data.meals[d][t] || []).forEach(f => {
-          dayTotal += f.k;
-          const mac = getFoodMacros(f);
-          pTotal += mac.protein;
-          cTotal += mac.carbs;
-          fTotal += mac.fat;
-        });
-      });
+      const { calories: dayTotal, protein: pTotal, carbs: cTotal, fat: fTotal } = getDietDateAggregates(data, currentUser, d);
       
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -4109,10 +4177,10 @@ function openAddFoodModal(mealType) {
   selectedDietCategory = ""; // Reset category filter
   
   // Set modal title depending on context (schedule vs log)
-  const titleEl = document.getElementById("diet-modal-title-text");
+  const titleEl = DOM.get("diet-modal-title-text");
   if (titleEl) {
     if (activeDietTab === "schedule") {
-      const day = document.getElementById("diet-sched-day-select").value;
+      const day = DOM.get("diet-sched-day-select").value;
       titleEl.textContent = `Add to ${day}'s ${mealType}`;
     } else {
       titleEl.textContent = `Add to ${mealType}`;
@@ -4120,7 +4188,7 @@ function openAddFoodModal(mealType) {
   }
   
   // Reset search input
-  const searchInput = document.getElementById("diet-search-input");
+  const searchInput = DOM.get("diet-search-input");
   if (searchInput) searchInput.value = "";
   
   // Render category chips
@@ -4133,18 +4201,18 @@ function openAddFoodModal(mealType) {
   onDietSearch();
   
   // Show modal
-  const modal = document.getElementById("diet-food-modal");
+  const modal = DOM.get("diet-food-modal");
   if (modal) modal.classList.add("active");
 }
 
 function closeAddFoodModal() {
-  const modal = document.getElementById("diet-food-modal");
+  const modal = DOM.get("diet-food-modal");
   if (modal) modal.classList.remove("active");
   activeLoggingMeal = "";
 }
 
 function loadExerciseVideo(info) {
-  const container = document.getElementById("ex-modal-video-container");
+  const container = DOM.get("ex-modal-video-container");
   if (!container) return;
 
   container.innerHTML = "";
@@ -4187,10 +4255,10 @@ function showExerciseInfo(exerciseId) {
   const info = exerciseInstructions[exerciseId];
   if (!info) return;
 
-  const modal = document.getElementById("exercise-info-modal");
-  const title = document.getElementById("ex-modal-name");
-  const stepsList = document.getElementById("ex-modal-steps");
-  const tipsText = document.getElementById("ex-modal-tips");
+  const modal = DOM.get("exercise-info-modal");
+  const title = DOM.get("ex-modal-name");
+  const stepsList = DOM.get("ex-modal-steps");
+  const tipsText = DOM.get("ex-modal-tips");
 
   if (!modal || !title || !stepsList || !tipsText) return;
 
@@ -4221,14 +4289,14 @@ function showExerciseInfo(exerciseId) {
 }
 
 function closeExerciseInfoModal() {
-  const modal = document.getElementById("exercise-info-modal");
+  const modal = DOM.get("exercise-info-modal");
   if (modal) {
     modal.classList.remove("active");
     modal.setAttribute("aria-hidden", "true");
   }
 
   // Clear the video container to stop playback/audio
-  const container = document.getElementById("ex-modal-video-container");
+  const container = DOM.get("ex-modal-video-container");
   if (container) {
     container.innerHTML = "";
     container.style.display = "none";
@@ -4244,8 +4312,8 @@ function closeExerciseInfoModal() {
 let selectedDictCategory = "";
 
 function renderExerciseDictionary() {
-  const container = document.getElementById("dict-exercise-list");
-  const chipsContainer = document.getElementById("dict-cat-chips");
+  const container = DOM.get("dict-exercise-list");
+  const chipsContainer = DOM.get("dict-cat-chips");
   if (!container || !chipsContainer) return;
 
   // 1. Render Category Chips
@@ -4285,7 +4353,7 @@ function renderExerciseDictionary() {
   });
 
   // 2. Render Cards
-  const searchInput = document.getElementById("dict-search-input");
+  const searchInput = DOM.get("dict-search-input");
   const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
 
   container.innerHTML = "";
@@ -4442,7 +4510,7 @@ function playSuccessSound() {
 }
 
 function renderCategoryChips() {
-  const container = document.getElementById("diet-cat-chips-container");
+  const container = DOM.get("diet-cat-chips-container");
   if (!container) return;
   container.innerHTML = "";
   
@@ -4474,11 +4542,11 @@ function selectCategoryChip(catName) {
 
 // ── FOOD DATABASE SEARCH & PAGINATION CONTROLLER ──
 function onDietSearch() {
-  const searchInput = document.getElementById("diet-search-input");
+  const searchInput = DOM.get("diet-search-input");
   const query = searchInput ? searchInput.value.toLowerCase() : "";
   const filterCat = selectedDietCategory;
   
-  const sortSelect = document.getElementById("diet-sort-select");
+  const sortSelect = DOM.get("diet-sort-select");
   const sortBy = sortSelect ? sortSelect.value : "name-asc";
   
   let list = dietFoods.filter(f => {
@@ -4502,7 +4570,7 @@ function onDietSearch() {
   const startIdx = (dietSearchPage - 1) * dietSearchPageSize;
   const pageSlice = list.slice(startIdx, startIdx + dietSearchPageSize);
   
-  const listContainer = document.getElementById("diet-search-list");
+  const listContainer = DOM.get("diet-search-list");
   if (!listContainer) return;
   listContainer.innerHTML = "";
   
@@ -4539,16 +4607,16 @@ function onDietSearch() {
     });
   }
   
-  const pageInfoEl = document.getElementById("diet-page-info");
+  const pageInfoEl = DOM.get("diet-page-info");
   if (pageInfoEl) pageInfoEl.textContent = `Page ${dietSearchPage} of ${totalPages}`;
   
-  const showingInfoEl = document.getElementById("diet-showing-info");
+  const showingInfoEl = DOM.get("diet-showing-info");
   if (showingInfoEl) showingInfoEl.textContent = `(${total} items)`;
   
-  const prevBtn = document.getElementById("diet-prev-btn");
+  const prevBtn = DOM.get("diet-prev-btn");
   if (prevBtn) prevBtn.disabled = dietSearchPage <= 1;
   
-  const nextBtn = document.getElementById("diet-next-btn");
+  const nextBtn = DOM.get("diet-next-btn");
   if (nextBtn) nextBtn.disabled = dietSearchPage >= totalPages;
   
   safeCreateIcons();
@@ -4583,22 +4651,22 @@ function addSearchedFood(foodName) {
   activePortionFood = food;
   
   // Close the search modal
-  const searchModal = document.getElementById("diet-food-modal");
+  const searchModal = DOM.get("diet-food-modal");
   if (searchModal) searchModal.classList.remove("active");
   
   // Open the portion modal
-  const portionModal = document.getElementById("diet-portion-modal");
+  const portionModal = DOM.get("diet-portion-modal");
   if (portionModal) {
     portionModal.classList.add("active");
     
     // Set UI details
-    document.getElementById("portion-food-name").textContent = food.n;
-    document.getElementById("portion-food-category").textContent = food.c;
-    document.getElementById("portion-recommended-size").textContent = `${food.s}`;
+    DOM.get("portion-food-name").textContent = food.n;
+    DOM.get("portion-food-category").textContent = food.c;
+    DOM.get("portion-recommended-size").textContent = `${food.s}`;
     
     // Set default weight in input
     const defaultWeight = food.w || 100;
-    document.getElementById("portion-weight-input").value = defaultWeight;
+    DOM.get("portion-weight-input").value = defaultWeight;
     
     // Render dynamic calorie/macro stats
     updatePortionModalStats();
@@ -4607,16 +4675,16 @@ function addSearchedFood(foodName) {
 
 function updatePortionModalStats() {
   if (!activePortionFood) return;
-  const weightInput = document.getElementById("portion-weight-input");
+  const weightInput = DOM.get("portion-weight-input");
   let weight = parseFloat(weightInput.value);
   if (isNaN(weight) || weight <= 0) weight = 0;
   
   const scaled = scaleFoodMetrics(activePortionFood, weight);
   
-  document.getElementById("portion-display-cal").textContent = `${scaled.k} kcal`;
-  document.getElementById("portion-display-protein").textContent = `${scaled.p}g`;
-  document.getElementById("portion-display-carbs").textContent = `${scaled.carb}g`;
-  document.getElementById("portion-display-fat").textContent = `${scaled.f}g`;
+  DOM.get("portion-display-cal").textContent = `${scaled.k} kcal`;
+  DOM.get("portion-display-protein").textContent = `${scaled.p}g`;
+  DOM.get("portion-display-carbs").textContent = `${scaled.carb}g`;
+  DOM.get("portion-display-fat").textContent = `${scaled.f}g`;
 }
 
 function onPortionWeightChange() {
@@ -4624,7 +4692,7 @@ function onPortionWeightChange() {
 }
 
 function stepPortionWeight(delta) {
-  const input = document.getElementById("portion-weight-input");
+  const input = DOM.get("portion-weight-input");
   let val = parseFloat(input.value) || 0;
   val = Math.max(0, val + delta);
   input.value = val;
@@ -4634,13 +4702,13 @@ function stepPortionWeight(delta) {
 function setPortionMultiplier(mult) {
   if (!activePortionFood) return;
   const stdWeight = activePortionFood.w || 100;
-  const input = document.getElementById("portion-weight-input");
+  const input = DOM.get("portion-weight-input");
   input.value = Math.round(stdWeight * mult);
   updatePortionModalStats();
 }
 
 function closePortionModal() {
-  const portionModal = document.getElementById("diet-portion-modal");
+  const portionModal = DOM.get("diet-portion-modal");
   if (portionModal) portionModal.classList.remove("active");
   activePortionFood = null;
 }
@@ -4648,7 +4716,7 @@ function closePortionModal() {
 function confirmAddPortion() {
   if (!activePortionFood || !activeLoggingMeal) return;
   
-  const input = document.getElementById("portion-weight-input");
+  const input = DOM.get("portion-weight-input");
   let weight = parseFloat(input.value);
   if (isNaN(weight) || weight <= 0) {
     alert("Please enter a valid weight in grams!");
@@ -4677,7 +4745,7 @@ function confirmAddPortion() {
     ensureDietDateRecord(data, selectedDietDate);
     data.meals[selectedDietDate][activeLoggingMeal].push(foodEntry);
   } else if (activeDietTab === "schedule") {
-    const day = document.getElementById("diet-sched-day-select").value;
+    const day = DOM.get("diet-sched-day-select").value;
     data.schedule[day][activeLoggingMeal].push(foodEntry);
   }
   
@@ -4767,7 +4835,7 @@ let isCountdown = false;
 let countdownEndTime = 0;
 
 function toggleStopwatch() {
-  const panel = document.getElementById("stopwatch-overlay");
+  const panel = DOM.get("stopwatch-overlay");
   if (!panel) return;
   const isHidden = panel.style.display === "none";
   panel.style.display = isHidden ? "flex" : "none";
@@ -4777,7 +4845,7 @@ function toggleStopwatch() {
 }
 
 function updateStopwatchDisplay() {
-  const display = document.getElementById("sw-display");
+  const display = DOM.get("sw-display");
   if (!display) return;
   
   let totalMs = stopwatchTime;
@@ -4798,7 +4866,7 @@ function updateStopwatchDisplay() {
 }
 
 function startStopwatch() {
-  const startBtn = document.getElementById("sw-start-btn");
+  const startBtn = DOM.get("sw-start-btn");
   if (!startBtn) return;
 
   if (stopwatchRunning) {
@@ -4828,7 +4896,7 @@ function startStopwatch() {
 
 function stopStopwatch() {
   stopwatchRunning = false;
-  const startBtn = document.getElementById("sw-start-btn");
+  const startBtn = DOM.get("sw-start-btn");
   if (startBtn) {
     startBtn.textContent = "Start";
     startBtn.classList.replace("btn-danger", "btn-primary");
@@ -4926,7 +4994,7 @@ function playAlarmSound() {
     alarmIntervalId = setInterval(() => {
       if (beepCount >= 10) {
         stopAlarmSound();
-        const banner = document.getElementById("timer-alarm-banner");
+        const banner = DOM.get("timer-alarm-banner");
         if (banner) banner.style.display = "none";
         return;
       }
@@ -4977,7 +5045,7 @@ function stopAlarmSound() {
 }
 
 function showTimerCompletionBanner() {
-  const banner = document.getElementById("timer-alarm-banner");
+  const banner = DOM.get("timer-alarm-banner");
   if (banner) {
     banner.style.display = "flex";
     safeCreateIcons();
@@ -4985,7 +5053,7 @@ function showTimerCompletionBanner() {
 }
 
 function hideTimerCompletionBanner() {
-  const banner = document.getElementById("timer-alarm-banner");
+  const banner = DOM.get("timer-alarm-banner");
   if (banner) {
     banner.style.display = "none";
   }
@@ -5049,8 +5117,8 @@ function openTimerModal(exerciseId, name, setsText, repsText) {
   }
 
   // Populate UI
-  document.getElementById("timer-modal-ex-name").textContent = name;
-  document.getElementById("timer-modal-ex-details").textContent = setsText ? `${setsText} Sets × ${repsText}` : `${timer.setsCount} Sets × ${repsText}`;
+  DOM.get("timer-modal-ex-name").textContent = name;
+  DOM.get("timer-modal-ex-details").textContent = setsText ? `${setsText} Sets × ${repsText}` : `${timer.setsCount} Sets × ${repsText}`;
   
   // Pause any other running timers
   Object.keys(activeTimers).forEach(id => {
@@ -5059,8 +5127,8 @@ function openTimerModal(exerciseId, name, setsText, repsText) {
       activeTimers[id].intervalId = null;
       activeTimers[id].state = 'paused';
       
-      const otherBtn = document.getElementById(`timer-btn-${id}`);
-      const otherDisplay = document.getElementById(`timer-val-${id}`);
+      const otherBtn = DOM.get(`timer-btn-${id}`);
+      const otherDisplay = DOM.get(`timer-val-${id}`);
       if (otherBtn) otherBtn.innerHTML = `<i data-lucide="play" style="width: 14px; height: 14px;"></i>`;
       if (otherDisplay) otherDisplay.classList.remove("counting");
     }
@@ -5073,7 +5141,7 @@ function openTimerModal(exerciseId, name, setsText, repsText) {
   updateTimerModalUI();
   
   // Show modal
-  const modal = document.getElementById("exercise-timer-modal");
+  const modal = DOM.get("exercise-timer-modal");
   if (modal) {
     modal.style.display = "flex";
     requestAnimationFrame(() => {
@@ -5089,7 +5157,7 @@ function openTimerModal(exerciseId, name, setsText, repsText) {
 }
 
 function closeTimerModal() {
-  const modal = document.getElementById("exercise-timer-modal");
+  const modal = DOM.get("exercise-timer-modal");
   if (modal) {
     modal.classList.remove("active");
     setTimeout(() => {
@@ -5116,11 +5184,11 @@ function updateTimerModalUI() {
   if (!timer) return;
 
   // Update text values
-  document.getElementById("timer-modal-countdown").textContent = formatTimerTime(timer.remainingSeconds);
-  document.getElementById("timer-modal-state").textContent = timer.state.toUpperCase();
+  DOM.get("timer-modal-countdown").textContent = formatTimerTime(timer.remainingSeconds);
+  DOM.get("timer-modal-state").textContent = timer.state.toUpperCase();
   
   // Update progress circle ring
-  const circle = document.getElementById("timer-circle-progress");
+  const circle = DOM.get("timer-circle-progress");
   if (circle) {
     const circumference = 414.7; // 2 * pi * 66
     const ratio = timer.targetSeconds > 0 ? (timer.remainingSeconds / timer.targetSeconds) : 0;
@@ -5128,7 +5196,7 @@ function updateTimerModalUI() {
   }
 
   // Update button icons
-  const ctrlBtn = document.getElementById("timer-modal-control-btn");
+  const ctrlBtn = DOM.get("timer-modal-control-btn");
   if (ctrlBtn) {
     if (timer.state === 'running') {
       ctrlBtn.innerHTML = `<i data-lucide="pause" style="width: 16px; height: 16px;"></i> Pause`;
@@ -5144,7 +5212,7 @@ function renderTimerModalSets() {
   const timer = activeTimers[currentTimerExerciseId];
   if (!timer) return;
 
-  const container = document.getElementById("timer-modal-sets-list");
+  const container = DOM.get("timer-modal-sets-list");
   if (!container) return;
   
   container.innerHTML = "";
@@ -5245,7 +5313,7 @@ function renderTimerModalSets() {
   }
 
   // Update ratio text
-  const ratioText = document.getElementById("timer-modal-set-ratio");
+  const ratioText = DOM.get("timer-modal-set-ratio");
   if (ratioText) {
     ratioText.textContent = `Done: ${doneCount}/${timer.setsCount}`;
   }
@@ -5291,8 +5359,8 @@ function toggleTimerModalState() {
   const timer = activeTimers[currentTimerExerciseId];
   if (!timer) return;
 
-  const display = document.getElementById(`timer-val-${currentTimerExerciseId}`);
-  const btn = document.getElementById(`timer-btn-${currentTimerExerciseId}`);
+  const display = DOM.get(`timer-val-${currentTimerExerciseId}`);
+  const btn = DOM.get(`timer-btn-${currentTimerExerciseId}`);
 
   // Silence alarm if active
   stopAlarmSound();
@@ -5323,7 +5391,7 @@ function toggleTimerModalState() {
       }
 
       // Update inline list display in background
-      const liveDisplay = document.getElementById(`timer-val-${timer.exerciseId}`);
+      const liveDisplay = DOM.get(`timer-val-${timer.exerciseId}`);
       if (liveDisplay) {
         liveDisplay.textContent = formatTimerTime(timer.remainingSeconds);
       }
@@ -5344,7 +5412,7 @@ function toggleTimerModalState() {
           toggleExerciseCheck(timer.exerciseId);
         }
 
-        const liveBtn = document.getElementById(`timer-btn-${timer.exerciseId}`);
+        const liveBtn = DOM.get(`timer-btn-${timer.exerciseId}`);
         if (liveBtn) liveBtn.style.display = "none";
         if (liveDisplay) {
           liveDisplay.textContent = "DONE";
@@ -5466,7 +5534,7 @@ function initKeyboardDetection() {
       handleKeyboard(true);
       if (e.target.id === "chat-message-input") {
         setTimeout(() => {
-          const listEl = document.getElementById("chat-messages-list");
+          const listEl = DOM.get("chat-messages-list");
           if (listEl) listEl.scrollTop = listEl.scrollHeight;
         }, 80);
       }
@@ -5487,7 +5555,7 @@ function initKeyboardDetection() {
         document.body.classList.add("keyboard-open");
         // Scroll to bottom immediately when keyboard expands
         setTimeout(() => {
-          const listEl = document.getElementById("chat-messages-list");
+          const listEl = DOM.get("chat-messages-list");
           if (listEl) listEl.scrollTop = listEl.scrollHeight;
         }, 50);
       } else if (window.visualViewport.height >= initialHeight - 40) {
@@ -5497,10 +5565,10 @@ function initKeyboardDetection() {
   }
 
   // Dismiss keyboard when tapping the messages list
-  const listEl = document.getElementById("chat-messages-list");
+  const listEl = DOM.get("chat-messages-list");
   if (listEl) {
     listEl.addEventListener("click", () => {
-      document.getElementById("chat-message-input")?.blur();
+      DOM.get("chat-message-input")?.blur();
     });
   }
 }
@@ -5516,7 +5584,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const savedTheme = safeStorage.getItem("duogym_theme") || "dark";
   if (savedTheme === "light") {
     document.body.classList.add("light-mode");
-    const themeIcon = document.getElementById("theme-icon");
+    const themeIcon = DOM.get("theme-icon");
     if (themeIcon) {
       themeIcon.setAttribute("data-lucide", "moon");
     }
@@ -5556,10 +5624,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     selectedDate = isWithinSubscription(todayStr) ? todayStr : START_DATE_STR;
     
     // Hide login, show app
-    const loginOverlay = document.getElementById("login-overlay");
+    const loginOverlay = DOM.get("login-overlay");
     if (loginOverlay) loginOverlay.classList.add("hidden");
     
-    const appLayout = document.getElementById("app-layout");
+    const appLayout = DOM.get("app-layout");
     if (appLayout) appLayout.style.display = "";
     
     // Initialize UI
@@ -5576,10 +5644,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   } else {
     console.log("FitRivals: No valid auth session. Showing login page.");
     // Show login page, hide app
-    const loginOverlay = document.getElementById("login-overlay");
+    const loginOverlay = DOM.get("login-overlay");
     if (loginOverlay) loginOverlay.classList.remove("hidden");
     
-    const appLayout = document.getElementById("app-layout");
+    const appLayout = DOM.get("app-layout");
     if (appLayout) appLayout.style.display = "none";
     
     // Pre-load data in background so it's ready after login
@@ -5588,7 +5656,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Hide loading indicator
-  const loadingEl = document.getElementById("app-loading");
+  const loadingEl = DOM.get("app-loading");
   if (loadingEl) {
     loadingEl.style.display = "none";
     console.log("DuoGym: Hid loading element.");
@@ -5606,7 +5674,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 
   // Show Download App button if on web browser
-  const downloadBtn = document.getElementById("download-app-btn");
+  const downloadBtn = DOM.get("download-app-btn");
   if (downloadBtn) {
     if (isWebView || isStandalone) {
       downloadBtn.style.display = "none";
@@ -6164,7 +6232,7 @@ function evaluateMissionsAndBadges() {
   const badges = fitnessData[currentUser].badges || [];
   let badgesUpdated = false;
   
-  const streaks = calculateStreaks(currentUser);
+  const streaks = getCachedStreaks(currentUser);
   if (streaks.currentStreak >= 3 && !badges.includes("consistent-crusader")) {
     badges.push("consistent-crusader");
     badgesUpdated = true;
@@ -6175,31 +6243,36 @@ function evaluateMissionsAndBadges() {
     badgesUpdated = true;
   }
   
-  if (dietData && dietData.meals) {
+  if (!badges.includes("kitchen-master") && dietData && dietData.meals) {
     let activeDietDays = 0;
-    Object.keys(dietData.meals).forEach(d => {
-      let dayTotal = 0;
-      ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(t => {
-        (dietData.meals[d][t] || []).forEach(f => dayTotal += f.k);
-      });
-      if (dayTotal > 0) activeDietDays++;
-    });
-    if (activeDietDays >= 3 && !badges.includes("kitchen-master")) {
+    const dates = Object.keys(dietData.meals);
+    for (const d of dates) {
+      const aggregates = getDietDateAggregates(dietData, currentUser, d);
+      if (aggregates.calories > 0) {
+        activeDietDays++;
+        if (activeDietDays >= 3) break;
+      }
+    }
+    if (activeDietDays >= 3) {
       badges.push("kitchen-master");
       badgesUpdated = true;
     }
   }
   
-  let waterTargetDays = 0;
-  Object.keys(fitnessData[currentUser].workouts).forEach(d => {
-    const rec = fitnessData[currentUser].workouts[d];
-    if (rec.waterIntake >= 3500) {
-      waterTargetDays++;
+  if (!badges.includes("hydration-champ")) {
+    let waterTargetDays = 0;
+    const dates = Object.keys(fitnessData[currentUser].workouts);
+    for (const d of dates) {
+      const rec = fitnessData[currentUser].workouts[d];
+      if (rec.waterIntake >= 3500) {
+        waterTargetDays++;
+        if (waterTargetDays >= 3) break;
+      }
     }
-  });
-  if (waterTargetDays >= 3 && !badges.includes("hydration-champ")) {
-    badges.push("hydration-champ");
-    badgesUpdated = true;
+    if (waterTargetDays >= 3) {
+      badges.push("hydration-champ");
+      badgesUpdated = true;
+    }
   }
   
   const isFriday = getWeekdayName(selectedDate) === "Friday";
@@ -6237,30 +6310,24 @@ function renderPremiumStatsStrip() {
   const fitData = fitnessData[currentUser] || { workouts: {} }; // Fitness data
   
   // 1. Streak
-  const streakVal = document.getElementById("header-streak-val");
+  const streakVal = DOM.get("header-streak-val");
   if (streakVal) {
-    const streak = calculateStreaks(currentUser).currentStreak || 0;
+    const streak = getCachedStreaks(currentUser).currentStreak || 0;
     streakVal.textContent = `${streak} Day${streak === 1 ? "" : "s"}`;
   }
   
   // 2. Calories
-  const calsVal = document.getElementById("header-cals-val");
+  const calsVal = DOM.get("header-cals-val");
   if (calsVal) {
     const todayStr = dateToYYYYMMDD(new Date());
-    let consumed = 0;
-    if (data.meals && data.meals[todayStr]) {
-      const dayMeals = data.meals[todayStr];
-      ["Breakfast", "Lunch", "EveningSnacks", "Dinner"].forEach(type => {
-        const items = dayMeals[type] || [];
-        items.forEach(f => { consumed += f.k; });
-      });
-    }
+    const aggregates = getDietDateAggregates(data, currentUser, todayStr);
+    const consumed = aggregates.calories;
     const target = data.profile ? data.profile.targetCalories : 2200;
     calsVal.textContent = `${consumed} / ${target} kcal`;
   }
   
   // 3. Water
-  const waterVal = document.getElementById("header-water-val");
+  const waterVal = DOM.get("header-water-val");
   if (waterVal) {
     const todayStr = dateToYYYYMMDD(new Date());
     const water = (fitData.workouts && fitData.workouts[todayStr]) ? (fitData.workouts[todayStr].waterIntake || 0) : 0;
@@ -6268,7 +6335,7 @@ function renderPremiumStatsStrip() {
   }
   
   // 4. Workout progress
-  const workoutVal = document.getElementById("header-workout-val");
+  const workoutVal = DOM.get("header-workout-val");
   if (workoutVal) {
     const todayStr = dateToYYYYMMDD(new Date());
     const workout = getWorkoutForDate(todayStr);
@@ -6405,10 +6472,10 @@ function switchActSubTab(tabId) {
   activeActTab = tabId;
   const tabIds = ["dash", "comp", "awards", "feed"];
   tabIds.forEach(id => {
-    const btn = document.getElementById(`act-tab-btn-${id}`);
+    const btn = DOM.get(`act-tab-btn-${id}`);
     if (btn) btn.classList.toggle("active", id === tabId);
     
-    const panel = document.getElementById(`act-sub-${id}`);
+    const panel = DOM.get(`act-sub-${id}`);
     if (panel) panel.classList.toggle("active", id === tabId);
   });
   if (tabId === "comp" || tabId === "feed") syncOpponentActivity();
@@ -6416,7 +6483,7 @@ function switchActSubTab(tabId) {
 }
 
 function closeActModal(modalId) {
-  const modal = document.getElementById(modalId);
+  const modal = DOM.get(modalId);
   if (modal) modal.style.display = "none";
 }
 
@@ -6425,20 +6492,20 @@ function showLogMovementModal() {
   const act = fitnessData[currentUser].activityData;
   const move = act.movement[selectedDate] || { steps: 0, distance: 0, activeMinutes: 0, floors: 0 };
   
-  document.getElementById("input-act-steps").value = move.steps || "";
-  document.getElementById("input-act-distance").value = move.distance || "";
-  document.getElementById("input-act-active").value = move.activeMinutes || "";
-  document.getElementById("input-act-floors").value = move.floors || "";
+  DOM.get("input-act-steps").value = move.steps || "";
+  DOM.get("input-act-distance").value = move.distance || "";
+  DOM.get("input-act-active").value = move.activeMinutes || "";
+  DOM.get("input-act-floors").value = move.floors || "";
   
-  document.getElementById("act-movement-modal").style.display = "flex";
+  DOM.get("act-movement-modal").style.display = "flex";
 }
 
 function saveActMovement() {
   ensureDateRecord(currentUser, selectedDate);
-  const steps = parseInt(document.getElementById("input-act-steps").value) || 0;
-  const distance = parseFloat(document.getElementById("input-act-distance").value) || 0;
-  const active = parseInt(document.getElementById("input-act-active").value) || 0;
-  const floors = parseInt(document.getElementById("input-act-floors").value) || 0;
+  const steps = parseInt(DOM.get("input-act-steps").value) || 0;
+  const distance = parseFloat(DOM.get("input-act-distance").value) || 0;
+  const active = parseInt(DOM.get("input-act-active").value) || 0;
+  const floors = parseInt(DOM.get("input-act-floors").value) || 0;
 
   if (selectedDate > dateToYYYYMMDD(new Date())) {
     alert("Cannot log movement for a future date.");
@@ -6511,19 +6578,19 @@ function showSleepLogModal() {
   const act = fitnessData[currentUser].activityData;
   const sleep = act.sleep[selectedDate] || { bedtime: "22:00", wakeTime: "06:00", quality: 3 };
   
-  document.getElementById("input-act-sleep-bed").value = sleep.bedtime || "22:00";
-  document.getElementById("input-act-sleep-wake").value = sleep.wakeTime || "06:00";
-  document.getElementById("input-act-sleep-quality").value = sleep.quality || 3;
-  document.getElementById("sleep-quality-lbl").textContent = `${sleep.quality || 3} / 5`;
+  DOM.get("input-act-sleep-bed").value = sleep.bedtime || "22:00";
+  DOM.get("input-act-sleep-wake").value = sleep.wakeTime || "06:00";
+  DOM.get("input-act-sleep-quality").value = sleep.quality || 3;
+  DOM.get("sleep-quality-lbl").textContent = `${sleep.quality || 3} / 5`;
   
-  document.getElementById("act-sleep-modal").style.display = "flex";
+  DOM.get("act-sleep-modal").style.display = "flex";
 }
 
 function saveActSleep() {
   ensureDateRecord(currentUser, selectedDate);
-  const bedtime = document.getElementById("input-act-sleep-bed").value;
-  const wakeTime = document.getElementById("input-act-sleep-wake").value;
-  const quality = parseInt(document.getElementById("input-act-sleep-quality").value) || 3;
+  const bedtime = DOM.get("input-act-sleep-bed").value;
+  const wakeTime = DOM.get("input-act-sleep-wake").value;
+  const quality = parseInt(DOM.get("input-act-sleep-quality").value) || 3;
 
   // Calculate sleep hours
   const bedParts = bedtime.split(":");
@@ -6563,18 +6630,18 @@ function showWeightLogModal() {
   const act = fitnessData[currentUser].activityData;
   const body = act.body[selectedDate] || { bodyFat: 20, waist: 32 };
   
-  document.getElementById("input-act-weight").value = currentWeight || "";
-  document.getElementById("input-act-bodyfat").value = body.bodyFat || "";
-  document.getElementById("input-act-waist").value = body.waist || "";
+  DOM.get("input-act-weight").value = currentWeight || "";
+  DOM.get("input-act-bodyfat").value = body.bodyFat || "";
+  DOM.get("input-act-waist").value = body.waist || "";
   
-  document.getElementById("act-weight-modal").style.display = "flex";
+  DOM.get("act-weight-modal").style.display = "flex";
 }
 
 function saveActWeight() {
   ensureDateRecord(currentUser, selectedDate);
-  const weight = parseFloat(document.getElementById("input-act-weight").value);
-  const bodyFat = parseFloat(document.getElementById("input-act-bodyfat").value) || 0;
-  const waist = parseFloat(document.getElementById("input-act-waist").value) || 0;
+  const weight = parseFloat(DOM.get("input-act-weight").value);
+  const bodyFat = parseFloat(DOM.get("input-act-bodyfat").value) || 0;
+  const waist = parseFloat(DOM.get("input-act-waist").value) || 0;
 
   if (!Number.isFinite(weight) || weight < 25 || weight > 350) {
     alert("Enter a valid weight between 25 kg and 350 kg.");
@@ -6618,7 +6685,7 @@ function setRaceTarget(val) {
   });
   const buttons = [5000, 10000, 15000];
   buttons.forEach(v => {
-    const btn = document.getElementById(`race-target-btn-${v === 5000 ? "5k" : v === 10000 ? "10k" : "15k"}`);
+    const btn = DOM.get(`race-target-btn-${v === 5000 ? "5k" : v === 10000 ? "10k" : "15k"}`);
     if (btn) btn.classList.toggle("active", v === val);
   });
   saveData();
@@ -6781,7 +6848,7 @@ function addFeedEvent(user, message, type) {
 }
 
 function postToFeed() {
-  const input = document.getElementById("act-feed-msg-input");
+  const input = DOM.get("act-feed-msg-input");
   if (!input || !input.value.trim()) return;
   
   const brag = input.value.trim().slice(0, 240);
@@ -6893,7 +6960,7 @@ function evaluateActivityAchievements() {
   checkUnlock("first-10k", has10k);
 
   // 4. Hydration Hero
-  const streaks = calculateActivityStreaks(currentUser);
+  const streaks = getCachedActivityStreaks(currentUser);
   checkUnlock("hydration-champ", streaks.hydration >= 3);
 
   // 5. Sleep Master
@@ -6957,7 +7024,7 @@ function renderActivityCenter() {
   }
   [5000, 10000, 15000].forEach(target => {
     const suffix = target === 5000 ? "5k" : target === 10000 ? "10k" : "15k";
-    const button = document.getElementById(`race-target-btn-${suffix}`);
+    const button = DOM.get(`race-target-btn-${suffix}`);
     if (button) button.classList.toggle("active", target === currentRaceTarget);
   });
   
@@ -6987,27 +7054,27 @@ function renderActivityCenter() {
     : (Math.max(0, Number(move.steps) || 0) * 0.00075);
 
   // Update Header XP & Flame Streak
-  const streaks = calculateActivityStreaks(currentUser);
-  document.getElementById("act-lvl-val").textContent = act.xp.level || 1;
+  const streaks = getCachedActivityStreaks(currentUser);
+  DOM.get("act-lvl-val").textContent = act.xp.level || 1;
   const currentLvl = act.xp.level || 1;
   const threshold = getXPThreshold(currentLvl);
   const prevThreshold = currentLvl > 1 ? getXPThreshold(currentLvl - 1) : 0;
   const relativeXP = act.xp.total - prevThreshold;
   const relativeThreshold = threshold - prevThreshold;
-  document.getElementById("act-xp-text").textContent = `${relativeXP} / ${relativeThreshold} XP`;
-  document.getElementById("act-xp-bar").style.width = Math.min(100, Math.round((relativeXP / relativeThreshold) * 100)) + "%";
+  DOM.get("act-xp-text").textContent = `${relativeXP} / ${relativeThreshold} XP`;
+  DOM.get("act-xp-bar").style.width = Math.min(100, Math.round((relativeXP / relativeThreshold) * 100)) + "%";
 
-  const actStreakVal = document.getElementById("act-streak-val");
+  const actStreakVal = DOM.get("act-streak-val");
   actStreakVal.textContent = `${streaks.workout} Days`;
   if (streaks.workout > 0) {
-    document.getElementById("act-streak-badge").classList.add("flame-active");
+    DOM.get("act-streak-badge").classList.add("flame-active");
   } else {
-    document.getElementById("act-streak-badge").classList.remove("flame-active");
+    DOM.get("act-streak-badge").classList.remove("flame-active");
   }
 
   // Streak Risk Banner
   const isWorkoutDay = wSchedule.exercises && wSchedule.exercises.length > 0;
-  const streakAlert = document.getElementById("act-streak-alert");
+  const streakAlert = DOM.get("act-streak-alert");
   if (isWorkoutDay && completedList.length === 0 && streaks.workout > 0) {
     streakAlert.style.display = "flex";
   } else {
@@ -7020,15 +7087,15 @@ function renderActivityCenter() {
   const calsPct = Math.min(1, activeCalories / 500);
   const waterPct = Math.min(1, water / 3500);
 
-  document.getElementById("ring-steps").style.strokeDashoffset = 439.82 - (stepsPct * 439.82);
-  document.getElementById("ring-active").style.strokeDashoffset = 351.85 - (activePct * 351.85);
-  document.getElementById("ring-calories").style.strokeDashoffset = 263.89 - (calsPct * 263.89);
-  document.getElementById("ring-water").style.strokeDashoffset = 175.92 - (waterPct * 175.92);
+  DOM.get("ring-steps").style.strokeDashoffset = 439.82 - (stepsPct * 439.82);
+  DOM.get("ring-active").style.strokeDashoffset = 351.85 - (activePct * 351.85);
+  DOM.get("ring-calories").style.strokeDashoffset = 263.89 - (calsPct * 263.89);
+  DOM.get("ring-water").style.strokeDashoffset = 175.92 - (waterPct * 175.92);
 
-  document.getElementById("legend-steps-val").textContent = Math.round(stepsPct * 100) + "%";
-  document.getElementById("legend-active-val").textContent = Math.round(activePct * 100) + "%";
-  document.getElementById("legend-calories-val").textContent = Math.round(calsPct * 100) + "%";
-  document.getElementById("legend-water-val").textContent = Math.round(waterPct * 100) + "%";
+  DOM.get("legend-steps-val").textContent = Math.round(stepsPct * 100) + "%";
+  DOM.get("legend-active-val").textContent = Math.round(activePct * 100) + "%";
+  DOM.get("legend-calories-val").textContent = Math.round(calsPct * 100) + "%";
+  DOM.get("legend-water-val").textContent = Math.round(waterPct * 100) + "%";
 
   // Transparent daily goal score; this is not a medical measurement.
   const sleepComp = sleep.duration > 0 ? Math.min(1, sleep.duration / 8) * 20 : 0;
@@ -7039,15 +7106,15 @@ function renderActivityCenter() {
 
   let healthScore = Math.round(sleepComp + stepsComp + workoutComp + waterComp + calorieComp);
   
-  const scoreArc = document.getElementById("health-score-arc");
+  const scoreArc = DOM.get("health-score-arc");
   if (scoreArc) {
     const offset = 263.89 - (Math.min(100, healthScore) / 100 * 263.89);
     scoreArc.style.strokeDashoffset = offset;
   }
   
-  document.getElementById("act-health-score").textContent = healthScore;
-  const scoreStatus = document.getElementById("act-health-status");
-  const scoreDesc = document.getElementById("act-health-desc");
+  DOM.get("act-health-score").textContent = healthScore;
+  const scoreStatus = DOM.get("act-health-status");
+  const scoreDesc = DOM.get("act-health-desc");
   
   if (healthScore >= 85) {
     scoreStatus.textContent = `${healthScore} / 100 — Excellent Day`;
@@ -7068,26 +7135,26 @@ function renderActivityCenter() {
   }
 
   // Update Daily Snapshot
-  document.getElementById("snap-steps").textContent = move.steps.toLocaleString();
-  document.getElementById("snap-distance").textContent = displayDistance.toFixed(1) + " km";
-  document.getElementById("snap-calories").textContent = activeCalories + " kcal";
-  document.getElementById("snap-active").textContent = move.activeMinutes + " m";
-  document.getElementById("snap-workout").textContent = workoutPct + "%";
-  document.getElementById("snap-water").textContent = water + " ml";
+  DOM.get("snap-steps").textContent = move.steps.toLocaleString();
+  DOM.get("snap-distance").textContent = displayDistance.toFixed(1) + " km";
+  DOM.get("snap-calories").textContent = activeCalories + " kcal";
+  DOM.get("snap-active").textContent = move.activeMinutes + " m";
+  DOM.get("snap-workout").textContent = workoutPct + "%";
+  DOM.get("snap-water").textContent = water + " ml";
 
   const weightRecord = getLatestWeightOnOrBefore(currentUser, selectedDate);
-  document.getElementById("snap-weight").textContent = weightRecord ? weightRecord + " kg" : "-- kg";
+  DOM.get("snap-weight").textContent = weightRecord ? weightRecord + " kg" : "-- kg";
 
   // Panel-specific rendering
   if (activeActTab === "dash") {
     // Hydration Panel
-    document.getElementById("act-water-streak").textContent = `${streaks.hydration} Day Streak`;
-    document.getElementById("act-water-progress-text").textContent = `${water} / 3500 ml`;
+    DOM.get("act-water-streak").textContent = `${streaks.hydration} Day Streak`;
+    DOM.get("act-water-progress-text").textContent = `${water} / 3500 ml`;
     
     // Movement Panel
-    document.getElementById("act-steps-progress").textContent = `${move.steps} / 10000`;
-    document.getElementById("act-active-progress").textContent = `${move.activeMinutes} / 60m`;
-    const syncStatus = document.getElementById("act-health-sync-status");
+    DOM.get("act-steps-progress").textContent = `${move.steps} / 10000`;
+    DOM.get("act-active-progress").textContent = `${move.activeMinutes} / 60m`;
+    const syncStatus = DOM.get("act-health-sync-status");
     if (syncStatus) {
       if (move.source === "health_connect") {
         syncStatus.textContent = "Health Connect";
@@ -7101,19 +7168,19 @@ function renderActivityCenter() {
     }
     
     // Sleep Panel
-    const sleepDur = document.getElementById("act-sleep-duration-text");
-    const sleepStars = document.getElementById("act-sleep-quality-stars");
+    const sleepDur = DOM.get("act-sleep-duration-text");
+    const sleepStars = DOM.get("act-sleep-quality-stars");
     if (sleep.duration > 0) {
       sleepDur.textContent = `${Math.floor(sleep.duration)}h ${Math.round((sleep.duration % 1) * 60)}m logged`;
       const quality = Math.max(0, Math.min(5, Number(sleep.quality) || 0));
       sleepStars.textContent = quality > 0
         ? "★".repeat(quality) + "☆".repeat(5 - quality)
         : "Synced from Health Connect";
-      document.getElementById("act-sleep-score-val").textContent = sleep.score;
+      DOM.get("act-sleep-score-val").textContent = sleep.score;
     } else {
       sleepDur.textContent = "No sleep logged";
       sleepStars.textContent = "☆☆☆☆☆";
-      document.getElementById("act-sleep-score-val").textContent = "--";
+      DOM.get("act-sleep-score-val").textContent = "--";
     }
     
     // Recovery estimate based on available habits; intentionally non-medical.
@@ -7125,7 +7192,7 @@ function renderActivityCenter() {
       sleepDurationScore + sleepQualityScore + hydrationScore + strainAdjustment
     )));
     
-    const recVal = document.getElementById("act-recovery-score-val");
+    const recVal = DOM.get("act-recovery-score-val");
     if (sleep.duration > 0) {
       recVal.textContent = recoveryScore + "%";
       if (recoveryScore >= 80) recVal.style.color = "#00ff88";
@@ -7139,17 +7206,17 @@ function renderActivityCenter() {
     // Weight progress
     const wGoal = fitnessData[currentUser].goalWeight || 80.0;
     const wStart = getStartingWeight(currentUser);
-    document.getElementById("act-current-weight").textContent = weightRecord ? weightRecord + " kg" : "-- kg";
-    document.getElementById("act-goal-weight").textContent = wGoal;
-    document.getElementById("act-goal-weight-2").textContent = wGoal;
-    document.getElementById("act-start-weight").textContent = wStart;
+    DOM.get("act-current-weight").textContent = weightRecord ? weightRecord + " kg" : "-- kg";
+    DOM.get("act-goal-weight").textContent = wGoal;
+    DOM.get("act-goal-weight-2").textContent = wGoal;
+    DOM.get("act-start-weight").textContent = wStart;
     
     const bodyAct = act.body[selectedDate] || { bodyFat: 0, waist: 0 };
-    document.getElementById("act-bodyfat-val").textContent = bodyAct.bodyFat > 0 ? bodyAct.bodyFat + " %" : "-- %";
-    document.getElementById("act-waist-val").textContent = bodyAct.waist > 0 ? bodyAct.waist + " in" : "-- in";
+    DOM.get("act-bodyfat-val").textContent = bodyAct.bodyFat > 0 ? bodyAct.bodyFat + " %" : "-- %";
+    DOM.get("act-waist-val").textContent = bodyAct.waist > 0 ? bodyAct.waist + " in" : "-- in";
 
     const delta = weightRecord - wStart;
-    const deltaText = document.getElementById("act-weight-delta-msg");
+    const deltaText = DOM.get("act-weight-delta-msg");
     if (delta > 0) {
       deltaText.textContent = `+${delta.toFixed(1)} kg gain`;
       deltaText.style.color = "#ff2a5f";
@@ -7163,7 +7230,7 @@ function renderActivityCenter() {
 
     // Draw weight bar fill
     const range = Math.abs(wStart - wGoal);
-    const weightBar = document.getElementById("weight-progress-fill");
+    const weightBar = DOM.get("weight-progress-fill");
     if (range > 0 && weightRecord) {
       const done = Math.abs(weightRecord - wStart);
       const pct = Math.min(100, Math.round((done / range) * 100));
@@ -7186,19 +7253,19 @@ function renderActivityCenter() {
     const rishitAct = fitnessData[rishitUser].activityData;
     const selfName = authenticatedProfile?.display_name || amanUser;
     const rivalName = configuredRival || "Choose Rival";
-    const title = document.getElementById("comp-arena-title");
+    const title = DOM.get("comp-arena-title");
     if (title) title.textContent = `Brother Arena: ${selfName} vs. ${rivalName}`;
-    const selfLabel = document.getElementById("comp-name-aman");
-    const rivalLabel = document.getElementById("comp-name-rishit");
-    const raceSelfLabel = document.getElementById("race-name-aman");
-    const raceRivalLabel = document.getElementById("race-name-rishit");
+    const selfLabel = DOM.get("comp-name-aman");
+    const rivalLabel = DOM.get("comp-name-rishit");
+    const raceSelfLabel = DOM.get("race-name-aman");
+    const raceRivalLabel = DOM.get("race-name-rishit");
     if (selfLabel) selfLabel.textContent = selfName;
     if (rivalLabel) rivalLabel.textContent = rivalName;
     if (raceSelfLabel) raceSelfLabel.textContent = `${selfName}🏃`;
     if (raceRivalLabel) raceRivalLabel.textContent = `${rivalName}🏃`;
-    const setupRow = document.getElementById("rival-setup-row");
+    const setupRow = DOM.get("rival-setup-row");
     if (setupRow) setupRow.style.display = ["aman", "rishit"].includes(authenticatedUser) ? "none" : "flex";
-    const rivalInput = document.getElementById("rival-username-input");
+    const rivalInput = DOM.get("rival-username-input");
     if (rivalInput && configuredRival && !rivalInput.value) rivalInput.value = configuredRival;
 
     const amanSteps = (amanAct.movement[selectedDate] || {}).steps || 0;
@@ -7222,27 +7289,27 @@ function renderActivityCenter() {
     const rishitWorkoutPct = rishitTotalEx > 0 ? Math.round((rishitCompEx / rishitTotalEx) * 100) : 0;
 
     // Display comparison text
-    document.getElementById("comp-steps-aman").textContent = amanSteps.toLocaleString() + " steps";
-    document.getElementById("comp-steps-rishit").textContent = rishitSteps.toLocaleString() + " steps";
+    DOM.get("comp-steps-aman").textContent = amanSteps.toLocaleString() + " steps";
+    DOM.get("comp-steps-rishit").textContent = rishitSteps.toLocaleString() + " steps";
     
-    document.getElementById("comp-sleep-aman").textContent = amanSleep > 0 ? amanSleep : "--";
-    document.getElementById("comp-sleep-rishit").textContent = rishitSleep > 0 ? rishitSleep : "--";
+    DOM.get("comp-sleep-aman").textContent = amanSleep > 0 ? amanSleep : "--";
+    DOM.get("comp-sleep-rishit").textContent = rishitSleep > 0 ? rishitSleep : "--";
 
-    document.getElementById("comp-water-aman").textContent = amanWater + " ml";
-    document.getElementById("comp-water-rishit").textContent = rishitWater + " ml";
+    DOM.get("comp-water-aman").textContent = amanWater + " ml";
+    DOM.get("comp-water-rishit").textContent = rishitWater + " ml";
 
-    document.getElementById("comp-workout-aman").textContent = amanWorkoutPct + "%";
-    document.getElementById("comp-workout-rishit").textContent = rishitWorkoutPct + "%";
+    DOM.get("comp-workout-aman").textContent = amanWorkoutPct + "%";
+    DOM.get("comp-workout-rishit").textContent = rishitWorkoutPct + "%";
 
     // Set bar widths
     const setRatioBars = (idAman, idRishit, valAman, valRishit) => {
       const sum = valAman + valRishit;
       if (sum === 0) {
-        document.getElementById(idAman).style.width = "50%";
-        document.getElementById(idRishit).style.width = "50%";
+        DOM.get(idAman).style.width = "50%";
+        DOM.get(idRishit).style.width = "50%";
       } else {
-        document.getElementById(idAman).style.width = Math.round((valAman / sum) * 100) + "%";
-        document.getElementById(idRishit).style.width = Math.round((valRishit / sum) * 100) + "%";
+        DOM.get(idAman).style.width = Math.round((valAman / sum) * 100) + "%";
+        DOM.get(idRishit).style.width = Math.round((valRishit / sum) * 100) + "%";
       }
     };
 
@@ -7255,10 +7322,10 @@ function renderActivityCenter() {
     const amanTotalXP = amanAct.xp ? amanAct.xp.total : 0;
     const rishitTotalXP = rishitAct.xp ? rishitAct.xp.total : 0;
     
-    document.getElementById("comp-aman-score").textContent = amanTotalXP.toLocaleString();
-    document.getElementById("comp-rishit-score").textContent = rishitTotalXP.toLocaleString();
+    DOM.get("comp-aman-score").textContent = amanTotalXP.toLocaleString();
+    DOM.get("comp-rishit-score").textContent = rishitTotalXP.toLocaleString();
 
-    const leaderBadge = document.getElementById("comp-leader-badge");
+    const leaderBadge = DOM.get("comp-leader-badge");
     if (amanTotalXP > rishitTotalXP) {
       leaderBadge.textContent = `${selfName} in Lead 👑`;
       leaderBadge.style.color = "#00ff88";
@@ -7271,16 +7338,16 @@ function renderActivityCenter() {
     }
 
     // Race Mode Progress
-    document.getElementById("race-steps-aman").textContent = `${amanSteps.toLocaleString()} / ${currentRaceTarget.toLocaleString()} steps`;
-    document.getElementById("race-steps-rishit").textContent = `${rishitSteps.toLocaleString()} / ${currentRaceTarget.toLocaleString()} steps`;
+    DOM.get("race-steps-aman").textContent = `${amanSteps.toLocaleString()} / ${currentRaceTarget.toLocaleString()} steps`;
+    DOM.get("race-steps-rishit").textContent = `${rishitSteps.toLocaleString()} / ${currentRaceTarget.toLocaleString()} steps`;
 
     const amanRacePct = Math.min(100, Math.round((amanSteps / currentRaceTarget) * 100));
     const rishitRacePct = Math.min(100, Math.round((rishitSteps / currentRaceTarget) * 100));
 
-    document.getElementById("race-bar-aman").style.width = amanRacePct + "%";
-    document.getElementById("race-bar-rishit").style.width = rishitRacePct + "%";
+    DOM.get("race-bar-aman").style.width = amanRacePct + "%";
+    DOM.get("race-bar-rishit").style.width = rishitRacePct + "%";
 
-    const raceStatus = document.getElementById("race-status-banner");
+    const raceStatus = DOM.get("race-status-banner");
     const raceWinner = finalizeStepsRace(amanSteps, rishitSteps);
     if (amanSteps >= currentRaceTarget && rishitSteps >= currentRaceTarget) {
       if (raceWinner === "tie") {
@@ -7309,13 +7376,13 @@ function renderActivityCenter() {
   }
   else if (activeActTab === "awards") {
     // Streaks and Badges
-    document.getElementById("streak-show-workout").textContent = `${streaks.workout} Days`;
-    document.getElementById("streak-show-steps").textContent = `${streaks.steps} Days`;
-    document.getElementById("streak-show-water").textContent = `${streaks.hydration} Days`;
-    document.getElementById("streak-show-sleep").textContent = `${streaks.sleep} Days`;
+    DOM.get("streak-show-workout").textContent = `${streaks.workout} Days`;
+    DOM.get("streak-show-steps").textContent = `${streaks.steps} Days`;
+    DOM.get("streak-show-water").textContent = `${streaks.hydration} Days`;
+    DOM.get("streak-show-sleep").textContent = `${streaks.sleep} Days`;
 
     // Render Badge grid
-    const grid = document.getElementById("act-badge-grid");
+    const grid = DOM.get("act-badge-grid");
     grid.innerHTML = "";
 
     const availableBadges = [
@@ -7364,7 +7431,7 @@ function renderActivityCenter() {
   }
   else if (activeActTab === "feed") {
     // Feed, Challenges, and AI insights
-    const feedList = document.getElementById("act-social-feed-list");
+    const feedList = DOM.get("act-social-feed-list");
     feedList.innerHTML = "";
     
     // Combine each user's own cloud-backed feed, deduplicate, then sort newest-first.
@@ -7410,7 +7477,7 @@ function renderActivityCenter() {
     });
 
     // Render challenges/quests
-    const chList = document.getElementById("act-challenges-list");
+    const chList = DOM.get("act-challenges-list");
     chList.innerHTML = "";
 
     const dailyQuests = getDailyActivityQuests(currentUser, selectedDate);
@@ -7447,7 +7514,7 @@ function renderActivityCenter() {
 }
 
 function generateActivityInsights() {
-  const container = document.getElementById("act-insights-list");
+  const container = DOM.get("act-insights-list");
   if (!container) return;
   container.innerHTML = "";
 
@@ -7505,9 +7572,9 @@ function generateActivityInsights() {
 }
 
 function renderActivityTrends() {
-  const stepsChart = document.getElementById("steps-bar-chart");
-  const waterChart = document.getElementById("water-bar-chart");
-  const sleepChart = document.getElementById("sleep-bar-chart");
+  const stepsChart = DOM.get("steps-bar-chart");
+  const waterChart = DOM.get("water-bar-chart");
+  const sleepChart = DOM.get("sleep-bar-chart");
 
   if (!stepsChart || !waterChart || !sleepChart) return;
   
@@ -7576,8 +7643,8 @@ let chatChannel = null;
 let chatInitialLoadComplete = false;
 
 function toggleChatWindow(forceState) {
-  const container = document.getElementById("chat-container");
-  const backdrop = document.getElementById("chat-backdrop");
+  const container = DOM.get("chat-container");
+  const backdrop = DOM.get("chat-backdrop");
   if (!container) return;
   
   const isCurrentlyVisible = container.classList.contains("active");
@@ -7596,12 +7663,12 @@ function toggleChatWindow(forceState) {
     }
     
     // Clear badge
-    const badge = document.getElementById("chat-badge");
+    const badge = DOM.get("chat-badge");
     if (badge) badge.style.display = "none";
     
     // Set partner name
     const partnerName = currentUser === "aman" ? "Rishit" : "Aman";
-    const partnerEl = document.getElementById("chat-partner-name");
+    const partnerEl = DOM.get("chat-partner-name");
     if (partnerEl) partnerEl.textContent = "Chat with " + partnerName;
     
     // Clear native phone notifications when chat is opened
@@ -7613,9 +7680,9 @@ function toggleChatWindow(forceState) {
     
     // Focus input on open
     setTimeout(() => {
-      document.getElementById("chat-message-input")?.focus();
+      DOM.get("chat-message-input")?.focus();
       // Scroll to bottom immediately
-      const listEl = document.getElementById("chat-messages-list");
+      const listEl = DOM.get("chat-messages-list");
       if (listEl) listEl.scrollTop = listEl.scrollHeight;
     }, 100);
     
@@ -7638,7 +7705,7 @@ function toggleChatWindow(forceState) {
     }
     
     // Blur input to ensure keyboard dismisses immediately
-    document.getElementById("chat-message-input")?.blur();
+    DOM.get("chat-message-input")?.blur();
     
     // Wait for animation to finish
     setTimeout(() => {
@@ -7653,6 +7720,7 @@ function toggleChatWindow(forceState) {
 }
 
 async function fetchChatMessages() {
+  if (document.hidden) return;
   if (!supabaseInitialized || !supabaseClient || !currentUser) return;
   
   try {
@@ -7699,7 +7767,7 @@ async function fetchChatMessages() {
 }
 
 function renderChatMessages() {
-  const container = document.getElementById("chat-messages-list");
+  const container = DOM.get("chat-messages-list");
   if (!container) return;
   
   container.innerHTML = "";
@@ -7751,7 +7819,7 @@ function renderChatMessages() {
 
 function handleSendChat(event) {
   if (event) event.preventDefault();
-  const input = document.getElementById("chat-message-input");
+  const input = DOM.get("chat-message-input");
   if (!input) return;
   
   const text = input.value.trim();
@@ -7826,14 +7894,14 @@ function retrySendChatMessage(tempId) {
 
 function triggerIncomingMessageNotification(msg) {
   // Suppress notifications if user is already reading the chat window
-  const container = document.getElementById("chat-container");
+  const container = DOM.get("chat-container");
   const isChatOpen = container && container.style.display !== "none" && container.classList.contains("active");
   if (isChatOpen) {
     return;
   }
 
   // Update header badge
-  const badge = document.getElementById("chat-badge");
+  const badge = DOM.get("chat-badge");
   if (badge) badge.style.display = "block";
   
   // Always show popup notification for incoming partner messages
@@ -7858,7 +7926,7 @@ function triggerIncomingMessageNotification(msg) {
 }
 
 function showIncomingMessagePopup(msg) {
-  const existing = document.getElementById("chat-popup-notification");
+  const existing = DOM.get("chat-popup-notification");
   if (existing) existing.remove();
   
   const popup = document.createElement("div");
