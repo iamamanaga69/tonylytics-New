@@ -2185,6 +2185,76 @@ const exerciseInstructions = {
       "Lower the weight slowly to full extension."
     ],
     tips: "Isolate the bicep completely by preventing any shoulder or elbow movement."
+  },
+  "kettlebell-swing": {
+    name: "Kettlebell Swing",
+    youtubeId: "sSESeQ550Ok",
+    category: "cardio",
+    steps: [
+      "Stand with feet slightly wider than shoulders, kettlebell on the floor in front of you.",
+      "Hinge at your hips, grab the handle, and pull it back between your legs to generate momentum.",
+      "Drive your hips forward explosively, swinging the kettlebell up to chest height.",
+      "Allow the weight to swing back down naturally between your legs while hinging again."
+    ],
+    tips: "This is a hip hinge, not a squat. Keep your arms relaxed and core braced."
+  },
+  "db-reverse-fly": {
+    name: "Dumbbell Reverse Fly",
+    youtubeId: "5yWaS1kkdj4",
+    category: "shoulders",
+    steps: [
+      "Hold dumbbells at your sides, hinge forward at your hips until your torso is nearly parallel to the floor.",
+      "Keep a slight bend in your elbows and raise your arms out to the sides.",
+      "Squeeze your rear delts and shoulder blades at the peak of the movement.",
+      "Lower the weights slowly back to the starting position."
+    ],
+    tips: "Avoid using momentum or shrugging your shoulders to lift the weights."
+  },
+  "plank-shoulder-taps": {
+    name: "Plank Shoulder Taps",
+    youtubeId: "T88nN7_W12E",
+    category: "core",
+    steps: [
+      "Start in a high plank position with your hands directly under your shoulders.",
+      "Brace your core and tap your left shoulder with your right hand.",
+      "Return to the plank, then tap your right shoulder with your left hand.",
+      "Alternate sides while keeping your hips completely stable."
+    ],
+    tips: "Do not let your hips sway or tilt. Keep your body in a straight line."
+  },
+  "lateral-lunge": {
+    name: "Lateral Lunge",
+    youtubeId: "L8o9T1-UexE",
+    category: "legs",
+    steps: [
+      "Stand tall with feet hip-width apart.",
+      "Step out wide to the right, hinge your hips back, and bend your right knee while keeping the left leg straight.",
+      "Push off your right foot to return to the starting position.",
+      "Repeat on the left side."
+    ],
+    tips: "Ensure your bent knee tracks in line with your toes, and keep your chest lifted."
+  },
+  "close-grip-pushups": {
+    name: "Close-Grip Push-Ups",
+    youtubeId: "J0DnG1_S12I",
+    category: "chest",
+    steps: [
+      "Assume a push-up position, but place your hands close together under your chest.",
+      "Lower your chest towards the floor, keeping your elbows tucked tight against your ribs.",
+      "Push back up to full arm extension, focusing on triceps and inner chest."
+    ],
+    tips: "Keep your body in a straight plank line and avoid flaring your elbows out."
+  },
+  "reverse-crunch": {
+    name: "Reverse Crunch",
+    youtubeId: "hyv14e2QDqA",
+    category: "core",
+    steps: [
+      "Lie flat on your back, arms at your sides, knees bent to 90 degrees.",
+      "Contract your lower abs to pull your knees towards your chest, lifting your hips off the floor.",
+      "Slowly lower your hips back down until your feet are just above the floor."
+    ],
+    tips: "Control the movement using your abs; do not use momentum or kick your legs."
   }
 };
 
