@@ -139,6 +139,24 @@ fun GymWebView(modifier: Modifier = Modifier) {
                     .build()
 
                 webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): Boolean {
+                        val url = request?.url ?: return false
+                        val urlString = url.toString()
+                        if (urlString.contains("youtube.com") || urlString.contains("youtu.be")) {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, url)
+                                context.startActivity(intent)
+                                return true
+                            } catch (e: Exception) {
+                                return false
+                            }
+                        }
+                        return false
+                    }
+
                     override fun shouldInterceptRequest(
                         view: WebView?,
                         request: WebResourceRequest?
