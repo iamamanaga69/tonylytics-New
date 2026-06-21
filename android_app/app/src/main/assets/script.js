@@ -4843,35 +4843,56 @@ function loadExerciseVideo(info) {
 
   container.innerHTML = "";
 
-  if (info && info.youtubeId) {
+  if (info && info.name) {
     container.style.display = "block";
     
-    const wrapper = document.createElement("div");
-    wrapper.style.position = "relative";
-    wrapper.style.width = "100%";
-    wrapper.style.paddingBottom = "56.25%"; // 16:9 Aspect Ratio
-    wrapper.style.height = "0";
-    wrapper.style.borderRadius = "var(--radius-sm)";
-    wrapper.style.overflow = "hidden";
-    wrapper.style.background = "#000";
-    wrapper.style.border = "1px solid var(--border-color)";
-    wrapper.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
-    wrapper.style.marginBottom = "10px";
+    const link = document.createElement("a");
+    const query = encodeURIComponent(info.name + " form short").replace(/%20/g, "+");
+    link.href = `https://www.youtube.com/results?search_query=${query}`;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.style.display = "flex";
+    link.style.alignItems = "center";
+    link.style.justifyContent = "center";
+    link.style.gap = "10px";
+    link.style.background = "rgba(255, 0, 0, 0.08)";
+    link.style.border = "1px solid rgba(255, 0, 0, 0.3)";
+    link.style.color = "#FF4D4D";
+    link.style.padding = "14px";
+    link.style.borderRadius = "12px";
+    link.style.fontWeight = "700";
+    link.style.fontSize = "13px";
+    link.style.textTransform = "uppercase";
+    link.style.letterSpacing = "0.5px";
+    link.style.textDecoration = "none";
+    link.style.transition = "all 0.2s ease";
+    link.style.boxSizing = "border-box";
+    link.style.marginBottom = "10px";
+    
+    // Hover animation
+    link.onmouseenter = () => {
+      link.style.background = "#FF0000";
+      link.style.color = "#FFFFFF";
+      link.style.borderColor = "#FF0000";
+      link.style.transform = "translateY(-1px)";
+      link.style.boxShadow = "0 4px 12px rgba(255, 0, 0, 0.3)";
+    };
+    link.onmouseleave = () => {
+      link.style.background = "rgba(255, 0, 0, 0.08)";
+      link.style.color = "#FF4D4D";
+      link.style.borderColor = "rgba(255, 0, 0, 0.3)";
+      link.style.transform = "none";
+      link.style.boxShadow = "none";
+    };
 
-    const iframe = document.createElement("iframe");
-    iframe.style.position = "absolute";
-    iframe.style.top = "0";
-    iframe.style.left = "0";
-    iframe.style.width = "100%";
-    iframe.style.height = "100%";
-    iframe.style.border = "0";
-    // Enable autoplay, mute, loop, playsinline, and hide related videos
-    iframe.src = `https://www.youtube.com/embed/${info.youtubeId}?autoplay=1&mute=1&loop=1&playlist=${info.youtubeId}&playsinline=1&controls=1&rel=0&modestbranding=1`;
-    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-    iframe.allowFullscreen = true;
-
-    wrapper.appendChild(iframe);
-    container.appendChild(wrapper);
+    link.innerHTML = `
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="flex-shrink:0;">
+        <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.517 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.508 9.388.508 9.388.508s7.517 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+      </svg>
+      Watch Video Guide
+    `;
+    
+    container.appendChild(link);
   } else {
     container.style.display = "none";
   }
