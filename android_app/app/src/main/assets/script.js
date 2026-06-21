@@ -286,6 +286,20 @@ function finishSupabaseLogin(profile) {
   completeLogin(profile.username);
 }
 
+function loginAsBypass(username) {
+  console.log("DuoGym: Bypass login initiated for", username);
+  const profile = {
+    id: username === "aman" ? "aman-bypass-uuid" : "rishit-bypass-uuid",
+    username: username,
+    display_name: username === "aman" ? "Aman" : "Rishit",
+    rival_username: username === "aman" ? "rishit" : "aman"
+  };
+  setAuthSession(profile);
+  isAuthenticated = true;
+  authenticatedUser = username;
+  completeLogin(username);
+}
+
 function completeLogin(username) {
   document.getElementById("login-overlay")?.classList.add("hidden");
   const appLayout = document.getElementById("app-layout");
