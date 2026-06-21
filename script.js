@@ -863,13 +863,30 @@ async function registerDeviceToken(username, token) {
   }
 }
 
-async function askAICoachRichards() {
+function askAICoachRichards() {
+  const modal = DOM.get("ai-coach-modal");
+  const input = DOM.get("ai-coach-query-input");
+  if (!modal || !input) return;
+  input.value = "";
+  modal.style.display = "flex";
+  setTimeout(() => input.focus(), 100);
+}
+
+function closeAICoachModal() {
+  const modal = DOM.get("ai-coach-modal");
+  if (modal) modal.style.display = "none";
+}
+
+async function submitAICoachQuery() {
+  const modal = DOM.get("ai-coach-modal");
+  const input = DOM.get("ai-coach-query-input");
   const btn = DOM.get("ask-ai-coach-btn");
   const textEl = DOM.get("coach-feedback-text");
-  if (!btn || !textEl || !supabaseInitialized || !supabaseClient) return;
   
-  const userMsg = prompt("Ask Coach Richards anything, or leave blank for a daily stats analysis:");
-  if (userMsg === null) return;
+  if (!modal || !input || !btn || !textEl || !supabaseInitialized || !supabaseClient) return;
+  
+  const userMsg = input.value.trim();
+  modal.style.display = "none";
   
   const originalBtnText = btn.innerHTML;
   btn.disabled = true;
