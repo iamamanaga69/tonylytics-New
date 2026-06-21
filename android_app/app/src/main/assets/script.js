@@ -7640,9 +7640,20 @@ function renderChatMessages() {
     
     const bubble = document.createElement("div");
     bubble.className = `chat-msg-bubble sender-${msg.sender}`;
+    
+    let statusHTML = "";
+    if (msg.status === 'sending') {
+      statusHTML = `<span class="chat-msg-status sending">Sending...</span>`;
+    } else if (msg.status === 'failed') {
+      statusHTML = `<span class="chat-msg-status failed" onclick="retrySendChatMessage('${msg.id}'); event.stopPropagation();" title="Failed to save to database. Tap to retry.">⚠️ Failed to sync (Tap to retry)</span>`;
+    }
+    
     bubble.innerHTML = `
       <div class="chat-msg-text">${escapeHTML(msg.message)}</div>
-      <div class="chat-msg-time">${formatChatTime(msg.created_at)}</div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        ${statusHTML}
+        <div class="chat-msg-time">${formatChatTime(msg.created_at)}</div>
+      </div>
     `;
     
     row.appendChild(bubble);
@@ -7676,34 +7687,56 @@ async function sendChatMessage(messageText) {
     sender,
     receiver,
     message: messageText,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    status: 'sending'
   };
   
   // Optimistic UI insert
   loadedMessages.push(tempMsg);
   renderChatMessages();
   
+  performSendChatMessage(messageText, tempId);
+}
+
+async function performSendChatMessage(messageText, tempId) {
+  const sender = currentUser;
+  const receiver = sender === 'aman' ? 'rishit' : 'aman';
   try {
     const client = getSupabaseClient();
-    if (client) {
-      const { data, error } = await client
-        .from('duogym_chat')
-        .insert({ sender, receiver, message: messageText })
-        .select()
-        .single();
-        
-      if (error) throw error;
+    if (!client) throw new Error("Supabase client not initialized");
+    
+    const { data, error } = await client
+      .from('duogym_chat')
+      .insert({ sender, receiver, message: messageText })
+      .select()
+      .single();
       
-      // Replace optimistic message with server message
-      const index = loadedMessages.findIndex(m => m.id === tempId);
-      if (index !== -1 && data) {
-        loadedMessages[index] = data;
-        renderChatMessages();
-      }
+    if (error) throw error;
+    
+    // Replace optimistic message with server message
+    const index = loadedMessages.findIndex(m => m.id === tempId);
+    if (index !== -1 && data) {
+      loadedMessages[index] = data;
+      renderChatMessages();
     }
   } catch (e) {
     console.warn('Chat: Failed to save message on Supabase', e);
+    const index = loadedMessages.findIndex(m => m.id === tempId);
+    if (index !== -1) {
+      loadedMessages[index].status = 'failed';
+      renderChatMessages();
+    }
   }
+}
+
+function retrySendChatMessage(tempId) {
+  const msg = loadedMessages.find(m => m.id === tempId);
+  if (!msg) return;
+  
+  msg.status = 'sending';
+  renderChatMessages();
+  
+  performSendChatMessage(msg.message, tempId);
 }
 
 function triggerIncomingMessageNotification(msg) {
