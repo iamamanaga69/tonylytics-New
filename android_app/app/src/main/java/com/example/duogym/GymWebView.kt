@@ -323,4 +323,26 @@ class GymAppInterface(
             android.util.Log.e("GymAppInterface", "Failed to share backup file", e)
         }
     }
+
+    @JavascriptInterface
+    fun showChatNotification(
+        senderName: String,
+        messageText: String,
+        replyAs: String,
+        replyTo: String
+    ) {
+        NotificationHelper.showChatNotification(context, senderName, messageText, replyAs, replyTo)
+    }
+
+    @JavascriptInterface
+    fun clearChatNotifications() {
+        try {
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+            for (id in 5000..5100) {
+                notificationManager.cancel(id)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("GymAppInterface", "Failed to clear notifications", e)
+        }
+    }
 }

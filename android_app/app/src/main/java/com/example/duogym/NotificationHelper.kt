@@ -12,6 +12,8 @@ import java.util.Calendar
 object NotificationHelper {
     const val CHANNEL_ID = "duogym_reminders"
     const val REMINDER_ALARM_ID = 9001
+    const val CHAT_CHANNEL_ID = "duogym_chat_messages"
+    private var chatNotificationId = 5000
 
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -24,6 +26,100 @@ object NotificationHelper {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    fun createChatNotificationChannel(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHAT_CHANNEL_ID,
+                "Partner Chat Messages",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notifications for incoming chat messages from your gym partner"
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 100, 50, 100)
+                setShowBadge(true)
+            }
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    fun showChatNotification(
+        context: Context,
+        senderName: String,
+        messageText: String,
+        replyAs: String = "",
+        replyTo: String = ""
+    ) {
+        createChatNotificationChannel(context)
+
+        val notifId = chatNotificationId++
+        if (chatNotificationId > 5100) chatNotificationId = 5000
+
+        // Tap notification to open app
+        val openIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val openPendingIntent = PendingIntent.getActivity(
+            context, notifId, openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder = androidx.core.app.NotificationCompat.Builder(context, CHAT_CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_dialog_email)
+            .setContentTitle("\uD83D\uDCAC $senderName")
+            .setContentText(messageText)
+            .setStyle(androidx.core.app.NotificationCompat.BigTextStyle().bigText(messageText))
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+            .setCategory(androidx.core.app.NotificationCompat.CATEGORY_MESSAGE)
+            .setAutoCancel(true)
+            .setContentIntent(openPendingIntent)
+            .setVibrate(longArrayOf(0, 100, 50, 100))
+            .setDefaults(androidx.core.app.NotificationCompat.DEFAULT_SOUND)
+
+        // --- Mark as Read action ---
+        val markReadIntent = Intent(context, ChatNotificationReceiver::class.java).apply {
+            action = ChatNotificationReceiver.ACTION_MARK_READ
+            putExtra(ChatNotificationReceiver.EXTRA_NOTIFICATION_ID, notifId)
+        }
+        val markReadPending = PendingIntent.getBroadcast(
+            context, notifId + 1000, markReadIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        builder.addAction(
+            android.R.drawable.ic_menu_close_clear_cancel,
+            "Mark as Read",
+            markReadPending
+        )
+
+        // --- Inline Reply action ---
+        if (replyAs.isNotEmpty() && replyTo.isNotEmpty()) {
+            val remoteInput = androidx.core.app.RemoteInput.Builder(
+                ChatNotificationReceiver.KEY_REPLY_TEXT
+            ).setLabel("Type a reply…").build()
+
+            val replyIntent = Intent(context, ChatNotificationReceiver::class.java).apply {
+                action = ChatNotificationReceiver.ACTION_REPLY
+                putExtra(ChatNotificationReceiver.EXTRA_NOTIFICATION_ID, notifId)
+                putExtra(ChatNotificationReceiver.EXTRA_REPLY_AS, replyAs)
+                putExtra(ChatNotificationReceiver.EXTRA_REPLY_TO, replyTo)
+            }
+            // FLAG_MUTABLE is required for RemoteInput to attach user text
+            val replyPending = PendingIntent.getBroadcast(
+                context, notifId + 2000, replyIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            )
+            val replyAction = androidx.core.app.NotificationCompat.Action.Builder(
+                android.R.drawable.ic_menu_send, "Reply", replyPending
+            ).addRemoteInput(remoteInput).build()
+
+            builder.addAction(replyAction)
+        }
+
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(notifId, builder.build())
     }
 
     fun scheduleDailyReminder(context: Context) {

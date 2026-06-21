@@ -389,9 +389,9 @@ function initSupabaseSync(username) {
       fetchChatMessages();
     }
     
-    // Start background chat message polling (fallback)
+    // Start background chat message polling (fallback) - 5s for fast notifications
     if (typeof startChatPolling === 'function') {
-      startChatPolling(15000); // 15 seconds slow background poll
+      startChatPolling(5000); // 5 seconds for fast notification delivery
     }
     
     console.log('DuoGym: Supabase sync initialized for', username);
@@ -5457,6 +5457,12 @@ function initKeyboardDetection() {
   document.addEventListener("focusin", (e) => {
     if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.getAttribute("contenteditable") === "true")) {
       handleKeyboard(true);
+      if (e.target.id === "chat-message-input") {
+        setTimeout(() => {
+          const listEl = document.getElementById("chat-messages-list");
+          if (listEl) listEl.scrollTop = listEl.scrollHeight;
+        }, 80);
+      }
     }
   });
 
@@ -5472,9 +5478,22 @@ function initKeyboardDetection() {
     window.visualViewport.addEventListener("resize", () => {
       if (window.visualViewport.height < initialHeight - threshold) {
         document.body.classList.add("keyboard-open");
+        // Scroll to bottom immediately when keyboard expands
+        setTimeout(() => {
+          const listEl = document.getElementById("chat-messages-list");
+          if (listEl) listEl.scrollTop = listEl.scrollHeight;
+        }, 50);
       } else if (window.visualViewport.height >= initialHeight - 40) {
         document.body.classList.remove("keyboard-open");
       }
+    });
+  }
+
+  // Dismiss keyboard when tapping the messages list
+  const listEl = document.getElementById("chat-messages-list");
+  if (listEl) {
+    listEl.addEventListener("click", () => {
+      document.getElementById("chat-message-input")?.blur();
     });
   }
 }
@@ -6290,6 +6309,13 @@ function onNativeHealthStatus(status) {
 
 function onNativeAppResumed() {
   if (activePage === "activity") requestNativeActivitySync(false);
+  
+  // Clear any pending chat notifications when the app is resumed
+  if (typeof AndroidApp !== "undefined" && AndroidApp.clearChatNotifications) {
+    try {
+      AndroidApp.clearChatNotifications();
+    } catch (_) {}
+  }
 }
 
 function onNativeActivityData(data, options = {}) {
@@ -7540,17 +7566,27 @@ function renderActivityTrends() {
 let loadedMessages = [];
 let chatPollingInterval = null;
 let chatChannel = null;
+let chatInitialLoadComplete = false;
 
 function toggleChatWindow(forceState) {
   const container = document.getElementById("chat-container");
+  const backdrop = document.getElementById("chat-backdrop");
   if (!container) return;
   
-  const isCurrentlyVisible = container.style.display !== "none";
+  const isCurrentlyVisible = container.classList.contains("active");
   const shouldShow = typeof forceState === "boolean" ? forceState : !isCurrentlyVisible;
   
   if (shouldShow) {
     container.style.display = "flex";
+    container.classList.remove("slide-out");
     container.classList.add("active");
+    
+    if (backdrop) {
+      backdrop.style.display = "block";
+      // Force reflow
+      backdrop.offsetHeight;
+      backdrop.classList.add("active");
+    }
     
     // Clear badge
     const badge = document.getElementById("chat-badge");
@@ -7561,9 +7597,19 @@ function toggleChatWindow(forceState) {
     const partnerEl = document.getElementById("chat-partner-name");
     if (partnerEl) partnerEl.textContent = "Chat with " + partnerName;
     
+    // Clear native phone notifications when chat is opened
+    if (typeof AndroidApp !== "undefined" && AndroidApp.clearChatNotifications) {
+      try {
+        AndroidApp.clearChatNotifications();
+      } catch (_) {}
+    }
+    
     // Focus input on open
     setTimeout(() => {
       document.getElementById("chat-message-input")?.focus();
+      // Scroll to bottom immediately
+      const listEl = document.getElementById("chat-messages-list");
+      if (listEl) listEl.scrollTop = listEl.scrollHeight;
     }, 100);
     
     // Trigger message load
@@ -7572,11 +7618,30 @@ function toggleChatWindow(forceState) {
     // Increase polling frequency (every 4 seconds) when window is active
     startChatPolling(4000);
   } else {
-    container.style.display = "none";
+    container.classList.add("slide-out");
     container.classList.remove("active");
     
+    if (backdrop) {
+      backdrop.classList.remove("active");
+      setTimeout(() => {
+        if (!container.classList.contains("active")) {
+          backdrop.style.display = "none";
+        }
+      }, 300);
+    }
+    
+    // Blur input to ensure keyboard dismisses immediately
+    document.getElementById("chat-message-input")?.blur();
+    
+    // Wait for animation to finish
+    setTimeout(() => {
+      if (container.classList.contains("slide-out")) {
+        container.style.display = "none";
+      }
+    }, 300);
+    
     // Slow down polling (every 15 seconds) when closed
-    startChatPolling(15000);
+    startChatPolling(15000); 
   }
 }
 
@@ -7601,12 +7666,15 @@ async function fetchChatMessages() {
       loadedMessages = data;
       renderChatMessages();
       
-      // Notify about new incoming messages
-      incomingMessages.forEach(msg => {
-        if (msg.sender !== currentUser) {
-          triggerIncomingMessageNotification(msg);
-        }
-      });
+      // Only notify about genuinely new messages (skip initial load)
+      if (chatInitialLoadComplete) {
+        incomingMessages.forEach(msg => {
+          if (msg.sender !== currentUser) {
+            triggerIncomingMessageNotification(msg);
+          }
+        });
+      }
+      chatInitialLoadComplete = true;
     }
   } catch (e) {
     console.warn('Chat: Failed to fetch messages', e);
@@ -7740,15 +7808,36 @@ function retrySendChatMessage(tempId) {
 }
 
 function triggerIncomingMessageNotification(msg) {
+  // Suppress notifications if user is already reading the chat window
+  const container = document.getElementById("chat-container");
+  const isChatOpen = container && container.style.display !== "none" && container.classList.contains("active");
+  if (isChatOpen) {
+    return;
+  }
+
   // Update header badge
   const badge = document.getElementById("chat-badge");
   if (badge) badge.style.display = "block";
   
-  // Show pop-up toast if chat container is closed
-  const chatContainer = document.getElementById("chat-container");
-  if (!chatContainer || chatContainer.style.display === "none") {
-    showIncomingMessagePopup(msg);
-  }
+  // Always show popup notification for incoming partner messages
+  showIncomingMessagePopup(msg);
+  
+  // Vibrate the device (works on Android WebView)
+  try {
+    if (navigator.vibrate) {
+      navigator.vibrate([100, 50, 100, 50, 150]); // short buzz pattern
+    }
+  } catch (_) {}
+  
+  // Trigger native Android system notification (shows in status bar & notification shade)
+  try {
+    if (typeof AndroidApp !== "undefined" && AndroidApp.showChatNotification) {
+      const senderDisplay = msg.sender === 'aman' ? 'Aman' : 'Rishit';
+      const replyAs = currentUser || '';
+      const replyTo = currentUser === 'aman' ? 'rishit' : 'aman';
+      AndroidApp.showChatNotification(senderDisplay, msg.message, replyAs, replyTo);
+    }
+  } catch (_) {}
 }
 
 function showIncomingMessagePopup(msg) {
@@ -7779,13 +7868,13 @@ function showIncomingMessagePopup(msg) {
   // Play short soft notification pop using web audio API (completely client side, works offline!)
   playNotificationSound();
   
-  // Auto-remove
+  // Auto-remove after 6 seconds
   setTimeout(() => {
     if (popup.parentElement) {
       popup.classList.add("fade-out");
       setTimeout(() => popup.remove(), 300);
     }
-  }, 4500);
+  }, 6000);
 }
 
 function playNotificationSound() {
