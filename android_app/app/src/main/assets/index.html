@@ -133,6 +133,12 @@
           <i data-lucide="sun" id="theme-icon" style="width: 18px; height: 18px;"></i>
         </button>
 
+        <!-- Chat Toggle Button -->
+        <button id="chat-toggle-btn" onclick="toggleChatWindow()" title="Chat with Partner" style="position: relative; padding: 6px; border: none; background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.2); color: #00ff88; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; transition: var(--transition);">
+          <i data-lucide="message-square" style="width: 18px; height: 18px;"></i>
+          <span id="chat-badge" class="chat-badge" style="display: none; position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: #ff453a; border-radius: 50%; border: 1.5px solid #0b1020;"></span>
+        </button>
+
         <!-- Logged-in User Badge -->
         <span id="header-logged-user" style="font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; display: none; margin-right: 4px;"></span>
 
@@ -236,7 +242,8 @@
           <div id="yesterday-missed-banner" class="missed-notification-banner" style="display: none;"></div>
 
           <!-- CHECK-IN GRID -->
-          <div class="dashboard-grid">             <!-- Workout Card -->
+          <div class="dashboard-grid">
+             <!-- Workout Card -->
             <div class="glass-card workout-main-card">
               <div class="workout-header">
                 <span id="workout-day-badge" class="badge">Monday Workout</span>
@@ -1314,6 +1321,26 @@
 
 
       </main>
+
+      <!-- Floating Chat Window Card -->
+      <div id="chat-container" class="chat-window-card" style="display: none;">
+        <div class="chat-window-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="chat-status-dot online"></span>
+            <span id="chat-partner-name" style="font-weight: 700;">Partner Chat</span>
+          </div>
+          <button class="chat-close-btn" onclick="toggleChatWindow(false)">&times;</button>
+        </div>
+        <div id="chat-messages-list" class="chat-messages-container">
+          <!-- Messages loaded dynamically -->
+        </div>
+        <form id="chat-input-form" onsubmit="handleSendChat(event)" class="chat-input-area">
+          <input type="text" id="chat-message-input" placeholder="Type a gym message..." autocomplete="off" />
+          <button type="submit" class="chat-send-btn">
+            <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 

@@ -334,6 +334,9 @@ async function handleLogout() {
   try {
     if (supabaseClient) await supabaseClient.auth.signOut();
   } catch (_) {}
+  if (typeof stopChatPolling === 'function') {
+    stopChatPolling();
+  }
   clearAuthSession();
   isAuthenticated = false;
   authenticatedUser = null;
@@ -375,6 +378,21 @@ function initSupabaseSync(username) {
     
     // Enable realtime sync for both user and rival updates
     enableSupabaseRealtime(username);
+    
+    // Initialize real-time chat channel
+    if (typeof initChatRealtime === 'function') {
+      initChatRealtime();
+    }
+    
+    // Initial fetch of messages
+    if (typeof fetchChatMessages === 'function') {
+      fetchChatMessages();
+    }
+    
+    // Start background chat message polling (fallback)
+    if (typeof startChatPolling === 'function') {
+      startChatPolling(15000); // 15 seconds slow background poll
+    }
     
     console.log('DuoGym: Supabase sync initialized for', username);
     updateSyncBadge('synced');
@@ -5422,6 +5440,45 @@ function clearAllRunningTimers() {
   activeTimers = {};
 }
 
+function initKeyboardDetection() {
+  const handleKeyboard = (isOpen) => {
+    if (isOpen) {
+      document.body.classList.add("keyboard-open");
+    } else {
+      setTimeout(() => {
+        const active = document.activeElement;
+        if (!active || (active.tagName !== "INPUT" && active.tagName !== "TEXTAREA" && active.getAttribute("contenteditable") !== "true")) {
+          document.body.classList.remove("keyboard-open");
+        }
+      }, 100);
+    }
+  };
+
+  document.addEventListener("focusin", (e) => {
+    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.getAttribute("contenteditable") === "true")) {
+      handleKeyboard(true);
+    }
+  });
+
+  document.addEventListener("focusout", (e) => {
+    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.getAttribute("contenteditable") === "true")) {
+      handleKeyboard(false);
+    }
+  });
+
+  if (window.visualViewport) {
+    const threshold = 150;
+    const initialHeight = window.visualViewport.height;
+    window.visualViewport.addEventListener("resize", () => {
+      if (window.visualViewport.height < initialHeight - threshold) {
+        document.body.classList.add("keyboard-open");
+      } else if (window.visualViewport.height >= initialHeight - 40) {
+        document.body.classList.remove("keyboard-open");
+      }
+    });
+  }
+}
+
 
 /* ============================================================
    13. INITIALIZATION ON LOAD
@@ -5442,16 +5499,22 @@ window.addEventListener("DOMContentLoaded", async () => {
   // --- AUTH CHECK ---
   // If user has a valid "Remember Me" session, skip login and go straight to app
   const authSession = getAuthSession();
-  const client = getSupabaseClient();
-  const { data: sessionData } = client ? await client.auth.getSession() : { data: { session: null } };
   let restoredProfile = authSession;
-  if (sessionData?.session?.user) {
-    try {
-      restoredProfile = await loadOrCreateAuthProfile(sessionData.session.user);
-      setAuthSession(restoredProfile);
-    } catch (error) {
-      console.warn("FitRivals profile restore failed", error);
+  try {
+    const client = getSupabaseClient();
+    if (client) {
+      const { data: sessionData } = await client.auth.getSession();
+      if (sessionData?.session?.user) {
+        try {
+          restoredProfile = await loadOrCreateAuthProfile(sessionData.session.user);
+          setAuthSession(restoredProfile);
+        } catch (error) {
+          console.warn("FitRivals profile restore failed", error);
+        }
+      }
     }
+  } catch (err) {
+    console.warn("Supabase auth session fetch failed:", err);
   }
   
   if (restoredProfile?.username) {
@@ -5459,6 +5522,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     isAuthenticated = true;
     authenticatedProfile = restoredProfile;
     authenticatedUser = restoredProfile.username;
+    currentUser = restoredProfile.username;
     
     // Load data and initialize app
     loadData();
@@ -5477,6 +5541,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     switchUser(restoredProfile.username);
     switchPage("today");
     updateLoggedInHeader(restoredProfile.username);
+    initDietData();
     
     // Initialize Supabase sync
     if (typeof initSupabaseSync === 'function') {
@@ -5502,6 +5567,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     loadingEl.style.display = "none";
     console.log("DuoGym: Hid loading element.");
   }
+
+  // Initialize keyboard layout adjustment listeners
+  initKeyboardDetection();
 
   // Detect WebView mode
   const isWebView = window.location.protocol === "file:" || 
@@ -7459,12 +7527,315 @@ function renderActivityTrends() {
     const slBar = document.createElement("div");
     slBar.className = "chart-bar-col";
     slBar.innerHTML = `
-      <div style="flex: 1; display: flex; align-items: flex-end; width: 100%;">
-        <div class="chart-bar-fill" style="height: ${sleepPct}%; background: #ffb703;" title="${sRecord.duration} hrs"></div>
-      </div>
       <span style="font-size: 8px; color: var(--text-sub);">${dayLabel}</span>
     `;
     sleepChart.appendChild(slBar);
+  }
+}
+
+
+/* ============================================================
+   14. DUOGYM REAL-TIME CHAT SYSTEM
+   ============================================================ */
+let loadedMessages = [];
+let chatPollingInterval = null;
+let chatChannel = null;
+
+function toggleChatWindow(forceState) {
+  const container = document.getElementById("chat-container");
+  if (!container) return;
+  
+  const isCurrentlyVisible = container.style.display !== "none";
+  const shouldShow = typeof forceState === "boolean" ? forceState : !isCurrentlyVisible;
+  
+  if (shouldShow) {
+    container.style.display = "flex";
+    container.classList.add("active");
+    
+    // Clear badge
+    const badge = document.getElementById("chat-badge");
+    if (badge) badge.style.display = "none";
+    
+    // Set partner name
+    const partnerName = currentUser === "aman" ? "Rishit" : "Aman";
+    const partnerEl = document.getElementById("chat-partner-name");
+    if (partnerEl) partnerEl.textContent = "Chat with " + partnerName;
+    
+    // Focus input on open
+    setTimeout(() => {
+      document.getElementById("chat-message-input")?.focus();
+    }, 100);
+    
+    // Trigger message load
+    fetchChatMessages();
+    
+    // Increase polling frequency (every 4 seconds) when window is active
+    startChatPolling(4000);
+  } else {
+    container.style.display = "none";
+    container.classList.remove("active");
+    
+    // Slow down polling (every 15 seconds) when closed
+    startChatPolling(15000);
+  }
+}
+
+async function fetchChatMessages() {
+  if (!supabaseInitialized || !supabaseClient || !currentUser) return;
+  
+  try {
+    const { data, error } = await supabaseClient
+      .from('duogym_chat')
+      .select('*')
+      .or(`and(sender.eq.aman,receiver.eq.rishit),and(sender.eq.rishit,receiver.eq.aman)`)
+      .order('created_at', { ascending: true })
+      .limit(100);
+      
+    if (error) throw error;
+    
+    if (data) {
+      // Find new messages that we didn't have before
+      const existingIds = new Set(loadedMessages.map(m => m.id));
+      const incomingMessages = data.filter(m => !existingIds.has(m.id));
+      
+      loadedMessages = data;
+      renderChatMessages();
+      
+      // Notify about new incoming messages
+      incomingMessages.forEach(msg => {
+        if (msg.sender !== currentUser) {
+          triggerIncomingMessageNotification(msg);
+        }
+      });
+    }
+  } catch (e) {
+    console.warn('Chat: Failed to fetch messages', e);
+  }
+}
+
+function renderChatMessages() {
+  const container = document.getElementById("chat-messages-list");
+  if (!container) return;
+  
+  container.innerHTML = "";
+  
+  if (loadedMessages.length === 0) {
+    const placeholder = document.createElement("div");
+    placeholder.style.display = "flex";
+    placeholder.style.alignItems = "center";
+    placeholder.style.justifyContent = "center";
+    placeholder.style.height = "100%";
+    placeholder.style.color = "var(--text-sub)";
+    placeholder.style.fontSize = "12px";
+    placeholder.style.textAlign = "center";
+    placeholder.style.padding = "24px";
+    placeholder.innerHTML = "No messages yet. Send a message to start competing!";
+    container.appendChild(placeholder);
+    return;
+  }
+  
+  loadedMessages.forEach(msg => {
+    const row = document.createElement("div");
+    row.className = `chat-msg-row ${msg.sender === currentUser ? 'self' : 'partner'}`;
+    
+    const bubble = document.createElement("div");
+    bubble.className = `chat-msg-bubble sender-${msg.sender}`;
+    bubble.innerHTML = `
+      <div class="chat-msg-text">${escapeHTML(msg.message)}</div>
+      <div class="chat-msg-time">${formatChatTime(msg.created_at)}</div>
+    `;
+    
+    row.appendChild(bubble);
+    container.appendChild(row);
+  });
+  
+  // Scroll to bottom
+  container.scrollTop = container.scrollHeight;
+}
+
+function handleSendChat(event) {
+  if (event) event.preventDefault();
+  const input = document.getElementById("chat-message-input");
+  if (!input) return;
+  
+  const text = input.value.trim();
+  if (!text) return;
+  
+  input.value = "";
+  sendChatMessage(text);
+}
+
+async function sendChatMessage(messageText) {
+  if (!currentUser) return;
+  const sender = currentUser;
+  const receiver = sender === 'aman' ? 'rishit' : 'aman';
+  
+  const tempId = 'temp-' + Date.now();
+  const tempMsg = {
+    id: tempId,
+    sender,
+    receiver,
+    message: messageText,
+    created_at: new Date().toISOString()
+  };
+  
+  // Optimistic UI insert
+  loadedMessages.push(tempMsg);
+  renderChatMessages();
+  
+  try {
+    const client = getSupabaseClient();
+    if (client) {
+      const { data, error } = await client
+        .from('duogym_chat')
+        .insert({ sender, receiver, message: messageText })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      
+      // Replace optimistic message with server message
+      const index = loadedMessages.findIndex(m => m.id === tempId);
+      if (index !== -1 && data) {
+        loadedMessages[index] = data;
+        renderChatMessages();
+      }
+    }
+  } catch (e) {
+    console.warn('Chat: Failed to save message on Supabase', e);
+  }
+}
+
+function triggerIncomingMessageNotification(msg) {
+  // Update header badge
+  const badge = document.getElementById("chat-badge");
+  if (badge) badge.style.display = "block";
+  
+  // Show pop-up toast if chat container is closed
+  const chatContainer = document.getElementById("chat-container");
+  if (!chatContainer || chatContainer.style.display === "none") {
+    showIncomingMessagePopup(msg);
+  }
+}
+
+function showIncomingMessagePopup(msg) {
+  const existing = document.getElementById("chat-popup-notification");
+  if (existing) existing.remove();
+  
+  const popup = document.createElement("div");
+  popup.id = "chat-popup-notification";
+  popup.className = "chat-popup-banner";
+  popup.innerHTML = `
+    <div class="chat-popup-header">
+      <span class="chat-popup-sender-dot sender-${msg.sender}"></span>
+      <span class="chat-popup-title">${msg.sender === 'aman' ? 'Aman' : 'Rishit'}</span>
+      <button class="chat-popup-close-btn" onclick="this.parentElement.parentElement.remove(); event.stopPropagation();">&times;</button>
+    </div>
+    <div class="chat-popup-body">
+      ${escapeHTML(msg.message)}
+    </div>
+  `;
+  
+  popup.onclick = () => {
+    toggleChatWindow(true);
+    popup.remove();
+  };
+  
+  document.body.appendChild(popup);
+  
+  // Play short soft notification pop using web audio API (completely client side, works offline!)
+  playNotificationSound();
+  
+  // Auto-remove
+  setTimeout(() => {
+    if (popup.parentElement) {
+      popup.classList.add("fade-out");
+      setTimeout(() => popup.remove(), 300);
+    }
+  }, 4500);
+}
+
+function playNotificationSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+    
+    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+  } catch (_) {}
+}
+
+function startChatPolling(intervalMs) {
+  stopChatPolling();
+  
+  chatPollingInterval = setInterval(() => {
+    fetchChatMessages();
+  }, intervalMs || 15000);
+}
+
+function stopChatPolling() {
+  if (chatPollingInterval) {
+    clearInterval(chatPollingInterval);
+    chatPollingInterval = null;
+  }
+}
+
+function initChatRealtime() {
+  if (!supabaseInitialized || !supabaseClient) return;
+  if (chatChannel) {
+    supabaseClient.removeChannel(chatChannel);
+  }
+  
+  chatChannel = supabaseClient
+    .channel('public:duogym_chat')
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'duogym_chat'
+    }, payload => {
+      const msg = payload.new;
+      if (msg && (msg.sender === currentUser || msg.receiver === currentUser)) {
+        const exists = loadedMessages.some(m => m.id === msg.id || (m.sender === msg.sender && m.message === msg.message && Math.abs(new Date(m.created_at) - new Date(msg.created_at)) < 3000));
+        if (!exists) {
+          loadedMessages.push(msg);
+          renderChatMessages();
+          if (msg.sender !== currentUser) {
+            triggerIncomingMessageNotification(msg);
+          }
+        }
+      }
+    })
+    .subscribe();
+}
+
+// Utility formatting helpers
+function escapeHTML(str) {
+  if (!str) return '';
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function formatChatTime(dateString) {
+  try {
+    const d = new Date(dateString);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch (_) {
+    return '';
   }
 }
 
