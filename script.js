@@ -5454,7 +5454,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   }
   
-  if (sessionData?.session && restoredProfile?.username) {
+  if (restoredProfile?.username) {
     console.log("FitRivals: Valid auth session found for " + restoredProfile.username);
     isAuthenticated = true;
     authenticatedProfile = restoredProfile;
