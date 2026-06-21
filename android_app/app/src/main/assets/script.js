@@ -2104,6 +2104,87 @@ const exerciseInstructions = {
       "Keep a tall posture and draw shoulders down away from ears."
     ],
     tips: "Vary the resistance to simulate flat roads and hills for higher calorie burn."
+  },
+  "arnold-press": {
+    name: "Arnold Press",
+    youtubeId: "62WpsneY_Ak",
+    category: "shoulders",
+    steps: [
+      "Sit on a bench with dumbbells held in front of your shoulders, palms facing you.",
+      "Press the dumbbells overhead while rotating your wrists 180 degrees so your palms face forward at the top.",
+      "Lower the weights back down, rotating your wrists back to the starting position."
+    ],
+    tips: "Keep your core tight and don't arch your back at the top."
+  },
+  "cable-crossover": {
+    name: "Cable Crossover",
+    youtubeId: "taI4XsqLp0o",
+    category: "chest",
+    steps: [
+      "Set pulleys to high position, grab handles, and stand in the middle.",
+      "Step forward slightly with one foot and lean forward.",
+      "Bring your hands together and downward in a wide arc, squeezing your chest.",
+      "Return slowly to the starting position under control."
+    ],
+    tips: "Maintain a slight bend in your elbows; squeeze hard at the bottom."
+  },
+  "chin-ups": {
+    name: "Chin-Ups",
+    youtubeId: "_71Z1eD22_g",
+    category: "back",
+    steps: [
+      "Grip the pull-up bar with an underhand grip, hands shoulder-width apart.",
+      "Pull your chest up to the bar by driving your elbows down and squeezing your shoulder blades.",
+      "Lower your body slowly to a full dead hang."
+    ],
+    tips: "Focus on engaging your biceps and lats, avoiding swinging."
+  },
+  "db-rdl": {
+    name: "Dumbbell Romanian Deadlift",
+    youtubeId: "JCXUYuzw41M",
+    category: "legs",
+    steps: [
+      "Stand holding dumbbells in front of your thighs, feet hip-width apart.",
+      "Hinge at your hips, pushing them back, and lower dumbbells along your shins.",
+      "Keep your back flat and knees slightly bent until you feel a deep hamstring stretch.",
+      "Drive your hips forward and squeeze your glutes to return upright."
+    ],
+    tips: "Keep the weights tight to your body; do not let your back round."
+  },
+  "bicycle-crunches": {
+    name: "Bicycle Crunches",
+    youtubeId: "Iwyvozckjak",
+    category: "core",
+    steps: [
+      "Lie flat on your back, hands behind your head, legs in tabletop position.",
+      "Raise your shoulders off the floor, rotate your torso, and bring opposite elbow to opposite knee.",
+      "Extend the other leg straight out, then alternate sides in a pedaling motion."
+    ],
+    tips: "Move slowly with control; do not pull on your neck."
+  },
+  "mountain-climbers": {
+    name: "Mountain Climbers",
+    youtubeId: "cnyTQDSE884",
+    category: "cardio",
+    steps: [
+      "Start in a high plank position, hands under shoulders, core braced.",
+      "Drive your right knee toward your chest, then return to start.",
+      "Quickly switch legs, driving your left knee toward your chest.",
+      "Alternate rapidly while keeping your hips level and core tight."
+    ],
+    tips: "Keep your shoulders directly over your wrists and avoid bouncing your hips up."
+  },
+  "concentration-curl": {
+    name: "Concentration Curl",
+    youtubeId: "0AUGkch3tgc",
+    category: "arms",
+    steps: [
+      "Sit on a bench, holding a dumbbell in one hand, feet wide apart.",
+      "Rest your elbow against the inside of your thigh, letting the arm hang straight down.",
+      "Curl the dumbbell up towards your face, keeping the elbow fixed against the thigh.",
+      "Lower the weight slowly to full extension."
+    ],
+    tips: "Isolate the bicep completely by preventing any shoulder or elbow movement."
   }
 };
 
