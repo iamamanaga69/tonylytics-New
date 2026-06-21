@@ -7787,9 +7787,36 @@ function renderChatMessages() {
     return;
   }
   
-  loadedMessages.forEach(msg => {
+  let lastDateStr = null;
+  loadedMessages.forEach((msg, idx) => {
+    // 1. Date header if date changed
+    const msgDate = new Date(msg.created_at);
+    const dateStr = msgDate.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+    if (dateStr !== lastDateStr) {
+      const dateHeader = document.createElement("div");
+      dateHeader.className = "chat-date-header";
+      dateHeader.textContent = dateStr;
+      container.appendChild(dateHeader);
+      lastDateStr = dateStr;
+    }
+    
+    // 2. Determine consecutive groupings
+    const prevMsg = loadedMessages[idx - 1];
+    const nextMsg = loadedMessages[idx + 1];
+    
+    // Only group consecutive messages sent by the same user on the same calendar day
+    const isConsecutivePrev = prevMsg && 
+                             prevMsg.sender === msg.sender && 
+                             (new Date(prevMsg.created_at).toLocaleDateString() === msgDate.toLocaleDateString());
+                             
+    const isConsecutiveNext = nextMsg && 
+                             nextMsg.sender === msg.sender && 
+                             (new Date(nextMsg.created_at).toLocaleDateString() === msgDate.toLocaleDateString());
+    
     const row = document.createElement("div");
-    row.className = `chat-msg-row ${msg.sender === currentUser ? 'self' : 'partner'}`;
+    row.className = `chat-msg-row ${msg.sender === currentUser ? 'self' : 'partner'}` +
+                    (isConsecutivePrev ? ' consecutive-prev' : '') +
+                    (isConsecutiveNext ? ' consecutive-next' : '');
     
     const bubble = document.createElement("div");
     bubble.className = `chat-msg-bubble sender-${msg.sender}`;
@@ -7827,6 +7854,12 @@ function handleSendChat(event) {
   
   input.value = "";
   sendChatMessage(text);
+}
+
+function sendQuickChatMessage(text) {
+  sendChatMessage(text);
+  // Focus the input to keep the experience seamless
+  DOM.get("chat-message-input")?.focus();
 }
 
 async function sendChatMessage(messageText) {

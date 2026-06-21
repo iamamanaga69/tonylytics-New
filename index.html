@@ -1337,6 +1337,16 @@
         <div id="chat-messages-list" class="chat-messages-container">
           <!-- Messages loaded dynamically -->
         </div>
+        <!-- Scrollable Quick Reply Chips -->
+        <div id="chat-quick-replies" class="chat-quick-replies-container">
+          <button type="button" class="quick-reply-chip" onclick="sendQuickChatMessage('Workout started! 🏋️‍♂️')">Workout started! 🏋️‍♂️</button>
+          <button type="button" class="quick-reply-chip" onclick="sendQuickChatMessage('Set complete! ✅')">Set complete! ✅</button>
+          <button type="button" class="quick-reply-chip" onclick="sendQuickChatMessage('Logged my diet 🥗')">Logged diet 🥗</button>
+          <button type="button" class="quick-reply-chip" onclick="sendQuickChatMessage('Leg day done! 🔥')">Leg day done! 🔥</button>
+          <button type="button" class="quick-reply-chip" onclick="sendQuickChatMessage('Water target reached! 💧')">Water target reached! 💧</button>
+          <button type="button" class="quick-reply-chip" onclick="sendQuickChatMessage('Ready for gym?')">Ready for gym?</button>
+          <button type="button" class="quick-reply-chip" onclick="sendQuickChatMessage('Awesome job! 💪')">Awesome job! 💪</button>
+        </div>
         <form id="chat-input-form" onsubmit="handleSendChat(event)" class="chat-input-area">
           <input type="text" id="chat-message-input" placeholder="Type a gym message..." autocomplete="off" />
           <button type="submit" class="chat-send-btn">
