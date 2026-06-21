@@ -50,6 +50,7 @@ let supabaseInitialized = false;
 let syncStatus = 'offline'; // 'synced', 'syncing', 'offline'
 let syncDebounceTimer = null;
 let supabaseRealtimeChannel = null;
+let supabaseRivalRealtimeChannel = null;
 let lastSyncedPayload = null;
 let lastOpponentSyncAt = 0;
 let opponentSyncInFlight = false;
@@ -358,6 +359,9 @@ function initSupabaseSync(username) {
     // Pull latest data from Supabase
     syncFromSupabase(username);
     
+    // Enable realtime sync for both user and rival updates
+    enableSupabaseRealtime(username);
+    
     console.log('DuoGym: Supabase sync initialized for', username);
     updateSyncBadge('synced');
     
@@ -606,7 +610,14 @@ function enableSupabaseRealtime(username) {
   if (supabaseRealtimeChannel) {
     supabaseClient.removeChannel(supabaseRealtimeChannel);
   }
+  if (supabaseRivalRealtimeChannel) {
+    supabaseClient.removeChannel(supabaseRivalRealtimeChannel);
+  }
   
+  const rival = typeof getRivalUsername === 'function' ? getRivalUsername() : null;
+  console.log('DuoGym: Initializing realtime channels for', username, 'and rival', rival);
+  
+  // 1. Listen to own changes (if updated from another of the user's devices)
   supabaseRealtimeChannel = supabaseClient
     .channel('public:duogym_users_data:username=' + username)
     .on('postgres_changes', {
@@ -638,6 +649,27 @@ function enableSupabaseRealtime(username) {
       }
     })
     .subscribe();
+
+  // 2. Listen to rival's changes (so workouts/posts update in realtime)
+  if (rival) {
+    supabaseRivalRealtimeChannel = supabaseClient
+      .channel('public:duogym_users_data:username=' + rival)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'duogym_users_data',
+        filter: 'username=eq.' + rival
+      }, payload => {
+        console.log('DuoGym: Realtime update received from Supabase for rival', rival);
+        const newData = payload.new;
+        if (newData && newData.fitness_data) {
+          fitnessData[rival] = mergeUserData(fitnessData[rival], newData.fitness_data);
+          saveData(false); // Do not sync back to cloud since this is rival's data
+          updatePageContent();
+        }
+      })
+      .subscribe();
+  }
 }
 
 // Debounced sync — called after every saveData()
