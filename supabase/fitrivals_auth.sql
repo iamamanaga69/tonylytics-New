@@ -73,3 +73,34 @@ create trigger fitrivals_profiles_updated_at
 before update on public.fitrivals_profiles
 for each row execute function public.set_fitrivals_profile_updated_at();
 
+-- Table for user fitness and diet data sync
+create table if not exists public.duogym_users_data (
+  username text primary key,
+  fitness_data jsonb not null default '{}'::jsonb,
+  diet_data jsonb not null default '{}'::jsonb,
+  last_synced timestamptz not null default now()
+);
+
+-- Enable RLS
+alter table public.duogym_users_data enable row level security;
+
+-- Policies for public (anon) and authenticated read/write
+drop policy if exists "Allow public read access" on public.duogym_users_data;
+create policy "Allow public read access"
+on public.duogym_users_data for select
+using (true);
+
+drop policy if exists "Allow public insert access" on public.duogym_users_data;
+create policy "Allow public insert access"
+on public.duogym_users_data for insert
+with check (true);
+
+drop policy if exists "Allow public update access" on public.duogym_users_data;
+create policy "Allow public update access"
+on public.duogym_users_data for update
+using (true)
+with check (true);
+
+-- Grant permissions to both anon and authenticated roles
+grant all on public.duogym_users_data to anon, authenticated;
+

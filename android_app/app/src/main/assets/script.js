@@ -417,7 +417,7 @@ async function syncToSupabase(username) {
     console.log('DuoGym: Synced to Supabase for', username);
     
   } catch (e) {
-    console.warn('DuoGym: Supabase sync to cloud failed', e);
+    console.warn('DuoGym: Supabase sync to cloud failed', e ? (e.message || JSON.stringify(e)) : 'Unknown error');
     updateSyncBadge('offline');
   }
 }
@@ -459,7 +459,7 @@ async function syncFromSupabase(username) {
     updateSyncBadge('synced');
     
   } catch (e) {
-    console.warn('DuoGym: Pull from Supabase failed', e);
+    console.warn('DuoGym: Pull from Supabase failed', e ? (e.message || JSON.stringify(e)) : 'Unknown error');
     updateSyncBadge('offline');
   }
 }
@@ -2250,7 +2250,7 @@ async function syncOpponentActivity() {
     }
     lastOpponentSyncAt = Date.now();
   } catch (e) {
-    console.warn("DuoGym: Opponent activity refresh failed", e);
+    console.warn("DuoGym: Opponent activity refresh failed", e ? (e.message || JSON.stringify(e)) : 'Unknown error');
   } finally {
     opponentSyncInFlight = false;
   }
